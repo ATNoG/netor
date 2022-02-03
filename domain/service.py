@@ -10,10 +10,6 @@ import logging
 
 def createDomain(data):
     schema=schemas.DomainSchema()
-    split_url = data['url'].split('://')
-    if len(split_url) > 1:
-        parsed_url = split_url[1]
-        data['url'] = parsed_url
     if "domainAgreement" in data:
         agreements=data["domainAgreement"]
     if "ownedLayers" in data:
@@ -59,6 +55,9 @@ def removeDomain(domainId):
     domain=persistance.DB.session.query(persistance.Domain).filter(persistance.Domain.domainId==domainId).first()
     persistance.DB.delete(domain)
     return
+
+
+
 class DomainActionHandler(Thread):
     def __init__(self, data):
         Thread.__init__(self)
@@ -80,13 +79,13 @@ class DomainActionHandler(Thread):
         try:
             if self.data["msgType"] == "instantiateNs":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                nsId=driver.instantiateNS(domain.url, self.data["data"]["name"], self.data["data"]["nsdId"], domainLayer,self.data["data"]["additionalConf"] if "additionalConf" in self.data["data"] else None)
+                nsId=driver.instantiateNS(domain.url, self.data["data"]["name"], self.data["data"]["nsdId"], domainLayer.vimAccount,self.data["data"]["additionalConf"] if "additionalConf" in self.data["data"] else None)
                 # messaging.publish2Exchange("vsLCM_"+str(self.data["vsiId"]), json.dumps({"msgType":"updateResourcesNfvoIds","vsiId":self.data["vsiId"],"error":False, "message":"Sending Resource's Components Ids", "data":{"componentName":self.data["data"]["name"],"componentId":nsId}}))
                 messaging.publish2Exchange("vsLCM_Management", json.dumps({"msgType":"updateResourcesNfvoIds","vsiId":self.data["vsiId"],"error":False, "message":"Sending Resource's Components Ids", "data":{"componentName":self.data["data"]["name"],"componentId":nsId}}))
                 return
             elif self.data["msgType"] == "instantiateNsi":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                nsiId=driver.instantiateNSI(domain.url, self.data["data"]["name"], self.data["data"]["nstId"], domainLayer,self.data["data"]["additionalConf"] if "additionalConf" in self.data["data"] else None)
+                nsiId=driver.instantiateNSI(domain.url, self.data["data"]["name"], self.data["data"]["nstId"], domainLayer.vimAccount,self.data["data"]["additionalConf"] if "additionalConf" in self.data["data"] else None)
                 nsiInfo=osm.getNSI(domain.url, self.data["data"]["name"])["_admin"]["nsrs-detailed-list"]
 
                 nssNsrId={}
@@ -109,31 +108,29 @@ class DomainActionHandler(Thread):
                 return
             elif self.data["msgType"] == "actionNs":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                result=driver.sendActionNS(domain.url, self.data["data"]["nsId"], domainLayer,additionalConf=self.data["data"]["additionalConf"])
+                result=driver.sendActionNS(domain.url, self.data["data"]["nsId"], additionalConf=self.data["data"]["additionalConf"])
                 actionResult={"msgType": "actionResponse", "message":"Returning NS action result","vsiId":self.data["vsiId"], "data":{"primitiveName":self.data["data"]["primitiveName"],"status":result["operationState"], "output":result["detailed-status"]["output"]}}
                 # messaging.publish2Exchange("vsLCM_"+str(self.data["vsiId"]), json.dumps(actionResult))
                 messaging.publish2Exchange("vsLCM_Management", json.dumps(actionResult))
                 return
             elif self.data["msgType"] == "actionNsi":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                result=driver.sendActionNSI(domain.url, self.data["data"]["nsiId"],domainLayer, additionalConf=self.data["data"]["additionalConf"])
+                result=driver.sendActionNSI(domain.url, self.data["data"]["nsiId"], additionalConf=self.data["data"]["additionalConf"])
                 actionResult={"msgType": "actionResponse", "message":"Returning NSI action result","vsiId":self.data["vsiId"], "data":{"primitiveName":self.data["data"]["primitiveName"],"status":result["operationState"], "output":result["detailed-status"]["output"]}}
                 # messaging.publish2Exchange("vsLCM_"+str(self.data["vsiId"]), json.dumps(actionResult))
                 messaging.publish2Exchange("vsLCM_Management", json.dumps(actionResult))
                 return
             elif self.data["msgType"] == "getNsInfo":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                nsInfo=driver.getNS(domain.url, self.data["data"]["nsId"],domainLayer)
+                nsInfo=driver.getNS(domain.url, self.data["data"]["nsId"])
                 messaging.publish2Exchange("vsLCM_"+str(self.data["vsiId"]), json.dumps({"msgType":"nsInfo","vsiId":self.data["vsiId"],"error":False, "message":"Sending NS "+self.data["data"]["nsId"]+" Info", "data":{"nsId":self.data["data"]["nsId"],"nsInfo":nsInfo}}))
                 return
             elif self.data["msgType"] == "getNsiInfo":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
-                nsiInfo=driver.getNSI(domain.url,domainLayer, self.data["data"]["nsiId"])
+                nsiInfo=driver.getNSI(domain.url, self.data["data"]["nsiId"])
                 # messaging.publish2Exchange("vsLCM_"+str(self.data["vsiId"]), json.dumps({"msgType":"nsiInfo","vsiId":self.data["vsiId"],"vsiId":self.data["vsiId"],"error":False, "message":"Sending NSI "+self.data["data"]["nsiId"]+" Info", "data":{"nsiId":self.data["data"]["nsiId"],"nsiInfo":nsiInfo}}))
                 messaging.publish2Exchange("vsLCM_Management", json.dumps({"msgType":"nsiInfo","vsiId":self.data["vsiId"],"vsiId":self.data["vsiId"],"error":False, "message":"Sending NSI "+self.data["data"]["nsiId"]+" Info", "data":{"nsiId":self.data["data"]["nsiId"],"nsiInfo":nsiInfo}}))
                 return
         except Exception as e:
             logging.info("Error while performing action '"+self.data["msgType"]+"' in domain '"+str(self.data["data"]["domainId"])+"': "+str(e))
             return
-
-
