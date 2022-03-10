@@ -1,6 +1,6 @@
 #!/bin/bash
-cd base && COPYFILE_DISABLE=1 tar -cvz -f ../outputs/interdomain_vnf_2.tar.gz interdomain_vnf_2
-COPYFILE_DISABLE=1 tar -cvz -f ../outputs/interdomain_slice_ns_2_Domain_1.tar.gz interdomain_slice_ns_2_Domain_1
-COPYFILE_DISABLE=1 tar -cvz -f ../outputs/interdomain_slice_ns_2_Domain_2.tar.gz interdomain_slice_ns_2_Domain_2
-cp interdomain_nsst_nst_2_Domain_1.yml ../outputs/interdomain_nsst_nst_2_Domain_1.yml
-cp interdomain_nsst_nst_2_Domain_2.yml ../outputs/interdomain_nsst_nst_2_Domain_2.yml
+cd base && COPYFILE_DISABLE=1 tar -cvz -f ../outputs/5gasp_interdomain_vnf.tar.gz 5gasp_interdomain_vnf
+COPYFILE_DISABLE=1 tar -cvz -f ../outputs/5gasp_interdomain_slice_ns_Domain_1.tar.gz 5gasp_interdomain_slice_ns_Domain_1
+COPYFILE_DISABLE=1 tar -cvz -f ../outputs/5gasp_interdomain_slice_ns_Domain_2.tar.gz 5gasp_interdomain_slice_ns_Domain_2
+cp 5gasp_interdomain_nsst_nst_Domain_1.yml ../outputs/5gasp_interdomain_nsst_nst_Domain_1.yml
+cp 5gasp_interdomain_nsst_nst_Domain_2.yml ../outputs/5gasp_interdomain_nsst_nst_Domain_2.yml
