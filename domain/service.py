@@ -89,7 +89,7 @@ class DomainActionHandler(Thread):
             elif self.data["msgType"] == "instantiateNsi":
                 domain, domainLayer, driver=self.getDomainInfo(self.data["data"]["domainId"])
                 nsiId=driver.instantiateNSI(domain.url, self.data["data"]["name"], self.data["data"]["nstId"], domainLayer,self.data["data"]["additionalConf"] if "additionalConf" in self.data["data"] else None)
-                nsiInfo=osm.getNSI(domain.url, self.data["data"]["name"])["_admin"]["nsrs-detailed-list"]
+                nsiInfo=osm.getNSI(domain.url, domainLayer, self.data["data"]["name"])["_admin"]["nsrs-detailed-list"]
 
                 nssNsrId={}
                 tunnelServiceId=None
