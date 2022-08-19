@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: Rafael Direito
+# @Date:   2022-08-19 16:06:31
+# @Last Modified by:   Rafael Direito
+# @Last Modified time: 2022-08-19 17:53:45
 from datetime import datetime
 from db.persistance import VerticalServiceInstance, DB, VSIStatus
 from flask import jsonify
@@ -8,7 +13,7 @@ import logging
 import config
 import requests
 from api.exception import CustomException
-
+import copy
 
 def getCatalogueVSdInfo(token, vsd_id):
     VSD_ENDPOINT=f"http://{config.CATALOGUE_IP}:{config.CATALOGUE_PORT}/vsdescriptor?vsd_id={vsd_id}"
@@ -61,6 +66,10 @@ def createNewVS(token,tenantName,request):
         domain_id = domain['domainId']
         getDomainInfo(token,domain_id)
     
+    # Todo - Change this later!
+    original_request = copy.deepcopy(request)
+    del request["DNSInfo"]
+    # Todo --------------------
     schema = schemas.VerticalServiceInstanceSchema()
     vsInstance = schema.load(request,session=DB.session)
     status_table = VSIStatus(status='Creating',statusMessage="Creating Vertical Service Instance", timestamp=datetime.utcnow())
@@ -79,7 +88,7 @@ def createNewVS(token,tenantName,request):
     # messaging.bindQueue2Exchange("vsLCM_"+str(vsInstance.vsiId), "managementQueue-vsLCM_"+str(vsInstance.vsiId))
     # messaging.bindQueue2Exchange("vsLCM_"+str(vsInstance.vsiId), "placementQueue-vsLCM_"+str(vsInstance.vsiId))
     
-    message={"msgType":"createVSI","vsiId": vsInstance.vsiId, "tenantId":tenantName, "data": request}
+    message={"msgType":"createVSI","vsiId": vsInstance.vsiId, "tenantId":tenantName, "data": original_request}
     #send needed info
     messaging.publish2Exchange('vsLCM_Management',json.dumps(message))
     return schema.dump(vsInstance)
