@@ -2,7 +2,7 @@
 # @Author: Rafael Direito
 # @Date:   2022-08-19 16:06:31
 # @Last Modified by:   Rafael Direito
-# @Last Modified time: 2022-08-19 17:53:45
+# @Last Modified time: 2022-08-19 18:48:42
 from datetime import datetime
 from db.persistance import VerticalServiceInstance, DB, VSIStatus
 from flask import jsonify
@@ -14,6 +14,7 @@ import config
 import requests
 from api.exception import CustomException
 import copy
+from dns_sd.power_dns_wrapper import PowerDNSWrapper
 
 def getCatalogueVSdInfo(token, vsd_id):
     VSD_ENDPOINT=f"http://{config.CATALOGUE_IP}:{config.CATALOGUE_PORT}/vsdescriptor?vsd_id={vsd_id}"
@@ -87,10 +88,24 @@ def createNewVS(token,tenantName,request):
     # messaging.createQueue("placementQueue-vsLCM_"+str(vsInstance.vsiId))
     # messaging.bindQueue2Exchange("vsLCM_"+str(vsInstance.vsiId), "managementQueue-vsLCM_"+str(vsInstance.vsiId))
     # messaging.bindQueue2Exchange("vsLCM_"+str(vsInstance.vsiId), "placementQueue-vsLCM_"+str(vsInstance.vsiId))
-    
+
+    # If everything went ok until here, we can create a DNS Zone
+    dns_info = original_request["DNSInfo"]
+    power_dns_client = PowerDNSWrapper(
+        api_endpoint=f"{config.DNS_API_BASE_ENDPOINT}/v1",
+        api_key=config.DNS_API_KEY
+    )
+    power_dns_client.create_dns_zone(
+        vsiId=vsInstance.vsiId,
+        dns_additional_info=dns_info
+    )
+        
     message={"msgType":"createVSI","vsiId": vsInstance.vsiId, "tenantId":tenantName, "data": original_request}
     #send needed info
     messaging.publish2Exchange('vsLCM_Management',json.dumps(message))
+    
+    
+    
     return schema.dump(vsInstance)
 
 def getAllVSIs(tenantName):
