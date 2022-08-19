@@ -1,7 +1,7 @@
 # @Author: Rafael Direito
 # @Date:   2022-08-19 16:06:31
 # @Last Modified by:   Rafael Direito
-# @Last Modified time: 2022-08-19 16:17:19
+# @Last Modified time: 2022-08-19 18:50:57
 version: "3.6"
 services:
   rabbitmq:
@@ -119,6 +119,9 @@ services:
       CATALOGUE_IP: netor_catalogue
       DOMAIN_IP: netor_domain
       ENVIRONMENT: prod
+      DNS_API_BASE_ENDPOINT: "http://pdns:8081/api"
+      DNS_API_KEY: "secret"
+
 
   netor_domain:
     image: netor/domain
