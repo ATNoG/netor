@@ -50,3 +50,26 @@ def getAllDomains():
         return jsonify(csmf.interdomainHandler(data))
     else:
         return "VSI Id not found", 500
+
+
+@app.route('/tunnel-as-a-service-handler', methods=["POST"])
+def wgMeshHandler():
+    """
+    Receives information to orchestrate the tunnels
+    ---
+    responses:
+        200:
+            description: acknowledges
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/definitions/Acknowledge'
+    """
+
+    data = request.json
+    csmf = getCSMF(data["vsiId"])
+    if csmf:
+        csmf.wgMeshHandler(data)
+        return "Running", 200
+    else:
+        return "VSI Id not found", 500
