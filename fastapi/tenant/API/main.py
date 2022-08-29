@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 14:31:17
+# @Last Modified time: 2022-08-28 14:08:56
 
 import json
 from fastapi import FastAPI
@@ -13,8 +13,7 @@ import sys
 import os
 import time
 from rabbitmq.adaptor import RabbitHandler
-import schemas.message as MessageSchemas
-from routers import auth, domain
+from routers import auth
 from rabbitmq.messaging_manager import MessageReceiver
 
 # custom imports
@@ -46,7 +45,6 @@ app = FastAPI(
 #     allow_headers=["*"],
 # )
 app.include_router(auth.router)
-app.include_router(domain.router)
 
 
 # Dependency
@@ -87,14 +85,14 @@ async def startup_event():
     Startup.fill_database(db)
     message_receiver = MessageReceiver()
     await message_receiver.start()
-    msg_data = MessageSchemas.FecthNsiInfoData(
-        domainId="ITAV", nsiId="b38a41a9-065c-4a2e-87f9-480b1db2a28d")
-    msg = MessageSchemas.Message(
-        vsiId=1,
-        msgType="getNsiInfo",
-    )
-    msg.data = msg_data
-    a = json.dumps(msg.dict())
-    msg = MessageSchemas.Message(**json.loads(a))
-    await message_receiver.messaging.publish_queue('vsDomain', message=a)
+    # msg_data = MessageSchemas.FecthNsiInfoData(
+    #     domainId="ITAV", nsiId="d401a39e-f298-4913-a180-55dc324b5d36")
+    # msg = MessageSchemas.Message(
+    #     vsiId=1,
+    #     msgType="getNsiInfo",
+    # )
+    # msg.data = msg_data
+    # a = json.dumps(msg.dict())
+    # msg = MessageSchemas.Message(**json.loads(a))
+    # await message_receiver.messaging.publish_queue('vsDomain', message=a)
     # await message_receiver.messaging.publish_queue('vsDomain', message=a)

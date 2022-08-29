@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:29:31
+# @Last Modified time: 2022-08-26 13:49:18
 
 
 import json
@@ -41,13 +41,13 @@ class DomainActionHandler:
         db_gen = get_db()
         db = next(db_gen)
         try:
+            response = MessageSchemas.Message(vsiId=self.payload.vsiId)
             domain, domainLayer, driver = CRUDDomain.getDomainInfo(
                 db, self.payload.data.domainId)
             if not driver:
                 raise DomainDriverNotFound()
             if not domainLayer:
                 raise DomainLayersCouldNotBeFound()
-            response = MessageSchemas.Message(vsiId=self.payload.vsiId)
             if self.payload.msgType == Constants.TOPIC_INSTANTIATE_NSI:
                 nsiData = driver.instantiateNSI(
                         self.payload.data.name,

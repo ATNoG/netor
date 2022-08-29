@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:31:57
+# @Last Modified time: 2022-08-28 14:13:09
 
 from fastapi import Depends
 # generic imports
@@ -17,6 +17,7 @@ import os
 import sql_app.crud.domain as CRUDDomain
 import schemas.domain as DomainSchemas
 import aux.utils as Utils
+import aux.auth as auth
 from exceptions.domain import DomainAlreadyExists
 import aux.constants as Constants
 from exceptions.domain import DomainLayerTypeNotSupported,\
@@ -72,7 +73,7 @@ def getAllDomains(
     description="Given a Domain's Id returns the domain requested",
 )
 def getDomainById(
-                  domainId: int,
+                  domainId: str,
                   userdata=Depends(Utils.rbacencforcer),
                   db: Session = Depends(get_db)):
     try:
@@ -98,7 +99,7 @@ def getDomainById(
 )
 def createNewDomain(
                     domain_data: DomainSchemas.DomainCreate,
-                    user_data=Depends(Utils.rbacencforcer),
+                    userdata=Depends(Utils.rbacencforcer),
                     db: Session = Depends(get_db)):
     try:
         # Check if there's already a Domain with this Id

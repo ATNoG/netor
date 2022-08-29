@@ -1,13 +1,13 @@
 # @Author: Daniel Gomes
-# @Date:   2022-08-16 09:40:42
+# @Date:   2022-08-23 14:37:01
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 12:03:35
+# @Last Modified time: 2022-08-25 10:40:58
 from http import HTTPStatus
 
 
-class UserInvalidCredentials(Exception):
+class TenantInvalidCredentials(Exception):
     """Exception raised for errors in the credential validation for a user.
 
     Attributes:
@@ -26,26 +26,7 @@ class UserInvalidCredentials(Exception):
         return self.message
 
 
-class UserNotActive(Exception):
-    """Exception raised when a user which is not active is trying to make an operation.
-
-    Attributes:
-        username -- username regarding the user who is not active
-    """
-
-    def __init__(self, username=None):
-        if username:
-            self.username = username
-            self.message = f'User {self.username} is not active'
-        else:
-           self.message = 'User is not active'
-        super().__init__(self.message)
-
-    def __str__(self):
-        return self.message
-
-
-class UserDoesNorExist(Exception):
+class TenantDoesNotExist(Exception):
     """Exception raised when a user doesn't exist.
 
     Attributes:
@@ -167,14 +148,6 @@ class PasswordUpdateFailed(Exception):
             self.message = f'Could not update {username}\'s passsword'
         else:
            self.message = 'Error in updating user\'s password'
-        super().__init__(self.message)
-
-    def __str__(self):
-        return self.message
-
-class CouldNotConnectToTenant(Exception):
-    def __init__(self):
-        self.message = "It was not possible to authenticate to the IDP Service"
         super().__init__(self.message)
 
     def __str__(self):

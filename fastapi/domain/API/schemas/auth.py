@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:31:18
+# @Last Modified time: 2022-08-28 14:12:22
 
 # generic imports
 from typing import List
@@ -23,10 +23,8 @@ class UserRegister(BaseModel):
 
 class Tenant(BaseModel):
     username: str
-    role: str
-
-    def isAdmin(self):
-        return self.role == 'ADMIN'
+    group: str
+    roles: List[str]
 
 
 class Token(BaseModel):

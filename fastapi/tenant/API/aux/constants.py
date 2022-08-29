@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 11:52:23
+# @Last Modified time: 2022-08-27 11:51:48
 
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
@@ -13,7 +13,7 @@ DEFAULT_ADMIN_CREDENTIALS = {
     "username": "admin",
     "password": "admin"
 }
-USER_ROLES = ["ADMIN", "USER"]
+USER_ROLES = ["ADMIN", "TENANT"]
 
 DB_NAME = None
 DB_LOCATION = None
@@ -26,27 +26,7 @@ RABBITMQ_IP = None
 RABBITMQ_PORT = None
 
 
-TENANT_HOST = None
-TENANT_PORT = None
-
-
 TOPIC_CREATEVSI = "createVSI"
-TOPIC_DOMAININFO = "domainInfo"
-TOPIC_INSTANTIATE_NSI = "instantiateNsi"
-TOPIC_DELETE_NSI = "deleteNSI"
-TOPIC_ACTION_NS = "actionNs"
-TOPIC_ACTION_NSI = "actionNsi"
-TOPIC_FETCH_NS_INFO = "getNsInfo"
-TOPIC_FETCH_NSI_INFO = "getNsiInfo"
-TOPIC_NSI_INFO = "nsiInfo"
 TOPIC_ERROR = "errorOccured"
 
-
-TOPIC_UPDATE_NFVO_IDS = 'updateResourcesNfvoIds'
-TOPIC_ACTION_RESPONSE = 'actionResponse'
 EXCHANGE_MGMT = "vsLCM_Management"
-QUEUE_DOMAIN = "vsDomain"
-
-DOMAIN_LAYER_TYPES = ['OSM_NSP']
-
-OSM_LAYER_TYPE = 'OSM_NSP'

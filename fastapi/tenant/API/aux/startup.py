@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 11:53:41
+# @Last Modified time: 2022-08-27 11:53:28
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -15,7 +15,7 @@ import configparser
 import logging
 import os
 import inspect
-
+import schemas.auth as AuthSchemas
 # Logger
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
@@ -41,8 +41,7 @@ def load_config():
         Constants.RABBITMQ_PORT = config['RabbitMQ']['Port']
         Constants.RABBITMQ_USER = config['RabbitMQ']['User']
         Constants.RABBITMQ_PASS = config['RabbitMQ']['Password']
-        Constants.TENANT_HOST = config['Tenant']['Host']
-        Constants.TENANT_PORT = config['Tenant']['Port']
+
     except Exception:
         return False, """The config file should have the folling sections with
                          the following variables:
@@ -55,14 +54,22 @@ def startup_roles(db):
         CRUD_Auth.create_role(db, role)
 
 
+def startup_groups(db):
+    CRUD_Auth.create_group(db, "admin")
+    CRUD_Auth.create_group(db, "user")
+
+
 def create_default_admin(db):
-    CRUD_Auth.register_user(
-        db=db,
-        username=Constants.DEFAULT_ADMIN_CREDENTIALS['username'], 
+    admin_tenant = AuthSchemas.TenantCreate(
+        username=Constants.DEFAULT_ADMIN_CREDENTIALS['username'],
         password=Constants.DEFAULT_ADMIN_CREDENTIALS['password'],
-        roles=Constants.USER_ROLES)
+        group="admin",
+        roles=Constants.USER_ROLES
+    )
+    CRUD_Auth.register_tenant(db, admin_tenant)
 
 
 def fill_database(db):
     startup_roles(db)
+    startup_groups(db)
     create_default_admin(db)
