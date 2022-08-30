@@ -1,5 +1,8 @@
 #!/bin/bash
-
+# @Author: Daniel Gomes
+# @Date:   2022-08-16 09:35:51
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-08-29 10:11:47
 # Author : Rafael Direito (rdireito@av.it.pt)
 # Copyright (c) Instituto de Telecomunicações  - Aveiro
 # Date: November 9th, 2021
@@ -18,9 +21,7 @@ do
             docker build ./tenant -t netor/tenant --no-cache	
             docker build ./catalogue/slicer_catalogue -t netor/catalogue --no-cache	
             docker build ./catalogue/portal -t netor/portal --no-cache	
-            docker build ./domain -t netor/domain --no-cache \
-                --build-arg PYTHON3_OSM_IM_URL='https://artifactory-osm.etsi.org/artifactory/osm-IM/v11.0/2/pool/IM/python3-osm-im_9.0.0.post19+g1ab5b68-1_all.deb' \
-                --build-arg PYTHON3_OSMCLIENT_URL='https://artifactory-osm.etsi.org/artifactory/osm-osmclient/v10.0/14/pool/osmclient/python3-osmclient_10.0.3+gc0a69f8-1_all.deb'
+            docker build ./domain -t netor/domain
             ;;
         mongo1) echo "Building the mongo1's image..."
             docker build ./catalogue/slicer_catalogue/db/primary -t netor/mongo1 --no-cache	

@@ -1,15 +1,23 @@
+#!/bin/bash
+# @Author: Daniel Gomes
+# @Date:   2022-08-16 09:35:51
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-08-28 14:55:52
 #executed as sudo
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-apt-get install -y apt-utils=1.6.*
-apt-get install -y gnupg2=2.2.*
-apt-get install -y software-properties-common=0.96.24.32.*
-apt-get install -y wget=1.19.*
-apt-get install -y python-dev=2.7.* python3-dev=3.6.* build-essential=12.* libssl-dev=1.1.* libffi-dev=3.2.* libxml2-dev=2.9.* libxslt1-dev=1.1.* zlib1g-dev=1:1.2.11.*
+# Clean the previous repos that might exist
 sed -i "/osm-download.etsi.org/d" /etc/apt/sources.list
-wget -qO - https://osm-download.etsi.org/repository/osm/debian/ReleaseNINE/OSM%20ETSI%20Release%20Key.gpg | apt-key add -
-add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/ReleaseNINE stable devops IM osmclient"
+
+# Add OSM debian repo
+curl -q -o OSM-ETSI-Release-key.gpg https://osm-download.etsi.org/repository/osm/debian/ReleaseTEN/OSM%20ETSI%20Release%20Key.gpg
+apt-key add OSM-ETSI-Release-key.gpg
+add-apt-repository -y "deb [arch=amd64] https://osm-download.etsi.org/repository/osm/debian/ReleaseTEN stable devops IM osmclient"
 apt-get update
-pip3 install python-magic==0.4.24 pyangbind==0.8.1 verboselogs==1.7
-apt-get install -y python3-osmclient
+
+# Install OSM IM and osmclient packages from deb repo
+apt-get install python3-osm-im python3-osmclient
+
+# Install osmclient and osm_im dependencies via pip
+python3 -m pip install -r /usr/lib/python3/dist-packages/osm_im/requirements.txt -r /usr/lib/python3/dist-packages/osmclient/requirements.txt
