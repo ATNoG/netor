@@ -3,43 +3,13 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:31:23
+# @Last Modified time: 2022-08-29 10:49:03
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 # custom imports
 from .database import Base
-
-
-class User(Base):
-    __tablename__ = "user"
-    id = Column(Integer, primary_key=True, index=True)    
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String, nullable=False)
-    is_active = Column(Boolean, nullable=False)
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class User_Role(Base):
-    __tablename__ = "user_role"
-    id = Column(Integer, primary_key=True, index=True)    
-    user = Column(Integer, ForeignKey("user.id"), nullable=False, index=True)
-    role = Column(Integer, ForeignKey("role.id"), nullable=False)
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-
-class Role(Base):
-    __tablename__ = "role"
-    id = Column(Integer, primary_key=True, index=True)    
-    role = Column(String, unique=True)
-
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 associationTable = Table(

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:29:10
+# @Last Modified time: 2022-10-12 10:20:58
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -35,15 +35,21 @@ class ActionNsData(BaseModel):
 
 
 class ActionResponseData(BaseModel):
-    primitiveName: str
-    status: Any = None
-    output: Any = None
+    primitiveName: str = None
+    actionId: str # Id given by the Coordinator to identify the Action
+    nfvoId: str # Id given by the NFVO to identify the Action
+    status: str 
+    output: str
 
 
 class FecthNsiInfoData(BaseModel):
     domainId: str = None
     nsiId: str = None
 
+class FetchPrimitiveData(BaseModel):
+    domainId: str
+    nfvoId: str
+    actionId: str
 
 class NsiInfoData(BaseModel):
     nsiId: str
@@ -58,5 +64,5 @@ class Message(BaseModel):
     tenantId: str = None
     data: Union[DomainInfoData,
                 InstantiateNsiData, UpdateResourcesNfvoIdsData,
-                ActionNsData, ActionResponseData,
+                ActionNsData, ActionResponseData, FetchPrimitiveData,
                 FecthNsiInfoData, NsiInfoData] = None

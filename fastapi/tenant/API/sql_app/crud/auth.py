@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-26 10:12:50
+# @Last Modified time: 2022-09-01 17:34:39
 import logging
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,7 @@ from aux import auth
 from exceptions.auth import UserCreationFailed, TenantDoesNotExist,\
     TenantInvalidCredentials, InvalidUser, PasswordUpdateFailed
 import schemas.auth as AuthSchemas
+import schemas.message as MessageSchemas
 
 # Logger
 logging.basicConfig(
@@ -86,7 +87,7 @@ def register_tenant(db: Session, tenant_data: AuthSchemas.TenantCreate):
             db_role = db.query(models.Role).filter(
                 models.Role.role == role.upper()).first()
             db_user_role = models.Tenant_Role(
-                           user=db_tenant.id, role=db_role.id)
+                           user=db_tenant.username, role=db_role.id)
             db_tenant_roles.append(db_user_role)
         db.add_all(db_tenant_roles)
         db.commit()
@@ -100,6 +101,22 @@ def register_tenant(db: Session, tenant_data: AuthSchemas.TenantCreate):
     logging.info(f"Tenant {username} created with success")
     return db_tenant
 
+def getTenantByUsername(db: Session, username: str):
+    return db.query(models.Tenant)\
+             .filter(models.Tenant.username == username)\
+             .first()
+
+def get_all_tenants_info(db: Session):
+    tenants_db = db.query(models.Tenant).all()
+    tenants_out = [
+        AuthSchemas.Tenant(
+            username=x.username,
+            group=x.group.name,
+            roles=get_user_roles(db, x.username)
+        ).dict()
+        for x in tenants_db
+    ]
+    return tenants_out
 
 def authenticate_user(db: Session, username: str, password: str):
     # 1 - check if credentials are correct
@@ -119,14 +136,12 @@ def get_user_info(db: Session, username: str):
             models.Tenant.username == username).first()
     except Exception:
         raise InvalidUser(username)
-    print(db_tenant.group)
     tenant_out = AuthSchemas.Tenant(
-                    id=db_tenant.id,
                     username=username,
                     group=db_tenant.group.name,
                     roles=get_user_roles(db, username)
     )
-    return tenant_out.dict()
+    return tenant_out
 
 
 def get_user_roles(db: Session, username: str):
@@ -137,7 +152,7 @@ def get_user_roles(db: Session, username: str):
         raise TenantDoesNotExist(username)
     # 2 - get roles
     user_roles = db.query(models.Tenant_Role).filter(
-        models.Tenant_Role.user == user.id).all()
+        models.Tenant_Role.user == user.username).all()
     if len(user_roles) == 0:
         return set()
     # 3 - roles2str
@@ -165,3 +180,32 @@ def update_user_password(db: Session, username: str, new_password: str):
     
     logging.info(f"{username}'s password updated with success")
     return db_user
+
+
+def update_tenant_vs_data(db: Session,
+                     tenant: models.Tenant,
+                     vsi: MessageSchemas.CreateVsiData):
+
+    vsi_in = models.VSI(
+        id=vsi.vsiId
+    )
+    # if vsi already in the Tenant's Vsis remove it, else add it
+    found = False
+    for vsi_db in tenant.vsis:
+        if vsi_db.id == vsi_in.id:
+            logging.info(f"Removing VSI with Id {vsi_db.id} for tenant" \
+                         + f" {tenant.username} ..."
+            )
+            tenant.vsis.remove(vsi_db)
+            found = True
+            break
+    
+    if not found:
+        logging.info(f"Adding VSI with Id {vsi_in.id} for tenant" \
+                         + f" {tenant.username} ..."
+        )
+        tenant.vsis.append(vsi_in)
+    db.add(tenant)
+    db.commit()
+    db.refresh(tenant)
+    return tenant

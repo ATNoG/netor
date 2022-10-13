@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 11:52:23
+# @Last Modified time: 2022-10-12 09:03:37
 
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
@@ -38,6 +38,7 @@ TOPIC_ACTION_NS = "actionNs"
 TOPIC_ACTION_NSI = "actionNsi"
 TOPIC_FETCH_NS_INFO = "getNsInfo"
 TOPIC_FETCH_NSI_INFO = "getNsiInfo"
+TOPIC_FETCH_ACTION_INFO = "getPrimitiveInfo"
 TOPIC_NSI_INFO = "nsiInfo"
 TOPIC_ERROR = "errorOccured"
 

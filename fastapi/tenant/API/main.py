@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-28 14:08:56
+# @Last Modified time: 2022-10-13 12:10:23
 
 import json
 from fastapi import FastAPI
@@ -13,13 +13,14 @@ import sys
 import os
 import time
 from rabbitmq.adaptor import RabbitHandler
-from routers import auth
+from routers import auth, groups
 from rabbitmq.messaging_manager import MessageReceiver
 
 # custom imports
 from sql_app import models
 from sql_app.database import SessionLocal, engine
 import aux.startup as Startup
+import schemas.message as MessageSchemas
 # import from parent directory
 currentdir = os.path.dirname(os.path.abspath(
              inspect.getfile(inspect.currentframe())))
@@ -45,6 +46,7 @@ app = FastAPI(
 #     allow_headers=["*"],
 # )
 app.include_router(auth.router)
+app.include_router(groups.router)
 
 
 # Dependency
@@ -85,14 +87,3 @@ async def startup_event():
     Startup.fill_database(db)
     message_receiver = MessageReceiver()
     await message_receiver.start()
-    # msg_data = MessageSchemas.FecthNsiInfoData(
-    #     domainId="ITAV", nsiId="d401a39e-f298-4913-a180-55dc324b5d36")
-    # msg = MessageSchemas.Message(
-    #     vsiId=1,
-    #     msgType="getNsiInfo",
-    # )
-    # msg.data = msg_data
-    # a = json.dumps(msg.dict())
-    # msg = MessageSchemas.Message(**json.loads(a))
-    # await message_receiver.messaging.publish_queue('vsDomain', message=a)
-    # await message_receiver.messaging.publish_queue('vsDomain', message=a)

@@ -3,11 +3,12 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-26 10:01:39
+# @Last Modified time: 2022-09-08 11:36:43
 from datetime import timedelta
 from fastapi import Depends
 # generic imports
 from fastapi import APIRouter
+from exceptions.auth import NotEnoughPrivileges, TenantDoesNotExist
 from sql_app.database import SessionLocal
 from sqlalchemy.orm import Session
 import logging
@@ -75,7 +76,6 @@ def login_for_access_token(form_data: AuthSchemas.TenantLogin,
             errors=[str(exception)]
         )
 
-
 @router.get(
     "/oauth/validate/",
     tags=["auth"],
@@ -89,48 +89,84 @@ def get_my_information(token: str = Depends(auth.oauth2_scheme),
         user_info = CRUD_Auth.get_user_info(db, username)
         return Utils.create_response(status_code=200,
                                      success=True,
-                                     data={"user_info": user_info})
+                                     data={"user_info": user_info.dict()})
     except Exception as exception:
         return Utils.create_response(
             status_code=400,
             success=False,
             errors=[str(exception)]
         )
-      
 
 
-# @router.post(
-#     "/users/register/",
-#     tags=["auth"],
-#     summary="Register user",
-#     description="This endpoint allows the user to register using credentials.",
-# )
-# def register_new_user(new_user: AuthSchemas.UserRegister, token: str = Depends(auth.oauth2_scheme), db: Session = Depends(get_db)):
-#     try:
-#         login_username = auth.get_current_user(token)
-#         roles = CRUD_Auth.get_user_roles(db, login_username)
-#         # check if operation was ordered by an admin
-#         if "ADMIN" not in roles:
-#             raise NotEnoughPrivileges(login_username, 'register_new_user')
-#         # create new user
-#         db_user = CRUD_Auth.register_user(db, new_user.username, new_user.password, new_user.roles)
-#         user_info = CRUD_Auth.get_user_info(db, db_user.username)
-#     except Exception as e:
-#         return Utils.create_response(status_code=401, success=False, errors=[e.message]) 
-#     return Utils.create_response(status_code=200, success=True, data={"new_user": user_info})  
+@router.post(
+     "/tenant",
+    tags=["tenant"],
+    summary="Create a Tenant",
+    description="This endpoint allows the creation of a Tenant"
+)
+@Utils.rbac_enforcer(['ADMIN'])
+def create_tenant(
+                  tenant_in: AuthSchemas.TenantCreate,
+                  token: str = Depends(auth.oauth2_scheme),
+                  db: Session = Depends(get_db)):
+    try:
+        tenant = CRUD_Auth.register_tenant(db, tenant_in)
+        return Utils.create_response(status_code=200,
+                                     success=True,
+                                     data=tenant.as_dict())
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        ) 
 
+@router.get(
+    "/tenant/{tenant_username}",
+    tags=["tenant"],
+    summary="Get a tenant by its Username",
+    description="This endpoint allows getting Tenant's Info"
+)
+@Utils.rbac_enforcer(['ADMIN', 'TENANT'])
+def get_tenant_by_id(tenant_username: str,
+                     token: str = Depends(auth.oauth2_scheme),
+                     db: Session = Depends(get_db)):
+    try:
+        tenant = CRUD_Auth.getTenantByUsername(db, tenant_username)
+        if not tenant:
+            raise TenantDoesNotExist(tenant)
+        current_user = auth.get_current_user(token)
+        if current_user != tenant_username:
+            raise NotEnoughPrivileges(current_user)
+        tenant = CRUD_Auth.get_user_info(db, tenant_username).dict()
+        return Utils.create_response(status_code=200,
+                                     success=True,
+                                     data=tenant)
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        )
 
-
-# @router.patch(
-#     "/users/update-password/",
-#     tags=["auth"],
-#     summary="Update Password",
-#     description="This endpoint allows the user to update his password."
-# )
-# def update_password(password_data: AuthSchemas.NewPassword, token: str = Depends(auth.oauth2_scheme) , db: Session = Depends(get_db)):
-#     try:
-#         username = auth.get_current_user(token)
-#         db_user = CRUD_Auth.update_user_password(db, username, password_data.new_password)
-#     except Exception as e:
-#         return Utils.create_response(status_code=403, success=False, errors=[e.message]) 
-#     return Utils.create_response(status_code=200, success=True, message="Password Updated With Success")  
+@router.get(
+    "/tenant",
+    tags=["tenant"],
+    summary="Get all tenants",
+    description="This endpoint allows getting all Tenants Info"
+)
+@Utils.rbac_enforcer(['ADMIN'])
+def get_tenant_by_id(
+                     token: str = Depends(auth.oauth2_scheme),
+                     db: Session = Depends(get_db)):
+    try:
+        data = CRUD_Auth.get_all_tenants_info(db)
+        return Utils.create_response(status_code=200,
+                                     success=True,
+                                     data=data)
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        )

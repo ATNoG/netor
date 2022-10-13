@@ -3,16 +3,19 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 16:13:45
+# @Last Modified time: 2022-09-01 16:56:17
 
 
+from functools import wraps
 from http.client import HTTPException
 from fastapi.responses import JSONResponse
+from exceptions.auth import NotEnoughPrivileges
 from schemas.auth import Tenant
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 # custom imports
-
+import aux.auth as auth
+import sql_app.crud.auth as AuthCRUD
 
 def create_response(status_code=200, data=[], errors=[],
                     success=True, message=""):
@@ -22,16 +25,28 @@ def create_response(status_code=200, data=[], errors=[],
                         headers={"Access-Control-Allow-Origin": "*"})
 
 
-def rbacencforcer():
-    try:
-        userdata = Tenant(username="User", role="Admin")
-        return userdata
-    except Exception:
-        raise HTTPException(
-            status_code=400,
-            detail="Insufficient permissions to access this" +
-                   " resource. This is resource is only available to")
-
+def rbac_enforcer(roles: list) -> None:
+    def inner(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            token = kwargs.get('token')
+            db = kwargs.get('db')
+            try:
+                username = auth.get_current_user(token)
+                user_roles = AuthCRUD.get_user_roles(db, username)
+                if not (set(roles) & set(user_roles)):
+                    raise Exception
+            except Exception as exception:
+                return create_response(
+                    status_code=400,
+                    success=False,
+                    errors=["Insufficient permissions to access this " +
+                            "resource. This is resource is only available to" +
+                            f" users with the roles: '{roles}', {exception}"]
+                    )
+            return await func(*args, **kwargs)
+        return wrapper
+    return inner
 
 def update_db_object(db: Session, db_obj: object, obj_in: dict,
                      add_to_db: bool = True):
@@ -48,3 +63,13 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.commit()
         db.refresh(db_obj)
     return db_obj
+
+
+def check_permission_on_group(db: Session,
+                                requester_username: str,
+                                group_name: str):
+    user_roles = AuthCRUD.get_user_roles(db, requester_username)
+    if "ADMIN" not in user_roles:
+        db_tenant = AuthCRUD.getTenantByUsername(db, requester_username)
+        if db_tenant.group.name != group_name:
+            raise NotEnoughPrivileges(requester_username)

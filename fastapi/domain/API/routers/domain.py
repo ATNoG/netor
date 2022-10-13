@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-28 14:13:09
+# @Last Modified time: 2022-09-19 17:21:41
 
 from fastapi import Depends
 # generic imports
@@ -81,7 +81,7 @@ def getDomainById(
         if not domain:
             raise DomainNotFound(domain_id=domainId)
         return Utils.create_response(
-            data=domain,
+            data=domain.as_dict(),
             message="Success obtaining Domain"
         )
     except Exception as exception:
@@ -150,7 +150,6 @@ def updateDomain(
         domain = CRUDDomain.getDomainById(db, domainId)
         if not domain:
             raise DomainNotFound(domain_id=domainId)
-        print(domain.ownedLayers)
         domain = CRUDDomain.updateDomain(db, domain, domain_data)
         driver = CRUDDomain.getDomainDriver(db, domain_data)
         # try to authenticate to the NFVO

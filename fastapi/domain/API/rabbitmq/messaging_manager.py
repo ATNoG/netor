@@ -3,19 +3,20 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:30:49
+# @Last Modified time: 2022-10-12 17:52:38
+import asyncio
+import threading
 from rabbitmq.adaptor import RabbitHandler
 from aio_pika import IncomingMessage, Message
 import json
-from threading import Thread
 import logging
 import schemas.message as MessageSchemas
 import aux.constants as Constants
 from sql_app.database import SessionLocal
 import sql_app.crud.domain as CRUDDomain
 from aux.domain_action_handler import DomainActionHandler
+import concurrent.futures
 
-from fastapi.concurrency import run_in_threadpool
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -31,11 +32,12 @@ logging.basicConfig(
 )
 
 
+
 class MessageReceiver():
 
     def __init__(self):
         self.messaging = RabbitHandler()
-
+        #self.loop = self._start_async()
     async def start(self):
         await self.messaging.start_pool()
         await self.messaging.create_exchange("vsLCM_Management")
@@ -48,16 +50,22 @@ class MessageReceiver():
             msg = message.body.decode()
             msg = json.loads(msg)
             payload = MessageSchemas.Message(**msg)
+            
+            logging.info(payload)
             handler = DomainActionHandler(payload, self.messaging)
-            await handler.run()
-        # handler.start()
-
+            await handler.start()
+            
+    
+            
     async def callback(self, message: IncomingMessage):
         async with message.process():
             msg = message.body.decode()
             msg = json.loads(msg)
-            payload = MessageSchemas.Message(**msg)
-            logging.info("here")
+            try:
+                payload = MessageSchemas.Message(**msg)
+            except Exception:
+                # if the message was not suposed to be received
+                return
             if payload.msgType == Constants.TOPIC_CREATEVSI:
                 try:
                     domainsIds = CRUDDomain.getDomainsIds()

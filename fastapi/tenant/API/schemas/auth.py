@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-24 17:59:10
+# @Last Modified time: 2022-08-30 10:12:26
 
 # generic imports
 from typing import List
@@ -62,7 +62,6 @@ class TenantCreate(TenantBase):
 
 
 class Tenant(TenantBase):
-    id: int
     roles: List[str]
     slas: List[Sla] = []
 

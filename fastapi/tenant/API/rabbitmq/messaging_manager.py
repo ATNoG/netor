@@ -3,15 +3,16 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 14:45:52
+# @Last Modified time: 2022-10-12 17:56:28
 from rabbitmq.adaptor import RabbitHandler
 from aio_pika import IncomingMessage
 import json
 import logging
 import aux.constants as Constants
 from sql_app.database import SessionLocal
-
-
+import schemas.message as MessageSchemas
+import sql_app.crud.auth as CRUDAuth
+import aux.utils as Utils
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -42,8 +43,47 @@ class MessageReceiver():
         async with message.process():
             msg = message.body.decode()
             msg = json.loads(msg)
-            # payload = MessageSchemas.Message(**msg)
-            logging.info("here")
+            try:
+                payload = MessageSchemas.Message(**msg)
+            except Exception:
+                # if the message was not suposed to be received
+                return
+            db_gen = get_db()
+            db = next(db_gen)
+            try:
+                if payload.msgType == Constants.TOPIC_CREATEVSI:
+
+                    tenant_db = CRUDAuth.getTenantByUsername(
+                        db, payload.tenantId)
+                    tenant_roles = CRUDAuth.get_user_roles(
+                        db, payload.tenantId)
+                    tenant_out = MessageSchemas.TenantInfoData(
+                            username=tenant_db.username,
+                            group=tenant_db.group.name,
+                            roles=tenant_roles
+                        )
+                    CRUDAuth.update_tenant_vs_data(db, tenant_db, payload.data)
+                    payload.data = tenant_out
+                    payload.msgType = Constants.TOPIC_TENANT_INFO
+
+                elif payload.msgType == Constants.TOPIC_REMOVEVSI:
+                    tenant_db = CRUDAuth.get_user_info(db, payload.tenantId)
+                    CRUDAuth.update_tenant_vs_data(db, tenant_db, payload.data)
+                else:
+                    return
+            except Exception as e:
+                error_msg = f"Error performing {payload.msgType}" + \
+                            f" in Tenant {payload}: {str(e)}"
+                payload.msgType = Constants.TOPIC_ERROR
+                payload.message = error_msg
+            
+        payload = payload.dict()
+        logging.info("sent message:" + str(payload))
+        await self.messaging.publish_exchange(
+            Constants.EXCHANGE_MGMT,
+            message=json.dumps(payload)
+        )
+        return
 
     def stop(self):
         try:

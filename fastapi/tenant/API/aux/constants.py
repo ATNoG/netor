@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 11:51:48
+# @Last Modified time: 2022-08-30 15:27:23
 
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
@@ -27,6 +27,8 @@ RABBITMQ_PORT = None
 
 
 TOPIC_CREATEVSI = "createVSI"
+TOPIC_REMOVEVSI = "removeVSI"
 TOPIC_ERROR = "errorOccured"
+TOPIC_TENANT_INFO = "tenantInfo"
 
 EXCHANGE_MGMT = "vsLCM_Management"

@@ -3,10 +3,11 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-26 13:49:18
+# @Last Modified time: 2022-10-12 10:24:03
 
 
 import json
+from time import sleep
 from rabbitmq.adaptor import RabbitHandler
 import aux.constants as Constants
 import schemas.message as MessageSchemas
@@ -14,6 +15,7 @@ import sql_app.crud.domain as CRUDDomain
 from sql_app.database import SessionLocal
 import logging
 from exceptions.domain import DomainDriverNotFound, DomainLayersCouldNotBeFound
+import aux.utils as Utils
 
 # Logger
 logging.basicConfig(
@@ -30,20 +32,23 @@ def get_db():
     finally:
         db.close()
 
-
 class DomainActionHandler:
     def __init__(self, payload: MessageSchemas.Message,
                  messaging: RabbitHandler):
         self.payload = payload
         self.messaging = messaging
 
-    async def run(self):
+    async def start(self):
+        await self.startConsuming()
+
+    async def startConsuming(self):
         db_gen = get_db()
         db = next(db_gen)
         try:
             response = MessageSchemas.Message(vsiId=self.payload.vsiId)
+            domainId = self.payload.data.domainId
             domain, domainLayer, driver = CRUDDomain.getDomainInfo(
-                db, self.payload.data.domainId)
+                db, domainId)
             if not driver:
                 raise DomainDriverNotFound()
             if not domainLayer:
@@ -65,7 +70,6 @@ class DomainActionHandler:
                     componentName=self.payload.data.name,
                     componentId=tunnelServiceId,
                     additionalData=nssNsrId)
-
                 response.msgType = Constants.TOPIC_UPDATE_NFVO_IDS,
                 response.message = "Sending Resource's Components Ids",
                 response.data = data
@@ -75,10 +79,15 @@ class DomainActionHandler:
                     self.payload.data.nsId,
                     self.payload.data.additionalConf
                 )
+                output = res['detailed-status']
+                if type(output) == dict:
+                    output = json.dumps(output)
                 data = MessageSchemas.ActionResponseData(
                     primitiveName=self.payload.data.primitiveName,
+                    actionId=self.payload.data.actionId,
+                    nfvoId=res['id'],
                     status=res['operationState'],
-                    output=res["detailed-status"]["output"]
+                    output=output
                 )
                 response.msgType = Constants.TOPIC_ACTION_RESPONSE
                 response.message = "Returning NS action result",
@@ -95,17 +104,34 @@ class DomainActionHandler:
                 response.msgType = Constants.TOPIC_NSI_INFO
                 response.message = f"Sending NSI {self.payload.data.nsiId} inf"
                 response.data = data
+            elif self.payload.msgType == Constants.TOPIC_DELETE_NSI:
+                driver.terminateNSI(self.payload.data.nsiId)
+            elif self.payload.msgType == Constants.TOPIC_FETCH_ACTION_INFO:
+                res = driver.get_primitive_state(self.payload.data.nfvoId)
+                output = res['detailed-status']
+                if type(output) == dict:
+                    output = json.dumps(output)
+                data = MessageSchemas.ActionResponseData(
+                    actionId=self.payload.data.actionId,
+                    nfvoId=res['id'],
+                    status=res['operationState'],
+                    output=output
+                )
+                response.msgType = Constants.TOPIC_ACTION_RESPONSE
+                response.message = f"Sending Operation {res['id']} execution state"
+                response.data = data
             else:
                 return
         except Exception as e:
             error_msg = f"Error performing action {self.payload.msgType}" + \
-                        f" in domain {self.payload}: {str(e)}"
+                        f" in domain: {str(e)}"
             response.msgType = Constants.TOPIC_ERROR
             response.message = error_msg
+            response.error = True
         response = response.dict()
         logging.info("sent message:" + str(response))
+
         await self.messaging.publish_exchange(
             Constants.EXCHANGE_MGMT,
             message=json.dumps(response)
         )
-        return

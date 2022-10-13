@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 14:31:17
+# @Last Modified time: 2022-10-12 16:07:32
 
 import json
 from fastapi import FastAPI
@@ -14,13 +14,13 @@ import os
 import time
 from rabbitmq.adaptor import RabbitHandler
 import schemas.message as MessageSchemas
-from routers import auth, domain
+from routers import domain
 from rabbitmq.messaging_manager import MessageReceiver
-
 # custom imports
 from sql_app import models
 from sql_app.database import SessionLocal, engine
 import aux.startup as Startup
+import aux.constants as Constants
 # import from parent directory
 currentdir = os.path.dirname(os.path.abspath(
              inspect.getfile(inspect.currentframe())))
@@ -38,14 +38,12 @@ app = FastAPI(
         "email": "user@av.it.pt",
     },
 )
-
 # app.add_middleware(
 #     CORSMiddleware,
 #     allow_credentials=True,
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
-app.include_router(auth.router)
 app.include_router(domain.router)
 
 
@@ -87,14 +85,21 @@ async def startup_event():
     Startup.fill_database(db)
     message_receiver = MessageReceiver()
     await message_receiver.start()
-    msg_data = MessageSchemas.FecthNsiInfoData(
-        domainId="ITAV", nsiId="b38a41a9-065c-4a2e-87f9-480b1db2a28d")
+    msg_data = MessageSchemas.FetchPrimitiveData(
+        domainId="ITAV",
+        nfvoId="5d7bc1b5-7e38-49f7-a3ec-848dfc4525e8",
+        actionId="1"
+    )
+    # msg_data = MessageSchemas.FecthNsiInfoData(
+    #     domainId="ITAV", nsiId="b38a41a9-065c-4a2e-87f9-480b1db2a28d")
     msg = MessageSchemas.Message(
         vsiId=1,
-        msgType="getNsiInfo",
+        msgType=Constants.TOPIC_FETCH_ACTION_INFO
     )
     msg.data = msg_data
     a = json.dumps(msg.dict())
+
     msg = MessageSchemas.Message(**json.loads(a))
-    await message_receiver.messaging.publish_queue('vsDomain', message=a)
+    # await message_receiver.messaging.publish_queue('vsDomain', message=a)
+    # await message_receiver.messaging.publish_queue('vsDomain', message=a)
     # await message_receiver.messaging.publish_queue('vsDomain', message=a)

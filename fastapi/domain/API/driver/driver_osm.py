@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:29:46
+# @Last Modified time: 2022-10-12 08:57:11
 
 from functools import wraps
 from osmclient import client
@@ -76,12 +76,19 @@ class OSMDriver(DomainDriver):
     @require_session(remove_prefix=True)
     def sendActionNS(self, nsId, additionalConf=None):
 
-        actionId = self.osm_client.ns.exec_op(nsId, "action",
-                                              op_data=additionalConf,
-                                              wait=True)
-        actionInfo = self.osm_client.ns.get_op(actionId)
+        nfvoId = self.osm_client.ns.exec_op(nsId, "action",
+                                              op_data=additionalConf)
+        actionInfo = self.osm_client.ns.get_op(nfvoId)
         return actionInfo
 
     @require_session(remove_prefix=True)
+    def get_primitive_state(self, nfvoId):
+        actionInfo = self.osm_client.ns.get_op(nfvoId)
+        return actionInfo
+    @require_session(remove_prefix=True)
     def getNSI(self, nsiId):
         return self.osm_client.nsi.get(nsiId)
+
+    @require_session(remove_prefix=True)
+    def terminateNSI(self, nsiId):
+        return self.osm_client.nsi.delete(nsiId)

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-28 14:07:55
+# @Last Modified time: 2022-09-01 10:14:55
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -15,7 +15,7 @@ from .database import Base
 class Tenant_Role(Base):
     __tablename__ = "tenant_role"
     id = Column(Integer, primary_key=True, index=True)
-    user = Column(Integer, ForeignKey("Tenant.id"),
+    user = Column(String, ForeignKey("Tenant.username"),
                   nullable=False, index=True)
     role = Column(Integer, ForeignKey("role.id"), nullable=False)
 
@@ -45,7 +45,7 @@ class Sla(Base):
     __tablename__ = 'Sla'
     id = Column(Integer, primary_key=True)
     enabled = Column(Boolean)
-    tenantId = Column(Integer, ForeignKey('Tenant.id'),
+    tenantUsername = Column(String, ForeignKey('Tenant.username'),
                       nullable=False)
     tenant = relationship("Tenant", back_populates="slas")
     constraints = relationship("SlaConstraint", back_populates="sla")
@@ -72,7 +72,7 @@ class SlaConstraint(Base):
 class VSD(Base):
     __tablename__ = 'VSD'
     id = Column(Integer, primary_key=True)
-    tenantId = Column(Integer, ForeignKey('Tenant.id'),
+    tenantUsername = Column(String, ForeignKey('Tenant.username'),
                       primary_key=True)
     tenant = relationship("Tenant", back_populates="vsds")
 
@@ -83,7 +83,7 @@ class VSD(Base):
 class VSI(Base):
     __tablename__ = 'VSI'
     id = Column(String, primary_key=True)
-    tenantId = Column(Integer, ForeignKey('Tenant.id'),
+    tenantUsername = Column(String, ForeignKey('Tenant.username'),
                       primary_key=True)
     tenant = relationship("Tenant", back_populates="vsis")
 
@@ -93,13 +93,12 @@ class VSI(Base):
 
 class Tenant(Base):
     __tablename__ = 'Tenant'
-    id = Column(Integer, primary_key=True, index=True)    
-    username = Column(String)
+    username = Column(String, primary_key=True, index=True)
     password = Column(String)
     groupName = Column(String, ForeignKey('Group.name'))
     group = relationship("Group", back_populates="tenants")
     vsds = relationship("VSD", back_populates="tenant")
-    vsis = relationship("VSI", back_populates="tenant")
+    vsis = relationship("VSI", back_populates="tenant", cascade="all, delete-orphan")
     slas = relationship("Sla", back_populates="tenant")
 
     def as_dict(self):

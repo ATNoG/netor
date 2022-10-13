@@ -3,9 +3,12 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-28 14:12:37
+# @Last Modified time: 2022-09-20 16:18:59
 
 
+import asyncio
+import typing
+from functools import wraps, partial
 from fastapi.responses import JSONResponse
 from fastapi import Depends, HTTPException
 from exceptions.domain import CouldNotAuthenticatetoNFVO
@@ -34,7 +37,6 @@ def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
         userdata = Tenant(**data)
         return userdata
     except Exception as e:
-        print(e)
         raise HTTPException(
             status_code=400,
             detail="Insufficient permissions to access this" +
@@ -67,7 +69,7 @@ def get_tenant_info(token):
             verify=False
         )
         data = r.json()
-        
+        print(data)
         return data
     except Exception as e:
         print(e)
@@ -89,3 +91,16 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.commit()
         db.refresh(db_obj)
     return db_obj
+
+def submit_async(awaitable, _loop):
+        return asyncio.run_coroutine_threadsafe(awaitable, _loop)
+
+
+
+def to_thread(func: typing.Callable) -> typing.Coroutine:
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        wrapped = partial(func, *args, **kwargs)
+        return await loop.run_in_executor(None, wrapper)
+    return wrapper

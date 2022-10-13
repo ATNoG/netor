@@ -3,12 +3,11 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-27 11:53:41
+# @Last Modified time: 2022-08-29 10:57:02
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
 import aux.constants as Constants
-from sql_app.crud import auth as CRUD_Auth
 
 # generic imports
 import configparser
@@ -50,19 +49,5 @@ def load_config():
     return True, ""
 
 
-def startup_roles(db):
-    for role in Constants.USER_ROLES:
-        CRUD_Auth.create_role(db, role)
-
-
-def create_default_admin(db):
-    CRUD_Auth.register_user(
-        db=db,
-        username=Constants.DEFAULT_ADMIN_CREDENTIALS['username'], 
-        password=Constants.DEFAULT_ADMIN_CREDENTIALS['password'],
-        roles=Constants.USER_ROLES)
-
-
 def fill_database(db):
-    startup_roles(db)
-    create_default_admin(db)
+    pass
