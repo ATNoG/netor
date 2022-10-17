@@ -1,0 +1,816 @@
+{
+	"info": {
+		"_postman_id": "9259366b-3205-4fef-9f95-eef1fd4498ef",
+		"name": "NetOr - Development",
+		"description": "Core steps:\n1- login do admin que cria o token de acesso (\"access_token\")\n2- ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "core",
+			"item": [
+				{
+					"name": "1-authenticateAdmin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.environment.set(\"adminToken\", jsonData[\"access_token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://{{netorIp}}/tenant/oauth/token?grant_type=password&client_id=portal&password=admin&username=admin&response_type=code&client_secret=portal",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"tenant",
+								"oauth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "grant_type",
+									"value": "password"
+								},
+								{
+									"key": "client_id",
+									"value": "portal"
+								},
+								{
+									"key": "password",
+									"value": "admin"
+								},
+								{
+									"key": "username",
+									"value": "admin"
+								},
+								{
+									"key": "response_type",
+									"value": "code"
+								},
+								{
+									"key": "client_secret",
+									"value": "portal"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.1-createDomain1",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainId\":\"ITAV\",\n    \"admin\":\"ITAV\",\n    \"description\":\"ITAV domain\",\n    \"auth\":false,\n    \"interfaceType\":\"HTTP\",\n    \"url\":\"http://10.0.12.96\",\n    \"name\":\"ITAV - Domain 1\",\n    \"owner\":\"ITAV - Domain 1\",\n    \"ownedLayers\":[\n        {\n            \"domainLayerId\":\"ITAV_OSM\",\n            \"domainLayerType\":\"OSM_NSP\",\n            \"username\":\"5gasp\",\n            \"password\":\"h:St.P6hTBQp-7wj\",\n            \"project\":\"5gasp\",\n            \"vimAccount\":\"Tron\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/domain/domain",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"domain",
+								"domain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.2-createDomain2",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainId\":\"OdinS\",\n    \"admin\":\"OdinS\",\n    \"description\":\"OdinS domain\",\n    \"auth\":false,\n    \"interfaceType\":\"HTTP\",\n    \"url\":\"http://10.0.12.96\",\n    \"name\":\"OdinS domain\",\n    \"owner\":\"OdinS domain\",\n    \"ownedLayers\":[\n        {\n            \"domainLayerId\":\"OdinS_OSM\",\n            \"domainLayerType\":\"OSM_NSP\",\n            \"username\":\"5gasp\",\n            \"password\":\"h:St.P6hTBQp-7wj\",\n            \"project\":\"5gasp\",\n            \"vimAccount\":\"Tron\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/domain/domain",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"domain",
+								"domain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3-createDomain3",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainId\":\"UoP\",\n    \"admin\":\"UoP\",\n    \"description\":\"UoP domain\",\n    \"auth\":false,\n    \"interfaceType\":\"HTTP\",\n    \"url\":\"http://10.0.12.96\",\n    \"name\":\"UoP domain\",\n    \"owner\":\"UoP domain\",\n    \"ownedLayers\":[\n        {\n            \"domainLayerId\":\"UoP_OSM\",\n            \"domainLayerType\":\"OSM_NSP\",\n            \"username\":\"5gasp\",\n            \"password\":\"h:St.P6hTBQp-7wj\",\n            \"project\":\"5gasp\",\n            \"vimAccount\":\"Tron\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/domain/domain",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"domain",
+								"domain"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3-onboardBlueprint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.environment.set(\"vsbId\", jsonData[\"data\"][\"vs_blueprint_id\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vs_blueprint\": {\n        \"slice_service_type\": \"EMBB\",\n        \"embb_service_category\":\"URBAN_MACRO\",\n        \"parameters\": [\n        {\n            \"parameter_id\": \"peers\",\n            \"parameter_type\": \"number\",\n            \"applicability_field\": \"interdomain\",\n            \"parameter_name\": \"Peers\",\n            \"parameter_description\": \"#Peers\"\n        }\n        ],\n        \"version\": \"version_1\",\n        \"name\": \"vsb-testNST\",\n        \"inter_site\": true\n    },\n    \"translation_rules\": [\n        {\n            \"nst_id\": \"interdomain_e2e_nstNST\",\n            \"input\": [\n            {\n                \"max_value\": 10,\n                \"parameter_id\": \"peers\",\n                \"min_value\": 1\n            }\n            ],\n            \"nsd_version\": \"1.0\",\n            \"blueprint_id\": \"1\"\n        }\n    ],\n    \"available_actions\": [\n        {\n            \"action_name\": \"Add Tunnel Peer\",\n            \"action_id\": \"add-peer\",\n            \"parameters\": [\n                {\n                    \"parameter_name\": \"Peer Endpoint\",\n                    \"parameter_id\": \"peer_endpoint\",\n                    \"parameter_type\": \"STRING\"\n                },\n                {\n                    \"parameter_name\": \"Peer Public Key\",\n                    \"parameter_id\": \"peer_public_key\",\n                    \"parameter_type\": \"STRING\"\n                },\n                {\n                    \"parameter_name\": \"Peer Allowed Netorks\",\n                    \"parameter_id\": \"allowed_networks\",\n                    \"parameter_default_value\":\"null\",\n                    \"parameter_type\": \"STRING\"\n                }\n            ]\n        },\n        {\n            \"action_name\": \"Route Management\",\n            \"action_id\": \"ip-route-management\",\n            \"parameters\": [\n                {\n                    \"parameter_name\": \"Network\",\n                    \"parameter_id\": \"network\",\n                    \"parameter_type\": \"STRING\"\n                },\n                {\n                    \"parameter_name\": \"Action to be executed\",\n                    \"parameter_id\": \"action\",\n                    \"parameter_type\": \"STRING\"\n                },\n                {\n                    \"parameter_name\": \"Gateway Address\",\n                    \"parameter_id\": \"gw_address\",\n                    \"parameter_type\": \"STRING\"\n                }\n            ]\n        }\n    ],\n    \"nsts\":[\n      {\n        \"nst_version\": \"1.0\",\n        \"nsst_ids\": [\n          \"interdomain-nst\",\n          \"interdomain-nst\",\n          \"interdomain-nst\"\n        ],\n        \"nsst_type\": \"NONE\",\n        \"nst_service_profile\": {\n          \"service_profile_id\": \"interdomain_profile\",\n          \"eMBB_perf_req\": [\n            {\n              \"user_density\": 100,\n              \"uE_speed\": 10\n            }\n          ],\n          \"latency\": 100,\n          \"sST\": \"EMBB\",\n          \"max_number_of_UEs\": 1000,\n          \"availability\": 100\n        },\n        \"nsd_version\": \"1.0\",\n        \"nst_id\": \"interdomain_e2e_nstNST\",\n        \"nst_provider\": \"ITAV\",\n        \"nst_name\": \"Interdomain Slice NST\"\n      }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/catalogue/vsblueprint",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"catalogue",
+								"vsblueprint"
+							],
+							"query": [
+								{
+									"key": "vsb_id",
+									"value": "60b3d81b728d57b249a110a3",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4-authenticateUser",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.environment.set(\"userToken\", jsonData[\"access_token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://{{netorIp}}/tenant/oauth/token?grant_type=password&client_id=portal&password=user&username=user&response_type=code&client_secret=portal",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"tenant",
+								"oauth",
+								"token"
+							],
+							"query": [
+								{
+									"key": "grant_type",
+									"value": "password"
+								},
+								{
+									"key": "client_id",
+									"value": "portal"
+								},
+								{
+									"key": "password",
+									"value": "user"
+								},
+								{
+									"key": "username",
+									"value": "user"
+								},
+								{
+									"key": "response_type",
+									"value": "code"
+								},
+								{
+									"key": "client_secret",
+									"value": "portal"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5-onboardDescriptor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.environment.set(\"vsdId\", jsonData[\"data\"][\"vs_descriptor_id\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"is_public\": true,\n    \"nested_vsd_ids\": {},\n    \"vs_blueprint_id\": \"{{vsbId}}\",\n    \"domain_id\": \"ITAV\",\n    \"version\": \"1.0\",\n    \"management_type\": \"TENANT_MANAGED\",\n    \"name\": \"vsdTestNST\",\n    \"qos_parameters\": {\"peers\":\"3\"},\n    \"tenant_id\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/catalogue/vsdescriptor",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"catalogue",
+								"vsdescriptor"
+							],
+							"query": [
+								{
+									"key": "vsd_id",
+									"value": "60b637eb257f705860e6681e",
+									"disabled": true
+								},
+								{
+									"key": "tenant_id",
+									"value": "admin",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6-newVSI",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var value = parseInt(pm.environment.get(\"id\"));",
+									"",
+									"if(value) {",
+									"    pm.environment.set(\"current_id\", value);",
+									"    pm.environment.set(\"id\", value+1);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"wireguard\",\n    \"description\":\"wireguard\",\n    \"vsdId\":\"{{vsdId}}\",\n    \"vsiId\":\"{{id}}\",\n    \"domainPlacements\":[\n        {\n            \"domainId\":\"ITAV\",\n            \"componentName\":\"{{id}}_1-wireguard\"\n        },\n        {\n            \"domainId\":\"OdinS\",\n            \"componentName\":\"{{id}}_2-wireguard\"\n        },\n        {\n            \"domainId\":\"UoP\",\n            \"componentName\":\"{{id}}_3-wireguard\"\n        }\n    ],\n    \"additionalConf\":[\n        {\n            \"componentName\":\"{{id}}_1-wireguard\",\n            \"conf\":\"{\\\"netslice-subnet\\\": [{\\\"id\\\": \\\"interdomain-tunnel-peer\\\", \\\"additionalParamsForVnf\\\": [{\\\"member-vnf-index\\\": \\\"1\\\", \\\"additionalParams\\\": {\\\"use_data_interfaces\\\": \\\"true\\\", \\\"tunnel_id\\\": \\\"wg1\\\", \\\"tunnel_peer_address\\\": \\\"10.100.101.1\\\", \\\"tunnel_address\\\": \\\"10.100.100.0/24\\\", \\\"vsi_id\\\": \\\"{{id}}\\\"}}]}]}\"\n        },\n        {\n            \"componentName\":\"{{id}}_2-wireguard\",\n            \"conf\":\"{\\\"netslice-subnet\\\": [{\\\"id\\\": \\\"interdomain-tunnel-peer\\\", \\\"additionalParamsForVnf\\\": [{\\\"member-vnf-index\\\": \\\"1\\\", \\\"additionalParams\\\": {\\\"use_data_interfaces\\\": \\\"true\\\", \\\"tunnel_id\\\": \\\"wg2\\\", \\\"tunnel_peer_address\\\": \\\"10.100.102.1\\\", \\\"tunnel_address\\\": \\\"10.100.100.0/24\\\", \\\"vsi_id\\\": \\\"{{id}}\\\"}}]}]}\"\n        },\n        {\n            \"componentName\":\"{{id}}_3-wireguard\",\n            \"conf\":\"{\\\"netslice-subnet\\\": [{\\\"id\\\": \\\"interdomain-tunnel-peer\\\", \\\"additionalParamsForVnf\\\": [{\\\"member-vnf-index\\\": \\\"1\\\", \\\"additionalParams\\\": {\\\"use_data_interfaces\\\": \\\"true\\\", \\\"tunnel_id\\\": \\\"wg3\\\", \\\"tunnel_peer_address\\\": \\\"10.100.103.1\\\", \\\"tunnel_address\\\": \\\"10.100.100.0/24\\\", \\\"vsi_id\\\": \\\"{{id}}\\\"}}]}]}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/lcm/vs",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"lcm",
+								"vs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7-configureWGMesh",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vsiId\": \"{{current_id}}\",\n    \"peers\": [\n        {\n            \"component_id\": \"{{current_id}}_1-wireguard\",\n            \"peer_public_key\": \"hxT/wlMGO9TsCp0w56SoaBQuNo4AOQqdFyaUHRaWyhs=\",\n            \"peer_endpoint\": \"10.0.12.224:51820\",\n            \"allowed_networks\": \"10.100.101.0/24,200.0.11.0/24\"\n        },\n        {\n            \"component_id\": \"{{current_id}}_2-wireguard\",\n            \"peer_public_key\": \"0x5vl0RReXhQuX32mxjzWv2dLvNH2juzOP2VFdCwJ1Y=\",\n            \"peer_endpoint\": \"10.0.12.220:51820\",\n            \"allowed_networks\": \"10.100.102.0/24,200.0.12.0/24\"\n        },\n        {\n            \"component_id\": \"{{current_id}}_3-wireguard\",\n            \"peer_public_key\": \"XY74JTV2FpjqX6cxZPFbHn4CdAQL1YnbT6gYtypnARs=\",\n            \"peer_endpoint\": \"10.0.12.228:51820\",\n            \"allowed_networks\": \"10.100.103.0/24,200.0.13.0/24\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/manager/tunnel-as-a-service-handler",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"manager",
+								"tunnel-as-a-service-handler"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "extra-getVSI Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/lcm/vs/{{current_id}}",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"lcm",
+								"vs",
+								"{{current_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "extra-Trigger Primitive",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"primitive\",\n    \"primitiveName\":\"ip-route-management\",\n    \"primitiveTarget\":\"{{id}}_1-wireguard\",\n    \"primitiveInternalTarget\":\"1\",\n    \"primitiveParams\":{\n        \"network\":\"10.100.100.0/24\",\n        \"action\":\"add\",\n        \"gw_address\": \"10.0.12.214\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/lcm/vs/{{id}}",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"lcm",
+								"vs",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "extra",
+			"item": [
+				{
+					"name": "getGroup",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "5G1Fbtoxr2T3i3KjPajagFb3UvHmFD",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/tenant/group/test",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"tenant",
+								"group",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "newTenant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"group\": \"user\",\n    \"username\": \"user_1\",\n    \"password\": \"test\",\n    \"role\": \"TENANT\",\n    \"storage\": 100,\n    \"memory\": 100,\n    \"vcpu\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/tenant/tenant",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"tenant",
+								"tenant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "onboardBlueprint-Novel",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "6iDiYc73mRKskz4MrcSM43nd2YEV3z",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vs_blueprint\": {\n        \"slice_service_type\": \"EMBB\",\n        \"embb_service_category\":\"URBAN_MACRO\",\n        \"parameters\": [\n        {\n            \"parameter_id\": \"peers\",\n            \"parameter_type\": \"number\",\n            \"applicability_field\": \"interdomain\",\n            \"parameter_name\": \"Peers\",\n            \"parameter_description\": \"#Peers\"\n        }\n        ],\n        \"version\": \"version_1\",\n        \"name\": \"vsb-novel-testNST\",\n        \"inter_site\": true\n    },\n    \"translation_rules\": [\n        {\n            \"nst_id\": \"interdomain_e2e_novel_nstNST\",\n            \"input\": [\n            {\n                \"max_value\": 5,\n                \"parameter_id\": \"peers\",\n                \"min_value\": 1\n            }\n            ],\n            \"nsd_version\": \"1.0\",\n            \"blueprint_id\": \"1\"\n        }\n    ],\n    \"available_actions\": [\n        {\n            \"action_name\": \"Add Tunnel Peer\",\n            \"action_id\": \"addpeer\",\n            \"parameters\": [\n                {\n                    \"parameter_name\": \"Peer Network\",\n                    \"parameter_id\": \"peer_network\",\n                    \"parameter_default_value\":\"10.100.100.0/24\",\n                    \"parameter_type\": \"STRING\"\n                }\n            ]\n        },\n        {\n            \"action_name\": \"VNF Sends Tunnel Peer Info\",\n            \"action_id\": \"sendvnfinfo\",\n            \"parameters\": [\n                {\n                    \"parameter_name\": \"Netor Ip\",\n                    \"parameter_id\": \"netorIp\",\n                    \"parameter_default_value\":\"10.0.12.117\",\n                    \"parameter_type\": \"STRING\"\n                }\n            ]\n        }\n    ],\n    \"nsts\":[\n      {\n        \"nst_version\": \"1.0\",\n        \"nsst_ids\": [\n          \"interdomain_nsst_nst_novel_HAL\",\n          \"interdomain_nsst_nst_novel_DEV\"\n        ],\n        \"nsst_type\": \"NONE\",\n        \"nst_service_profile\": {\n          \"service_profile_id\": \"interdomain_profile\",\n          \"eMBB_perf_req\": [\n            {\n              \"user_density\": 100,\n              \"uE_speed\": 10\n            }\n          ],\n          \"latency\": 100,\n          \"sST\": \"EMBB\",\n          \"max_number_of_UEs\": 1000,\n          \"availability\": 100\n        },\n        \"nsd_version\": \"2.0\",\n        \"nst_id\": \"interdomain_e2e_novel_nstNST\",\n        \"nst_provider\": \"ITAV\",\n        \"nst_name\": \"Interdomain Novel Slice NST\"\n      }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/catalogue/vsblueprint",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"catalogue",
+								"vsblueprint"
+							],
+							"query": [
+								{
+									"key": "vsb_id",
+									"value": "60b3d81b728d57b249a110a3",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "onboardDescriptor-Novel",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ceHmclLvJkxmgUNMC1mc1aOo7gNj1d",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n    \"is_public\": true,\n    \"nested_vsd_ids\": {},\n    \"vs_blueprint_id\": \"60d1b11065b67bdc757b66bc\",\n    \"domain_id\": \"ITAV\",\n    \"version\": \"1.0\",\n    \"management_type\": \"TENANT_MANAGED\",\n    \"name\": \"vsdNovelTestNST\",\n    \"qos_parameters\": {\"peers\":\"2\"},\n    \"tenant_id\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/catalogue/vsdescriptor",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"catalogue",
+								"vsdescriptor"
+							],
+							"query": [
+								{
+									"key": "vsd_id",
+									"value": "60b637eb257f705860e6681e",
+									"disabled": true
+								},
+								{
+									"key": "tenant_id",
+									"value": "admin",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "newVSI-Novel",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "ILBeyVYuQpT824vEpRGu05zVvxmhp0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"testNovelNST\",\n    \"description\":\"test\",\n    \"vsdId\":\"60d1b13065b67bdc757b66c3\",\n    \"vsiId\":\"1\",\n    \"domainPlacements\":[\n        {\n            \"domainId\":\"ITAV\",\n            \"componentName\":\"1_1-testNovelNST\"\n        },\n        {\n            \"domainId\":\"DETI\",\n            \"componentName\":\"1_2-testNovelNST\"\n        }\n    ],\n    \"additionalConf\":[\n        {\n            \"componentName\":\"1_1-testNovelNST\",\n            \"conf\":\"{\\\"netslice-subnet\\\": [{\\\"id\\\": \\\"interdomain-tunnel-peer\\\", \\\"additionalParamsForVnf\\\": [{\\\"member-vnf-index\\\": \\\"1\\\", \\\"additionalParams\\\": {\\\"use_data_interfaces\\\": \\\"false\\\", \\\"netorIp\\\": \\\"10.0.12.117/manager/interdomain\\\"}}]}]}\"\n        },{\n            \"componentName\":\"1_2-testNovelNST\",\n            \"conf\":\"{\\\"netslice-subnet\\\": [{\\\"id\\\": \\\"interdomain-tunnel-peer\\\", \\\"additionalParamsForVnf\\\": [{\\\"member-vnf-index\\\": \\\"1\\\", \\\"additionalParams\\\": {\\\"use_data_interfaces\\\": \\\"false\\\",\\\"netorIp\\\": \\\"10.0.12.117/manager/interdomain\\\"}}]}]}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{netorIp}}/lcm/vs/1?force=True",
+							"protocol": "http",
+							"host": [
+								"{{netorIp}}"
+							],
+							"path": [
+								"lcm",
+								"vs",
+								"1"
+							],
+							"query": [
+								{
+									"key": "force",
+									"value": "True"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

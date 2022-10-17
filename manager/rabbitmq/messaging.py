@@ -15,16 +15,21 @@ class MessageReceiver(Thread):
         self.messaging.consumeExchange("vsLCM_Management",self.callback)
 
     def callback(self, channel, method_frame, header_frame, body):
-        logging.info("Received Message {}".format(body))
+        # REMOVE THE COMMENT @todo 
+        #logging.info("Received Message {}".format(body))
         # exchange = method_frame.exchange
         data=json.loads(body)
         # if exchange=="vsLCM_Management":
         if data["msgType"]=="createVSI":
-            newCSMF(data)
+            vsiId = data["vsiId"]
+            print("Creatig vsiId: "+vsiId)
+            if getCSMF(vsiId) is None:
+                newCSMF(data)
         elif data["msgType"]=="removeVSI":
             deleteVsi(data)
         else:
             vsiId=data["vsiId"]
+            print("vsiId:", vsiId)
             csmf=getCSMF(vsiId)
             if csmf:
                 th=Thread(target=csmfs[vsiId].processAction, args=[data])

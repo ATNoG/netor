@@ -1,0 +1,171 @@
+# @Author: Daniel Gomes
+# @Date:   2022-07-26 16:07:53
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-13 11:54:10
+
+version: "3.6"
+services:
+  coordinator:
+    image: netor:coordinator
+    depends_on:
+      - "db"
+      - "rabbitmq"
+      - "redis"
+    ports:
+      - 8000:80
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
+  tenant:
+    image: netor:tenant
+    depends_on:
+      - "db"
+    ports:
+      - 8001:80
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
+  domain:
+    image: netor:domain
+    depends_on:
+      - "db"
+    ports:
+      - 8002:80
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
+  placement:
+    image: netor:placement
+    depends_on:
+      - "db"
+    ports:
+      - 8003:80
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
+  manager:
+    image: netor:manager
+    depends_on:
+      - "db"
+      - "rabbitmq"
+      - "redis"
+    ports:
+      - 8004:80
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
+  # catalogue:
+  #   image: netor/catalogue
+  #   restart: always
+  #   ports:
+  #     - 5010:5010
+  #   depends_on:
+  #     - mongo1
+  #   environment:
+  #     APPLICATION_NAME: catalogues
+  #     MONGO_USERNAME: catalogues
+  #     MONGO_PASSWORD: catalogues
+  #     MONGO_URL: mongo1
+  #     MONGO_DB: catalogues
+  #     SECRET_KEY: tenantManager
+  #     RABBIT_HOST: rabbitmq
+  #     RABBIT_USERNAME: admin
+  #     RABBIT_PASSWORD: admin
+  #     IDP_IP: tenant
+  #     IDP_PORT: 8001
+  #     IDP_ENDPOINT: /oauth/validate/
+  #     ENVIRONMENT: prod
+
+  db:
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD=password 
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=5gasp     
+    volumes:
+      - thesisPostgresVolume:/var/lib/postgresql/data
+  
+  # mongo1:
+  #   image: docker.io/bitnami/mongodb-sharded:4.2
+  #   hostname: mongo1
+  #   environment:
+  #     - MONGODB_ADVERTISED_HOSTNAME=mongo1
+  #     - MONGODB_SHARDING_MODE=mongos
+  #     - MONGODB_MONGOS_HOST=mongo1
+  #     - MONGODB_CFG_PRIMARY_HOST=mongodb-cfg
+  #     - MONGODB_CFG_REPLICA_SET_NAME=cfgreplicaset
+  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
+  #     - MONGODB_ROOT_PASSWORD=root
+  #   ports:
+  #     - "27017:27017"
+
+  # secondary_mongo1:
+  #   image: docker.io/bitnami/mongodb-sharded:4.2
+  #   environment:
+  #     - MONGODB_ADVERTISED_HOSTNAME=secondary_mongo1
+  #     - MONGODB_SHARDING_MODE=shardsvr
+  #     - MONGODB_MONGOS_HOST=mongo1
+  #     - MONGODB_ROOT_PASSWORD=root
+  #     - MONGODB_USERNAME=catalogues
+  #     - MONGODB_PASSWORD=catalogues 
+  #     - MONGODB_DATABASE=catalogues 
+  #     - MONGODB_REPLICA_SET_MODE=primary
+  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
+  #     - MONGODB_REPLICA_SET_NAME=shard0
+  #   volumes:
+  #     - 'shard0_data:/bitnami'
+
+  # mongodb-cfg:
+  #   image: docker.io/bitnami/mongodb-sharded:4.2
+  #   volumes:
+  #     - 'cfg_data:/bitnami'
+  #   environment:
+  #     - MONGODB_ADVERTISED_HOSTNAME=mongodb-cfg
+  #     - MONGODB_SHARDING_MODE=configsvr
+  #     - MONGODB_ROOT_PASSWORD=root
+  #     - MONGODB_USERNAME=catalogues
+  #     - MONGODB_PASSWORD=catalogues 
+  #     - MONGODB_DATABASE=catalogues 
+  #     - MONGODB_REPLICA_SET_MODE=primary
+  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
+  #     - MONGODB_REPLICA_SET_NAME=cfgreplicaset
+  redis:
+    image: "redis:alpine"
+    restart: always
+    command: redis-server --requirepass netorRedisPassword
+    ports:
+      - "6379:6379"
+    volumes:
+      - thesisRedisVolume:/var/lib/redis
+      - thesisRedisDataVolume:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf 
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    restart: always
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      # The location of the RabbitMQ server.  "amqp" is the protocol;
+      # "rabbitmq" is the hostname.  Note that there is not a guarantee
+      # that the server will start first!  Telling the pika client library
+      # to try multiple times gets around this ordering issue.
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+    volumes:
+      - thesisRabbitVolume:/var/lib/rabbitmq
+  
+volumes:
+  thesisPostgresVolume:
+    external: false
+  thesisRabbitVolume:
+    external: false
+  thesisRedisVolume:
+    external: false
+  thesisRedisDataVolume:
+    external: false
+  shard0_data:
+    external: false
+  cfg_data:
+    external: false
