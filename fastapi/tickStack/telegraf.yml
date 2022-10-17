@@ -1,0 +1,25 @@
+version: '3.8' 
+
+services:
+  telefrag:
+    hostname: ${ORGANIZATION}
+    container_name: telegraf
+    build: telegraf/.
+    restart: always
+    ports:
+      - 8125:8125
+      - 8092:8092
+      - 8094:8094
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    environment:
+      INFLUX_URL: ${INFLUXDB_URL}
+      METRIC_DB: ${METRIC_DB}
+      INFLUX_USERNAME: ${INFLUXDB_USER}
+      INFLUXDB_PASSWORD: ${INFLUXDB_USER_PASSWORD}
+
+
+networks:
+  default:
+    driver: bridge
+    name: tickStack

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  influxdb:
+    container_name: influxdb
+    build: influxdb/.
+    restart: always
+    ports:
+      - 8086:8086
+    volumes:
+      - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ./influxdb/influxdb_data:/var/lib/influxdb
+    environment:
+      INFLUXDB_ADMIN_USER: ${INFLUXDB_ADMIN_USER}
+      INFLUXDB_ADMIN_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
+      INFLUXDB_USER: ${INFLUXDB_USER}
+      INFLUXDB_USER_PASSWORD: ${INFLUXDB_USER_PASSWORD}
+      INFLUXDB_DB: ${METRIC_DB}
+      METRIC_DB: ${METRIC_DB}
+      CHRONOGRAF_DB: chronograf
+
+
+  kapacitor:
+    depends_on:
+      - influxdb
+    container_name: kapacitor
+    build: kapacitor/.
+    restart: always
+    ports:
+      - 9092:9092
+    environment:
+      KAPACITOR_INFLUXDB_0_URLS_0: ${INFLUXDB_URL}
+      KAPACITOR_INFLUXDB_0_NAME: ${METRIC_DB}
+      KAPACITOR_INFLUXDB_0_USERNAME: ${INFLUXDB_ADMIN_USER}
+      KAPACITOR_INFLUXDB_0_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
+    volumes:
+      - ./kapacitor/kapacitor_data:/var/lib/kapacitor
+      - ./kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
+
+
+  chronograf:
+    depends_on:
+      - influxdb
+      - kapacitor
+    container_name: chronograf
+    build: chronograf/.
+    restart: always
+    ports:
+      - 8888:8888
+    environment:
+      RESOURCES_PATH: /usr/share/chronograf/resources
+      METRIC_DB: ${METRIC_DB}
+      METRIC_DB_USER: ${INFLUXDB_USER}
+      METRIC_DB_PASS: ${INFLUXDB_USER_PASSWORD}
+      METRIC_DB_URL: ${INFLUXDB_URL}
+      KAPACITOR_URL: ${KAPACITOR_URL}
+      ORGANIZATION: ${ORGANIZATION}
+    volumes:
+      - ./chronograf/chronograf_data:/var/lib/chronograf
+      - ./chronograf/resources:/usr/share/chronograf/resources
+  
+networks:
+  default:
+    driver: bridge
+    name: tickStack
+
+
