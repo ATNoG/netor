@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:51:52
+# @Last Modified time: 2022-10-19 22:07:55
 import asyncio
 import threading
 from rabbitmq.adaptor import RabbitHandler
@@ -22,10 +22,10 @@ def get_db():
     finally:
         db.close()
 
-
 logging.basicConfig(
-    format="%(module)-15s:%(levelname)-10s| %(message)s",
-    level=logging.INFO
+    format="%(asctime)s %(module)-15s:%(levelname)-10s| %(message)s",
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
 
 

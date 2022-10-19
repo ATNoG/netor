@@ -3,12 +3,13 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 23:52:57
+# @Last Modified time: 2022-10-19 22:09:23
 
 import json
 from fastapi import Depends
 # generic imports
 from fastapi import APIRouter
+from dns_sd.power_dns_wrapper import Netor_DNS_SD
 from exceptions.auth import NotEnoughPrivileges
 from exceptions.domain import DomainNotFound
 from exceptions.catalogue import VSDNotFound
@@ -25,6 +26,7 @@ import schemas.vertical as VerticalSchemas
 import schemas.message as MessageSchemas
 from exceptions.vertical import VerticalAlreadyExists, VerticalNotFound
 from rabbitmq.adaptor import rabbit_handler
+
 # import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(
                              inspect.currentframe())))
@@ -105,12 +107,23 @@ async def createnewVS(
                 raise DomainNotFound(domain_id=domain.domainId)
         # Store in DB
         vs_out = CRUDVertical.createNewVS(db, userdata.username, vs_in)
+
+        # dns_info = original_request["DNSInfo"]
+        power_dns_client = Netor_DNS_SD(
+            dns_ip=Constants.DNS_IP,
+            api_port=Constants.DNS_API_PORT,
+            vsi_id=vs_out.vsiId,
+            api_key=Constants.DNS_API_KEY
+        )
+        power_dns_client.create_zone()
+        vs_in = Utils.parse_dns_params_to_vnf(vs_in)
         # Send Message to the MessageBus
         msg = MessageSchemas.Message(
             vsiId=vs_in.vsiId,
             msgType=Constants.TOPIC_CREATEVSI,
             tenantId=userdata.username
         )
+
         data = MessageSchemas.CreateVsiData(**vs_in.dict())
         msg.data = data
         await rabbit_handler.publish_exchange(

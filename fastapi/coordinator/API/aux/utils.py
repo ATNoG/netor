@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:23:43
+# @Last Modified time: 2022-10-19 21:47:35
 
 
 from fastapi.responses import JSONResponse
@@ -16,6 +16,9 @@ from sqlalchemy.orm import Session
 import aux.constants as Constants
 import schemas.auth as AuthSchemas
 from fastapi.encoders import jsonable_encoder
+import schemas.vertical as VerticalSchemas
+from cryptography.fernet import Fernet
+import json
 # custom imports
 
 
@@ -114,3 +117,23 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.refresh(db_obj)
     return db_obj
 
+def parse_dns_params_to_vnf(vs_in: VerticalSchemas.VSICreate):
+    key = Fernet.generate_key()
+    dns_params = {
+            "dns_ip": Constants.DNS_IP,
+            "dns_port": Constants.DNS_PORT,
+            "dns_api_port": Constants.DNS_API_PORT,
+            "dns_api_key": Constants.DNS_API_KEY,
+            "dns_encryption_key": str(key.decode()),
+            "dns_zone": f"vsi-{vs_in.vsiId}.netor."
+        }
+    for peer in vs_in.additionalConf:
+        peer_conf = json.loads(peer.conf)
+        vnf_params = peer_conf['netslice-subnet'][0]\
+                              ['additionalParamsForVnf'][0]
+        for param in dns_params:
+            vnf_params[param] = dns_params[param]
+        peer_conf['netslice-subnet'][0]\
+                 ['additionalParamsForVnf'][0] = vnf_params
+        peer.conf = json.dumps(peer_conf)
+    return vs_in
