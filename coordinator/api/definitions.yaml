@@ -1,3 +1,7 @@
+# @Author: Rafael Direito
+# @Date:   2022-08-19 16:06:31
+# @Last Modified by:   Rafael Direito
+# @Last Modified time: 2022-08-19 17:06:35
 ---
 definitions:
   Acknowledge:
@@ -74,6 +78,20 @@ definitions:
             componentName:
               type: string
               example: test_VSI-3_1
+      DNSInfo:
+        type: array
+        items:
+          type: object
+          properties:
+            protocol:
+              type: string
+              example: tcp
+            service_name:
+              type: string
+              example: website
+            service_type:
+              type: string
+              example: http
       locationConstraints:
         type: object
         properties:
