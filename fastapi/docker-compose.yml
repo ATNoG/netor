@@ -1,131 +1,185 @@
 # @Author: Daniel Gomes
 # @Date:   2022-07-26 16:07:53
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-13 11:54:10
+# @Last Modified time: 2022-10-19 14:45:45
 
 version: "3.6"
 services:
   coordinator:
-    image: netor:coordinator
+    build:
+        dockerfile: docker/coordinator/Dockerfile
+        context: ./
     depends_on:
       - "db"
       - "rabbitmq"
       - "redis"
     ports:
       - 8000:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=COORDINATOR
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
       - ./config_files/config.ini:/app/config.ini
   tenant:
-    image: netor:tenant
+    build:
+      dockerfile: docker/tenant/Dockerfile
+      context: ./
     depends_on:
       - "db"
     ports:
       - 8001:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=TENANT
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
       - ./config_files/config.ini:/app/config.ini
   domain:
-    image: netor:domain
+    build:
+      dockerfile: docker/domain/Dockerfile
+      context: ./
     depends_on:
       - "db"
     ports:
       - 8002:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=DOMAIN
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
       - ./config_files/config.ini:/app/config.ini
   placement:
-    image: netor:placement
+    build:
+      dockerfile: docker/placement/Dockerfile
+      context: ./
     depends_on:
       - "db"
     ports:
       - 8003:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=PLACEMENT
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
       - ./config_files/config.ini:/app/config.ini
   manager:
-    image: netor:manager
+    build:
+      dockerfile: docker/coordinator/Dockerfile
+      context: ./
     depends_on:
       - "db"
       - "rabbitmq"
       - "redis"
     ports:
       - 8004:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=MANAGER
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
-      - ./config_files/config.ini:/app/config.ini
-  # catalogue:
-  #   image: netor/catalogue
-  #   restart: always
-  #   ports:
-  #     - 5010:5010
-  #   depends_on:
-  #     - mongo1
-  #   environment:
-  #     APPLICATION_NAME: catalogues
-  #     MONGO_USERNAME: catalogues
-  #     MONGO_PASSWORD: catalogues
-  #     MONGO_URL: mongo1
-  #     MONGO_DB: catalogues
-  #     SECRET_KEY: tenantManager
-  #     RABBIT_HOST: rabbitmq
-  #     RABBIT_USERNAME: admin
-  #     RABBIT_PASSWORD: admin
-  #     IDP_IP: tenant
-  #     IDP_PORT: 8001
-  #     IDP_ENDPOINT: /oauth/validate/
-  #     ENVIRONMENT: prod
-
+     - ./config_files/config.ini:/app/config.ini
+  catalogue:
+    build:
+        dockerfile: docker/catalogue/Dockerfile
+        context: ./
+    restart: always
+    ports:
+      - 5010:5010
+    depends_on:
+      - mongo1
+    environment:
+      APPLICATION_NAME: catalogues
+      MONGO_USERNAME: catalogues
+      MONGO_PASSWORD: catalogues
+      MONGO_URL: mongo1
+      MONGO_DB: catalogues
+      SECRET_KEY: tenantManager
+      RABBIT_HOST: rabbitmq
+      RABBIT_USERNAME: admin
+      RABBIT_PASSWORD: admin
+      IDP_IP: tenant
+      IDP_PORT: 8001
+      IDP_ENDPOINT: /oauth/validate/
+      ENVIRONMENT: prod
+      INFLUX_DB_URL: ${INFLUXDB_URL}
+      INFLUX_DB_NAME: ${INFLUXDB_NAME}
+      IMAGE_NAME: CATALOGUE
+      INFLUX_USERNAME: ${INFLUXDB_USER}
+      INFLUXDB_PASSWORD: ${INFLUXDB_USER_PASSWORD}
+  
   db:
-    image: postgres:latest
+    build:
+      dockerfile: postgresql/Dockerfile
+      context: ./
     ports:
       - '5432:5432'
     environment:
       - POSTGRES_PASSWORD=password 
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=5gasp     
+      - POSTGRES_DB=5gasp 
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=DB
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}    
     volumes:
       - thesisPostgresVolume:/var/lib/postgresql/data
   
-  # mongo1:
-  #   image: docker.io/bitnami/mongodb-sharded:4.2
-  #   hostname: mongo1
-  #   environment:
-  #     - MONGODB_ADVERTISED_HOSTNAME=mongo1
-  #     - MONGODB_SHARDING_MODE=mongos
-  #     - MONGODB_MONGOS_HOST=mongo1
-  #     - MONGODB_CFG_PRIMARY_HOST=mongodb-cfg
-  #     - MONGODB_CFG_REPLICA_SET_NAME=cfgreplicaset
-  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
-  #     - MONGODB_ROOT_PASSWORD=root
-  #   ports:
-  #     - "27017:27017"
+  mongo1:
+    image: docker.io/bitnami/mongodb-sharded:4.2
+    hostname: mongo1
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongo1
+      - MONGODB_SHARDING_MODE=mongos
+      - MONGODB_MONGOS_HOST=mongo1
+      - MONGODB_CFG_PRIMARY_HOST=mongodb-cfg
+      - MONGODB_CFG_REPLICA_SET_NAME=cfgreplicaset
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_ROOT_PASSWORD=root
+    ports:
+      - "27017:27017"
 
-  # secondary_mongo1:
-  #   image: docker.io/bitnami/mongodb-sharded:4.2
-  #   environment:
-  #     - MONGODB_ADVERTISED_HOSTNAME=secondary_mongo1
-  #     - MONGODB_SHARDING_MODE=shardsvr
-  #     - MONGODB_MONGOS_HOST=mongo1
-  #     - MONGODB_ROOT_PASSWORD=root
-  #     - MONGODB_USERNAME=catalogues
-  #     - MONGODB_PASSWORD=catalogues 
-  #     - MONGODB_DATABASE=catalogues 
-  #     - MONGODB_REPLICA_SET_MODE=primary
-  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
-  #     - MONGODB_REPLICA_SET_NAME=shard0
-  #   volumes:
-  #     - 'shard0_data:/bitnami'
+  secondary_mongo1:
+    image: docker.io/bitnami/mongodb-sharded:4.2
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=secondary_mongo1
+      - MONGODB_SHARDING_MODE=shardsvr
+      - MONGODB_MONGOS_HOST=mongo1
+      - MONGODB_ROOT_PASSWORD=root
+      - MONGODB_USERNAME=catalogues
+      - MONGODB_PASSWORD=catalogues 
+      - MONGODB_DATABASE=catalogues 
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard0
+    volumes:
+      - 'shard0_data:/bitnami'
 
-  # mongodb-cfg:
-  #   image: docker.io/bitnami/mongodb-sharded:4.2
-  #   volumes:
-  #     - 'cfg_data:/bitnami'
-  #   environment:
-  #     - MONGODB_ADVERTISED_HOSTNAME=mongodb-cfg
-  #     - MONGODB_SHARDING_MODE=configsvr
-  #     - MONGODB_ROOT_PASSWORD=root
-  #     - MONGODB_USERNAME=catalogues
-  #     - MONGODB_PASSWORD=catalogues 
-  #     - MONGODB_DATABASE=catalogues 
-  #     - MONGODB_REPLICA_SET_MODE=primary
-  #     - MONGODB_REPLICA_SET_KEY=replicasetkey123
-  #     - MONGODB_REPLICA_SET_NAME=cfgreplicaset
+  mongodb-cfg:
+    image: docker.io/bitnami/mongodb-sharded:4.2
+    volumes:
+      - 'cfg_data:/bitnami'
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-cfg
+      - MONGODB_SHARDING_MODE=configsvr
+      - MONGODB_ROOT_PASSWORD=root
+      - MONGODB_USERNAME=catalogues
+      - MONGODB_PASSWORD=catalogues 
+      - MONGODB_DATABASE=catalogues 
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=cfgreplicaset
   redis:
     image: "redis:alpine"
     restart: always
@@ -169,3 +223,8 @@ volumes:
     external: false
   cfg_data:
     external: false
+
+networks:
+  default:
+    driver: bridge
+    name: tickStack
