@@ -27,11 +27,11 @@ RUN apt-get -y install \
 RUN apt-get update && \
     apt-get -y install netcat
 
+WORKDIR /app
 RUN chmod +x installDrivers.sh
 RUN ./installDrivers.sh
 
 
-WORKDIR /app
  
 RUN python3 -m pip install -r requirements.txt
 

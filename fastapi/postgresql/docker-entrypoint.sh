@@ -297,7 +297,7 @@ _main() {
 		docker_create_db_directories
 		if [ "$(id -u)" = '0' ]; then
 			# then restart script as postgres user
-			exec su-exec postgres "$BASH_SOURCE" "$@"
+			exec gosu postgres "$BASH_SOURCE" "$@"
 		fi
 
 		# only run initialization on an empty data directory
@@ -330,13 +330,15 @@ _main() {
 			echo
 		fi
 	fi
-	# changed/new
+    # changed/new
     # save ip in an environment variable
     export HOST=$IMAGE_NAME-$(hostname)
     # Run metric collector - telegraf
     eval  "telegraf --config postgresql_telegraf.conf &"
-	exec "$@"
-}
+    # end changed/new 
+
+    exec "$@"
+    }
 
 if ! _is_sourced; then
 	_main "$@"
