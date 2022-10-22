@@ -2,7 +2,7 @@
 # @Author: Rafael Direito
 # @Date:   2022-08-19 16:06:31
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-11 16:33:20
+# @Last Modified time: 2022-10-20 17:51:43
 from datetime import datetime
 from db.persistance import VerticalServiceInstance, DB, VSIStatus
 from flask import jsonify
@@ -69,8 +69,7 @@ def createNewVS(token,tenantName,request):
         getDomainInfo(token,domain_id)
     
     # Todo - Change this later!
-    original_request = copy.deepcopy(request)
-    del request["DNSInfo"]
+    
     # Todo --------------------
     schema = schemas.VerticalServiceInstanceSchema()
     vsInstance = schema.load(request,session=DB.session)
@@ -92,7 +91,7 @@ def createNewVS(token,tenantName,request):
 
     # If everything went ok until here, we can create a DNS Zone
     key = Fernet.generate_key()
-    # dns_info = original_request["DNSInfo"]
+    # dns_info = request["DNSInfo"]
     power_dns_client = Netor_DNS_SD(
         dns_ip=config.DNS_IP,
         api_port=config.DNS_API_PORT,
@@ -108,16 +107,15 @@ def createNewVS(token,tenantName,request):
         "dns_encryption_key": str(key.decode()),
         "dns_zone": f"vsi-{vsInstance.vsiId}.netor."
     }
-    for peer in original_request['additionalConf']:
+    for peer in request['additionalConf']:
         peer_conf = json.loads(peer['conf'])
-        vnf_params = peer_conf['netslice-subnet'][0]['additionalParamsForVnf'][0]
-        for param in dns_params:
-            vnf_params[param] = dns_params[param]
-        peer_conf['netslice-subnet'][0]['additionalParamsForVnf'][0] = vnf_params
+        for vnf in peer_conf['netslice-subnet'][0]['additionalParamsForVnf']:
+            for param in dns_params:
+                vnf['additionalParams'][param] = dns_params[param]
         peer['conf'] = json.dumps(peer_conf)
-    
-    logging.info("original Request: " , original_request)
-    message={"msgType":"createVSI","vsiId": vsInstance.vsiId, "tenantId":tenantName, "data": original_request}
+        logging.info(f"Peer conf: {peer['conf']}")    
+    #logging.info(f"original Request: {request}")
+    message={"msgType":"createVSI","vsiId": vsInstance.vsiId, "tenantId":tenantName, "data": request}
     #send needed info
     messaging.publish2Exchange('vsLCM_Management',json.dumps(message))
     
