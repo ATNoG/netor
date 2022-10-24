@@ -2,7 +2,7 @@
 # @Author: Daniel Gomes
 # @Date:   2022-10-17 21:13:44
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-22 09:41:57
+# @Last Modified time: 2022-10-24 11:47:43
 
 # general imports
 import pytest
@@ -66,8 +66,10 @@ def test_correct_domain_post(mocker: MockerFixture):
 def test_incorrect_nfvo_post(mocker: MockerFixture):
     auth_driver = mocker.patch("driver.driver_osm.OSMDriver.authenticate")
     auth_driver.side_effect = CouldNotAuthenticatetoNFVO()
+    token = "mytoken"
     response = test_client.post(
         "/domain",
+        headers={'Authorization': f'Bearer {token}'},
         json={
             "domainId":"ITAV",
             "admin":"ITAV",
@@ -98,6 +100,7 @@ def test_incorrect_nfvo_post(mocker: MockerFixture):
 
 def test_incorrect_domain_data_post(mocker: MockerFixture):
     database = next(override_get_db())
+    token = "mytoken"
     # add sample object to db
     domain_db = Domain(domainId="ITAV",
             admin="ITAV",
@@ -111,6 +114,7 @@ def test_incorrect_domain_data_post(mocker: MockerFixture):
     database.commit()
     response = test_client.post(
         "/domain",
+        headers={'Authorization': f'Bearer {token}'},
         json={
             "domainId":"ITAV",
             "admin":"ITAV",
@@ -132,6 +136,7 @@ def test_incorrect_domain_data_post(mocker: MockerFixture):
             ]
         }
     )
+    print(response.json())
     assert response.status_code == 400
     assert response.json()['success'] == False
     assert any("already exists" in x \

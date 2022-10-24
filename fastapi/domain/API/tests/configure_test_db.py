@@ -3,7 +3,8 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-20 14:07:49
+# @Last Modified time: 2022-10-24 11:38:19
+from fastapi import HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
@@ -12,7 +13,7 @@ from schemas.auth import Tenant
 from main import app, get_db
 from aux.utils import rbacencforcer
 from routers import domain as domain_router 
-
+from aux.auth import oauth2_scheme
 engine = create_engine(
     url="sqlite:///./test.db",
     connect_args={
@@ -33,11 +34,18 @@ def override_get_db():
     finally:
         db.close()
 
+def override_oauth2_scheme(token: str):
+    print("ttt", token)
+    return token
 
-def override_rbac_enforcer(token: str = None):
-    userdata = Tenant(username="admin",group="ADMIN", roles=["ADMIN"])
-    return userdata
-
+def override_rbac_enforcer(token:str = Depends(oauth2_scheme)):
+    print(token)
+    if token == 'mytoken':
+        userdata = Tenant(username="admin",group="ADMIN", roles=["ADMIN"])
+        return userdata
+    raise HTTPException(
+            status_code=400,
+            detail="Insufficient permissions to access this resource")
 
 app.dependency_overrides[rbacencforcer] = override_rbac_enforcer
 app.dependency_overrides[domain_router.get_db] = override_get_db

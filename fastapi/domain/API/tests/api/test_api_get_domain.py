@@ -3,11 +3,12 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-22 09:51:33
+# @Last Modified time: 2022-10-24 11:53:35
 
 
 # general imports
 import pytest
+from sql_app import database
 # custom imports
 import schemas.domain as DomainSchemas
 import sql_app.crud.domain as CRUDDomain
@@ -36,7 +37,7 @@ def test_correct_domain_get():
         ownedLayers=[]
     )
     
-    db_domain = CRUDDomain.createDomain(
+    CRUDDomain.createDomain(
         db=database,
         domain_data=domain)
     token = "mytoken"
@@ -49,4 +50,29 @@ def test_correct_domain_get():
     assert data['domainId'] == domain.domainId
     assert data['name'] == domain.name
     assert data['url'] == domain.url
-    
+
+
+def test_non_existent_domain_get():
+    token = "mytoken"
+    domainId = "ITAV"
+    response = test_client.get(
+        f"/domain/{domainId}",
+        headers={'Authorization': f'Bearer {token}'}    
+    )
+    assert response.status_code == 400
+    assert response.json()['success'] == False
+    error_msg =  f"Domain with Id '{domainId}' was not found"
+    assert any(error_msg in x \
+                   for x in response.json()['errors'])
+
+
+def test_non_authorized_domain_get():
+    token = "wrong_token"
+    domainId = "ITAV"
+    response = test_client.get(
+        f"/domain/{domainId}",
+        headers={'Authorization': f'Bearer {token}'}    
+    )
+    assert response.status_code == 400
+    error_msg =  "Insufficient permissions to access this resource"
+    assert error_msg in response.json()['detail']
