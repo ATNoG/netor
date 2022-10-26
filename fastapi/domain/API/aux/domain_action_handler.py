@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 10:24:03
+# @Last Modified time: 2022-10-26 23:47:11
 
 
 import json
@@ -59,14 +59,10 @@ class DomainActionHandler:
                         self.payload.data.nstId,
                         domainLayer.vimAccount,
                         self.payload.data.additionalConf)
-                logging.info(f"nsiDATA--->>>{nsiData}")
-                nssNsrId = {}
-                tunnelServiceId = None
-                for nss in nsiData["_admin"]["nsrs-detailed-list"]:
-                    if nss["nss-id"] == "tunnel-as-a-service-sd-tunnel-peer":
-                        tunnelServiceId = nss["nsrId"]
-                    nssNsrId[nss["nss-id"]] = nss["nsrId"]
-
+                nssNsrId, tunnelServiceId = driver.get_tunnel_additional_data(
+                    nsiData
+                )
+               
                 data = MessageSchemas.UpdateResourcesNfvoIdsData(
                     componentName=self.payload.data.name,
                     componentId=tunnelServiceId,
@@ -108,7 +104,10 @@ class DomainActionHandler:
                 response.message = f"Sending NSI {self.payload.data.nsiId} inf"
                 response.data = data
             elif self.payload.msgType == Constants.TOPIC_DELETE_NSI:
-                driver.terminateNSI(self.payload.data.nsiId)
+                driver.terminateNSI(self.payload.data.nsiId,
+                                    force=self.payload.data.force)
+                logging.info(f"Deleted NSI {self.payload.data.nsiId}...")
+                return
             elif self.payload.msgType == Constants.TOPIC_FETCH_ACTION_INFO:
                 res = driver.get_primitive_state(self.payload.data.nfvoId)
                 output = res['detailed-status']

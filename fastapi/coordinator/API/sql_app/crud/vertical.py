@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 23:36:40
+# @Last Modified time: 2022-10-26 16:08:50
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -139,7 +139,14 @@ def changeActionStatus(db: Session, payload: MessageSchemas.Message):
     if action:
         logging.info("Changing Action Status...")
         Utils.update_db_object(db, action, payload.data.dict() )
+
 def getAllVSIStatus(db: Session, vsiId):
     status = db.query(models.VSIStatus)\
             .filter(models.VSIStatus.vsiId == vsiId).all()
     return [ stat.as_dict() for stat in status]
+
+def deleteVSI(db: Session, vsiId: str):
+    vs = getVSById(db, vsi_id=vsiId)
+    db.delete(vs)
+    db.commit()
+    return vs

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 10:38:29
+# @Last Modified time: 2022-10-26 17:54:17
 
 
 
@@ -47,6 +47,7 @@ TOPIC_REMOVEVSI = "removeVSI"
 TOPIC_MODIFYVSI = "modifyVSI"
 TOPIC_INSTANTIATE_NSI = "instantiateNsi"
 TOPIC_DELETE_NSI = "deleteNSI"
+TOPIC_DELETE_NS = "deleteNS"
 TOPIC_ACTION_NS = "actionNs"
 TOPIC_ACTION_NSI = "actionNsi"
 TOPIC_FETCH_NS_INFO = "getNsInfo"
@@ -76,4 +77,5 @@ INSTANTIATING_STATUS = "instantiating"
 DEPLOYING_STATUS = "deploying"
 INSTANTIATED_STATUS = "instantiated"
 FAILING_STATUS = "fail"
+TERMINATING_STATUS = "terminating"
 TERMINATED_STATUS = "terminated"

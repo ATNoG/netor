@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:09:52
+# @Last Modified time: 2022-10-26 22:34:31
 import json
 from typing import Dict
 import aioredis
@@ -140,6 +140,8 @@ class RedisHandler:
     async def tear_down_vsi_data(self, vsiId):
         await self.delete_key(vsiId)
         await self.delete_hash_key(Constants.TOPIC_CREATEVSI, vsiId)
+        await self.delete_hash_key("serviceComposition", vsiId)
+        await self.delete_hash_key("Primitive", vsiId)
 
 redis_handler = RedisHandler()
 

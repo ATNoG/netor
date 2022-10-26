@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 16:48:04
+# @Last Modified time: 2022-10-26 16:59:09
 
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
@@ -56,30 +56,30 @@ class MessageReceiver():
             try:
                 payload = MessageSchemas.Message(**msg)
             except Exception:
-                logging.info(f"Message Not supposted: {msg}")
+                logging.info(f"Message Not supported: {msg}")
                 # if the message was not suposed to be received
                 return
             logging.info(f"Received message in Manager: {payload}")
             res = MessageSchemas.Message(vsiId=payload.vsiId)
-            #try:
             if payload.msgType == Constants.TOPIC_CREATEVSI:
                 a = await Utils.is_csmf_data_stored(db,
                     self.caching,
                     Constants.TOPIC_CREATEVSI,payload.vsiId
                     )
+                if a:
+                    return
                 # If its Neither in Cache or in Database then store data
-                if not a:
-                    logging.info("NO Information found, starting CSMF")
-                    await csmf_handler.store_new_csmf(db, payload)
-                    data = MessageSchemas.StatusUpdateData(
-                        status=Constants.CREATING_STATUS
-                    )
-                    res = Utils.prepare_message(
-                        res,
-                        data=data,
-                        msg="Created Management Function, waiting to" \
-                            + "receive all necessary information"
-                    )
+                logging.info("NO Information found, starting CSMF")
+                await csmf_handler.store_new_csmf(db, payload)
+                data = MessageSchemas.StatusUpdateData(
+                    status=Constants.CREATING_STATUS
+                )
+                res = Utils.prepare_message(
+                    res,
+                    data=data,
+                    msg="Created Management Function, waiting to" \
+                        + "receive all necessary information"
+                )
             if payload.msgType == Constants.TOPIC_REMOVEVSI:
                 self.caching.delete_hash_key(Constants.TOPIC_CREATEVSI,
                                         payload.vsiId)

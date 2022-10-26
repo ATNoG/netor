@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 16:36:59
+# @Last Modified time: 2022-10-26 17:33:10
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -108,6 +108,16 @@ class ActionUpdateData(BaseModel):
     actionId: str
     status: str
     output: str
+
+class DeleteNsiData(BaseModel):
+    domainId: str
+    nsiId: str
+    force: bool
+
+class DeleteNsData(BaseModel):
+    domainId: str
+    nsId: str
+    force: bool
 
 class Message(BaseModel):
     vsiId: str

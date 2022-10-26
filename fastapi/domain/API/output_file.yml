@@ -1,0 +1,14 @@
+"\"netslice-subnet:\\n- additionalParamsForVnf:\\n  - additionalParams:\\n      dns_api_key:\\\
+  \n  \\ secret\\n      dns_api_port: '8081'\\n      dns_encryption_key: 9GMI-_r3YwKR_NDSclvC4tW3Uu_opP7_IFbLdr1Y0Ak=\\\
+  n\\\n  \\      dns_ip: 10.0.13.71\\n      dns_port: '9000'\\n      dns_protocol:\
+  \ udp\\n   \\\n  \\   dns_service_type: wireguard\\n      dns_total_num_peers: '2'\\\
+  n      dns_zone:\\\n  \\ vsi-0.netor.\\n      max_waiting_time_for_other_peers_secs:\
+  \ '1200'\\n      ssh_password:\\\n  \\ osmtunnel\\n      ssh_username: ubuntu\\\
+  n      tunnel_address: 10.100.100.0/24\\n\\\n  \\      tunnel_allowed_networks:\
+  \ 10.100.100.0/24\\n      tunnel_id: wg2\\n      tunnel_peer_address:\\\n  \\ 10.100.100.2\\\
+  n      tunnel_public_address: 10.0.31.241\\n      tunnel_public_port:\\\n  \\ '51820'\\\
+  n      use_data_interfaces: 'true'\\n      vsi_id: '0'\\n    member-vnf-index:\\\
+  \n  \\ '1'\\n  id: ' tunnel-as-a-service-sd-tunnel-peer'\\n  vld:\\n  - name: mgmtnet\\\
+  n\\\n  \\    vnfd-connection-point-ref:\\n    - ip-address: 10.0.31.241\\n     \
+  \ member-vnf-index-ref:\\\n  \\ '1'\\n      vnfd-connection-point-ref: tunnel-as-a-service-sd-eth0-ext\\\
+  n\"\n"

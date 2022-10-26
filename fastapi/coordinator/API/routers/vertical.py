@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-19 22:09:23
+# @Last Modified time: 2022-10-26 16:48:16
 
 import json
 from fastapi import Depends
@@ -220,7 +220,6 @@ def getVSiStatusHistory(vsiId: str,
                         db: Session = Depends(get_db)):
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId )
-        print(db_vs)
         if not db_vs:
             raise VerticalNotFound(vsiId)
         CRUDVertical.verify_vsi_ownership(db_vs, userdata)
@@ -236,3 +235,40 @@ def getVSiStatusHistory(vsiId: str,
             errors=[str(exception)]
         )
 
+@router.delete(
+    "/vs/{vsiId}",
+    tags=["vs"],
+    summary="Deletes the Vertical Service requested",
+    description="Deletes the Vertical Service requested",
+)
+async def deleteVSI(vsiId: str,
+                force: bool=False,
+                userdata=Depends(Utils.rbacencforcer),
+                db: Session= Depends(get_db)):
+    try:
+        db_vs = CRUDVertical.getVSById(db, vsiId )
+        if not db_vs:
+            raise VerticalNotFound(vsiId)
+        CRUDVertical.verify_vsi_ownership(db_vs, userdata)
+        data = CRUDVertical.deleteVSI(db, vsiId)
+        msg_data = MessageSchemas.DeleteVsiData(
+            force=force
+        )
+        message = MessageSchemas.Message(vsiId=vsiId,
+            msgType=Constants.TOPIC_PRIMITIVE,
+            data=msg_data
+        )
+        await rabbit_handler.publish_exchange(
+            Constants.EXCHANGE_MGMT,
+            message
+        )
+        return Utils.create_response(
+            data=data,
+            message="Success Deleting Vertical",
+        )
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        )

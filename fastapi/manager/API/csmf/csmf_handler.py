@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:35:37
+# @Last Modified time: 2022-10-26 23:12:14
 
 import aux.constants as Constants
 from aux.enums import VSIStatus
@@ -155,9 +155,13 @@ class CSMF_Handler():
             # Update Cache's VSI Status
             await redis_handler.update_vsi_running_data(payload.vsiId,
              already_running=True)
+
         elif await Utils.verify_resource_operate_status(
             "terminated", nsidata=nsi_info_data):
-            #terminateVsi
+            await vsi_helper.tearDownComponent(
+                payload.vsiId,
+                
+            )
             pass
         return
     
@@ -212,8 +216,18 @@ class CSMF_Handler():
             payload.vsiId, running_actions, parse_dict=True
         )
             
-
-        
+    @local_handler.register(event_name=Constants.TOPIC_REMOVEVSI)
+    async def handle_primitive_status_response(event: Event):
+        _, event_args = event
+        payload, db = event_args
+        delete_data = payload.data
+        a = await Utils.is_csmf_data_stored(db,
+            redis_handler,
+            Constants.TOPIC_CREATEVSI,payload.vsiId
+            )
+        if not a:
+            logging.info("Cannot Delete VSI, since it is not stored")
+            return
         
 csmf_handler = CSMF_Handler()
 

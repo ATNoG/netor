@@ -3,8 +3,9 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:09:47
+# @Last Modified time: 2022-10-26 23:24:51
 import json
+from manager.API.csmf.polling import Polling
 from redis.handler import redis_handler
 from rabbitmq.adaptor import rabbit_handler
 import schemas.message as MessageSchemas
@@ -55,7 +56,6 @@ class VsiHelper:
         for placement in placementInfo:
             component_name = f"{payload.vsiId}_{composingComponentId}"\
                              + f"-{vsiRequestInfo.data.name}"
-            logging.info(f"COMPONENT {component_name}")
             data = None
             if self.is_a_slice(placement):
                 data = MessageSchemas.InstantiateNsiData(
@@ -72,7 +72,6 @@ class VsiHelper:
                         if conf_component['componentName'] == component_name:
                             config = json.loads(conf_component['conf'])
                             data.additionalConf = yaml.safe_dump(config)
-                            logging.info(f"Config: --->{data.additionalConf}")
                             break
             # store on redis VSI Service Composition
             serviceComposition = await redis_handler.get_vsi_servicecomposition(
@@ -190,7 +189,92 @@ class VsiHelper:
         await redis_handler.store_primitive_op_status(
             payload.vsiId, actions
         )
-                    
+    async def deleteVSI(self, payload: MessageSchemas.Message):
+        serviceComposition = await redis_handler.get_vsi_servicecomposition(
+                vsiId=payload.vsiId)
+        msg_domain = MessageSchemas.Message(
+            vsiId=payload.vsiId
+        )
+        force = payload.data.force
+        logging.info("Deleting VSI Data...")
+        for component, componentData in serviceComposition.items():
+            componentData.status = Constants.TERMINATING_STATUS
+            if componentData.sliceEnabled:
+                data = MessageSchemas.DeleteNsiData(
+                    domainId=componentData.domainId,
+                    nsiId=componentData.nsiId,
+                    force=force
+                )
+                topic = Constants.TOPIC_DELETE_NSI
+            else:
+                data = MessageSchemas.DeleteNsData(
+                    domainId=componentData.domainId,
+                    nsiId=componentData.nsiId,
+                    force=force   
+                )
+                topic = Constants.TOPIC_DELETE_NS
+            msg = Utils.prepare_message(msg_base=msg_domain,
+                                        data=data,
+                                        msgType=topic)
+            logging.info("Send Terminate Action to Domain for component")
+            await rabbit_handler.publish_queue(
+                Constants.QUEUE_DOMAIN,
+                json.dumps(msg.dict())
+            )
+        # store update in component status
+        await redis_handler.store_vsi_service_composition(
+            payload.vsiId,
+            data=serviceComposition,
+            parse_dict=True
+        )
+        update_data = MessageSchemas.StatusUpdateData(
+            status=Constants.TERMINATING_STATUS
+        )
+        lcm_message = MessageSchemas.Message(
+            vsiId=payload.vsiId,
+            message="Terminating Vertical Service Instance",
+            data=update_data
+        )
+        await rabbit_handler.publish_queue(
+            Constants.QUEUE_COORDINATOR,
+            json.dumps(lcm_message.dict())
+        )
+
+        #TODO: Perhap delete Here
+    
+
+    async def tearDownComponent(self, vsiId, componentName, polling: Polling):
+        serviceComposition = await redis_handler.get_vsi_servicecomposition(
+            vsiId=vsiId,
+            store_objects=True
+        )
+        if componentName in serviceComposition:
+            serviceComposition[componentName].status = Constants.\
+                                                        TERMINATED_STATUS
+        all_terminated = all([
+            (x,y) for (x,y) in serviceComposition.items() \
+            if y.status == Constants.TERMINATED_STATUS
+        ])    
+        if all_terminated:
+            logging.info("All Components terminated, deleting Vsi Data")
+            await redis_handler.tear_down_vsi_data(vsiId=vsiId)
+            await polling.stop_vsi_polling_csmf(vsiId=vsiId)
+        
+        update_data = MessageSchemas.StatusUpdateData(
+            status=Constants.TERMINATED_STATUS
+        )
+        lcm_message = MessageSchemas.Message(
+            vsiId=vsiId,
+            message="Terminated Vertical Service Instance",
+            data=update_data
+        )
+        await rabbit_handler.publish_queue(
+            Constants.QUEUE_COORDINATOR,
+            json.dumps(lcm_message.dict())
+        )
+
+        
+
 
 vsi_helper = VsiHelper()
 

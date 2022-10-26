@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-01 08:44:12
+# @Last Modified time: 2022-10-26 17:40:50
 
 
 import json
@@ -32,11 +32,15 @@ def create_response(status_code=200, data=[], errors=[],
 
 
 def prepare_message(msg_base: MessageSchemas.Message, data=None,
-                    error=False, msg="", tenantId=None):
+                    error=False, msg="", tenantId=None,
+                    msgType=None
+                    ):
     msg_base.data = data
     msg_base.message = msg
     msg_base.tenantId = tenantId
     msg_base.error = error
+    if msgType:
+        msg_base.msgType = msgType
     return msg_base
 
 def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
