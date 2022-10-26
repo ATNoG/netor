@@ -26,6 +26,6 @@ echo "Postgres started"
 # save ip in an environment variable
 export HOST=$IMAGE_NAME-$(hostname) 
 # Run metric collector - telegraf
-eval "telegraf --config telegraf.conf &"
+#eval "telegraf --config telegraf.conf &"
 
 python3 main.py

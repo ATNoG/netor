@@ -130,10 +130,9 @@ def parse_dns_params_to_vnf(vs_in: VerticalSchemas.VSICreate):
     for peer in vs_in.additionalConf:
         peer_conf = json.loads(peer.conf)
         vnf_params = peer_conf['netslice-subnet'][0]\
-                              ['additionalParamsForVnf'][0]
-        for param in dns_params:
-            vnf_params[param] = dns_params[param]
-        peer_conf['netslice-subnet'][0]\
-                 ['additionalParamsForVnf'][0] = vnf_params
+                              ['additionalParamsForVnf']
+        for vnf in vnf_params:
+            for param in dns_params:
+                vnf['additionalParams'][param] = dns_params[param] 
         peer.conf = json.dumps(peer_conf)
     return vs_in

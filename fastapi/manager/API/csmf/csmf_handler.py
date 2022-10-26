@@ -34,6 +34,7 @@ class CSMF_Handler():
         self.poller = Polling() 
         
     def start(self):
+        logging.info("Starting CSMF Poller...")
         self.poller.start_all_jobs()       
 
     async def store_new_csmf(self, db: Session, payload:MessageSchemas.Message):      
@@ -47,7 +48,7 @@ class CSMF_Handler():
             json.dumps(payload.dict(exclude_none=True, exclude_unset=True))
         )
         # Store in database
-        # CsmfCRUD.createCSMF(db, payload)
+        CsmfCRUD.createCSMF(db, payload)
         # Create CSMF Polling CronJob,
         #  which will ask the Domain Service for Info regarding the Vsi Services
         self.poller.start_vsi_polling_csmf(payload.vsiId)
@@ -58,6 +59,7 @@ class CSMF_Handler():
         _, event_args = event
         payload, db = event_args
         CsmfCRUD.getCSMFByVSiId(db, payload.vsiId)
+        logging.info(f"Storing {payload.msgType} Info")
         await redis_handler.set_hash_key(
             payload.vsiId,
             payload.msgType,

@@ -55,14 +55,20 @@ class Arbitrator:
         try:
             cached_vsi_data = await self.redis_handler.hget_all(vsiId)
             for key,value in cached_vsi_data.items():
+                key = key.decode()
+                # skip createVSI request message 
+                if key not in Constants.INFO_TOPICS:
+                    logging.info("Skipping creatVSI request")
+                    continue
                 # load and parse data 
-                allVsiData[key.decode()] = MessageSchemas.Message(
+                allVsiData[key] = MessageSchemas.Message(
                     **json.loads(value))
-                if allVsiData[key.decode()].error:
+                logging.info(f"Cached Data {json.loads(value)}")
+                if allVsiData[key].error:
                     raise InvalidPlacementInformation()
             domainInfo = allVsiData["domainInfo"]
             catalogueInfo = allVsiData['catalogueInfo']
-            
+            logging.info("Starting translation...")
             translation = self.translateVSD(catalogueInfo.dict())
             logging.info("Translation done.. Verifying Domain Placement")
             self.verify_domain_placement(translation, domainInfo)
@@ -114,8 +120,8 @@ class Arbitrator:
             current_qos_param = qos_params_parsed[input_rule.parameter_id]
             current_qos_value = qos_values[input_rule.parameter_id]
             if current_qos_param['parameter_type'] == 'number':
-                if not input_rule.max_value\
-                    > current_qos_value > input_rule.min_value:
+                if not int(input_rule.max_value)\
+                    > int(current_qos_value) > int(input_rule.min_value):
                     # error!
                     raise InvalidQoSRange(input_rule.parameter_id)
 
@@ -132,7 +138,7 @@ class Arbitrator:
                 externalNST = False
                 if nst.nsst_ids:
                     for nsst_id in nst.nsst_ids:
-                        externalNST = True
+                        externalNSST = True
                         for nsst in nst.nsst:
                             if nsst_id == nsst.nst_id:
                                 externalNST = False
@@ -142,7 +148,7 @@ class Arbitrator:
                                     nsdId=nsst.nsd_id,
                                     translation_set=translation)
                                 break
-                        if externalNST:
+                        if externalNSST:
                             translation = Utils.prepare_translation(
                                     domainId=domainId,
                                     sliceEnabled=True,
@@ -160,6 +166,7 @@ class Arbitrator:
                                     sliceEnabled=True,
                                     nstId=rule_nst.nst_id,
                                     translation_set=translation)
+        logging.info(f"Translation: {translation}")
         return translation
             
     def verify_nsds(self, rule_nsd: TranslationRules, domainId: str):
@@ -175,8 +182,8 @@ class Arbitrator:
         domainData: MessageSchemas.Message):
 
         for component in placement:
-            if component.domaindId not in domainData.data.domainIds:
-                raise DomainNotFound(component.domaindId)
+            if component.domainId not in domainData.data.domainIds:
+                raise DomainNotFound(component.domainId)
 
 
 

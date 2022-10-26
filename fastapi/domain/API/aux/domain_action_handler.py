@@ -59,10 +59,11 @@ class DomainActionHandler:
                         self.payload.data.nstId,
                         domainLayer.vimAccount,
                         self.payload.data.additionalConf)
+                logging.info(f"nsiDATA--->>>{nsiData}")
                 nssNsrId = {}
                 tunnelServiceId = None
                 for nss in nsiData["_admin"]["nsrs-detailed-list"]:
-                    if nss["nss-id"] == "interdomain-tunnel-peer":
+                    if nss["nss-id"] == "tunnel-as-a-service-sd-tunnel-peer":
                         tunnelServiceId = nss["nsrId"]
                     nssNsrId[nss["nss-id"]] = nss["nsrId"]
 
@@ -70,8 +71,8 @@ class DomainActionHandler:
                     componentName=self.payload.data.name,
                     componentId=tunnelServiceId,
                     additionalData=nssNsrId)
-                response.msgType = Constants.TOPIC_UPDATE_NFVO_IDS,
-                response.message = "Sending Resource's Components Ids",
+                response.msgType = Constants.TOPIC_UPDATE_NFVO_IDS
+                response.message = "Sending Resource's Components Ids"
                 response.data = data
 
             elif self.payload.msgType == Constants.TOPIC_ACTION_NS:
@@ -90,12 +91,14 @@ class DomainActionHandler:
                     output=output
                 )
                 response.msgType = Constants.TOPIC_ACTION_RESPONSE
-                response.message = "Returning NS action result",
+                response.message = "Returning NS action result"
                 response.data = data
             elif self.payload.msgType == Constants.TOPIC_FETCH_NSI_INFO:
                 nsiInfo = driver.getNSI(
                     self.payload.data.nsiId
                 )
+                if type(nsiInfo) == dict:
+                    nsiInfo = json.dumps(nsiInfo)
                 data = MessageSchemas.NsiInfoData(
                     vsiId=self.payload.vsiId,
                     nsiId=self.payload.data.nsiId,

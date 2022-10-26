@@ -1,3 +1,9 @@
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:49
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-24 17:01:50
 import os
 
 from mongoengine import connect
@@ -51,5 +57,6 @@ if __name__ == '__main__':
         vs_blueprint = mixer.blend(VsBlueprint, **args)
         vs_blueprint_info = mixer.blend(VsBlueprintInfo, vs_blueprint_id=f'{i}', vs_blueprint_version=f'version_{i}',
                                         name=f'name_{i}', active_vsd_id=[f"{j}" for j in range(5)])
-        vs_descriptor = mixer.blend(VsDescriptor, descriptor_id=f"{i}", vs_blueprint_id=f'{i}', tenant_id='tenant')
+        vs_descriptor = mixer.blend(VsDescriptor, descriptor_id=f"{i}", vs_blueprint_id=f'{i}', tenant_id='admin')
         nst = mixer.blend(Nst, nsst=None, geographical_area_info_list=[])
+

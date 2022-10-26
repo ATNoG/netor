@@ -55,6 +55,7 @@ class VsiHelper:
         for placement in placementInfo:
             component_name = f"{payload.vsiId}_{composingComponentId}"\
                              + f"-{vsiRequestInfo.data.name}"
+            logging.info(f"COMPONENT {component_name}")
             data = None
             if self.is_a_slice(placement):
                 data = MessageSchemas.InstantiateNsiData(
@@ -71,6 +72,7 @@ class VsiHelper:
                         if conf_component['componentName'] == component_name:
                             config = json.loads(conf_component['conf'])
                             data.additionalConf = yaml.safe_dump(config)
+                            logging.info(f"Config: --->{data.additionalConf}")
                             break
             # store on redis VSI Service Composition
             serviceComposition = await redis_handler.get_vsi_servicecomposition(
@@ -91,16 +93,16 @@ class VsiHelper:
                 serviceComposition[component_name] = composition_data.dict(
                     exclude_unset=True,
                 )
-
+            logging.info(f"Service Composition: {serviceComposition}")
             await redis_handler.store_vsi_service_composition(
                 vsiId=payload.vsiId,
                 data=serviceComposition
             )
             res = Utils.prepare_message(res, data)
             # send message to Domain to instantiatie each component
-            # await rabbit_handler.publish_queue(
-            #     Constants.QUEUE_DOMAIN,
-            #     json.dumps(res.dict()))
+            await rabbit_handler.publish_queue(
+                Constants.QUEUE_DOMAIN,
+                json.dumps(res.dict()))
             composingComponentId+=1 #TODO: Check this, will be changed...
 
 
@@ -162,8 +164,8 @@ class VsiHelper:
             data=message_data
             )
         logging.info("Sending Message to Domain to Start executing primitive")
-        # await rabbit_handler.publish_queue(
-        #     Constants.QUEUE_DOMAIN, json.dumps(message.dict()))
+        await rabbit_handler.publish_queue(
+            Constants.QUEUE_DOMAIN, json.dumps(message.dict()))
         
         #Store new primitive data on Cache to later fetch from Domain the op
         # execution status

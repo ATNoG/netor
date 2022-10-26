@@ -24,6 +24,6 @@ fi
 # save ip in an environment variable
 export HOST=$IMAGE_NAME-$(hostname)
 # Run metric collector - telegraf
-eval  "telegraf --config redis_telegraf.conf &"
+#eval  "telegraf --config redis_telegraf.conf &"
 
 exec "$@"

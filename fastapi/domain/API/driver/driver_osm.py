@@ -69,7 +69,8 @@ class OSMDriver(DomainDriver):
             nst_name=nstName,
             nsi_name=nsiName,
             account=vimAccount,
-            config=additionalConf)
+            config=additionalConf
+            )
         nsiData = self.osm_client.nsi.get(nsiName)
         return nsiData
 

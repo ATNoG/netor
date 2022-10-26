@@ -64,6 +64,7 @@ class MessageReceiver():
             try:
                 payload = MessageSchemas.Message(**msg)
             except Exception:
+                logging.info(f"Could not read message {msg}")
                 # if the message was not suposed to be received
                 return
             if payload.msgType == Constants.TOPIC_CREATEVSI:

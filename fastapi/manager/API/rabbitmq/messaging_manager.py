@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:52:23
+# @Last Modified time: 2022-10-24 16:48:04
 
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
@@ -56,6 +56,7 @@ class MessageReceiver():
             try:
                 payload = MessageSchemas.Message(**msg)
             except Exception:
+                logging.info(f"Message Not supposted: {msg}")
                 # if the message was not suposed to be received
                 return
             logging.info(f"Received message in Manager: {payload}")
@@ -67,7 +68,8 @@ class MessageReceiver():
                     Constants.TOPIC_CREATEVSI,payload.vsiId
                     )
                 # If its Neither in Cache or in Database then store data
-                if a:
+                if not a:
+                    logging.info("NO Information found, starting CSMF")
                     await csmf_handler.store_new_csmf(db, payload)
                     data = MessageSchemas.StatusUpdateData(
                         status=Constants.CREATING_STATUS

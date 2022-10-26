@@ -60,12 +60,12 @@ class InstantiateNsiData(BaseModel):
     additionalConf: AdditionalConf = None
 
 class FecthNsiInfoData(BaseModel):
-    domainId: str = None
-    nsiId: str = None
+    domainId: str
+    nsiId: str
 
 class FetchNsInfoData(BaseModel):
-    domainId: str = None
-    nsId: str = None
+    domainId: str
+    nsId: str
 
 class FetchPrimitiveData(BaseModel):
     domainId: str = None
@@ -75,7 +75,7 @@ class FetchPrimitiveData(BaseModel):
 class UpdateResourcesNfvoIdsData(BaseModel):
     componentName: str
     componentId: str
-    additionalData: Dict[str, str]
+    additionalData: Dict
 
 class NsiInfoData(BaseModel):
     nsiId: str

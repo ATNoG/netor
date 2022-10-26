@@ -58,7 +58,7 @@ class Polling:
                          + " No additional job will be created")
             return
         self.scheduler.add_job(self.pollVsiLCM,
-           'interval', seconds=5, args=[vsiId], id=vsiId)
+           'interval', seconds=30, args=[vsiId], id=vsiId)
         logging.info(f"CSMF Polling started for VSI {vsiId}")
         self.scheduler.add_listener(self.my_listener,
          EVENT_JOB_ERROR | EVENT_JOB_MISSED)
@@ -129,6 +129,6 @@ class Polling:
                         nsId=component_name
                     )
                 msg.data = res_data
-                # await rabbit_handler.publish_queue(
-                #     Constants.QUEUE_DOMAIN,
-                #     json.dumps(msg.dict()))
+                await rabbit_handler.publish_queue(
+                    Constants.QUEUE_DOMAIN,
+                    json.dumps(msg.dict()))

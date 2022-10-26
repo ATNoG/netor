@@ -6,7 +6,7 @@
 # @Last Modified time: 2022-10-01 08:44:12
 
 
-import imp
+import json
 from typing import List
 from fastapi.responses import JSONResponse
 from fastapi import Depends, HTTPException
@@ -121,5 +121,7 @@ async def verify_resource_operate_status(status: str,
     if (not nsidata and nsdata) or (nsidata and nsdata):
         return False
     elif nsidata:
-        return nsidata.nsiInfo['operational-status'] == status
-    return nsidata.nsInfo['operational-status'] == status
+        json_nsiInfo = json.loads(nsidata.nsiInfo)
+        return json_nsiInfo['operational-status'] == status
+    json_nsInfo = json.loads(nsidata.nsInfo)
+    return json_nsInfo['operational-status'] == status

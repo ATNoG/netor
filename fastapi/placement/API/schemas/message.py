@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-11 16:36:45
+# @Last Modified time: 2022-10-24 17:26:54
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -35,13 +35,13 @@ class CatalogueInfoData(BaseModel):
     vsb_actions: List = []
 
 class TranslationInfoData(BaseModel):
-    domaindId: str
+    domainId: str
     sliceEnabled: bool
     nsdId: str = None
     nstId: str = None
 
 class RemoveVSIData(BaseModel):
-    force: bool = False
+    force: bool
 
 class Message(BaseModel):
     vsiId: str
@@ -52,3 +52,4 @@ class Message(BaseModel):
     data: Union[DomainInfoData, CreateVsiData, TenantInfoData,
                 CatalogueInfoData, RemoveVSIData,
                 List[TranslationInfoData]] = None
+

@@ -20,7 +20,7 @@ class NSTServiceProfile(BaseModel):
     availability: float
     pLMN_id_list: List = []
     eMBB_perf_req: List[Dict] = []   
-    uE_mobility_level: None
+    uE_mobility_level: Any = None
 
 
 class NST(BaseModel):

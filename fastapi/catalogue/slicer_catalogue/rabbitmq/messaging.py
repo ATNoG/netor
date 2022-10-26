@@ -17,6 +17,7 @@ class MessageReceiver(Thread):
 
         data = get_info(content)
         if data is not None:
+            print(data)
             # self.messaging.publish2Exchange("vsLCM_"+str(content["vsiId"]), json.dumps(data))
             self.messaging.publish2Exchange("vsLCM_Management", json.dumps(data))
 

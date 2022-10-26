@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-25 10:09:17
+# @Last Modified time: 2022-10-24 17:56:47
 from typing import List, Any
 from pydantic import BaseModel, validator
 
@@ -49,19 +49,19 @@ class InputParameter(BaseModel):
     parameter_id: str
     max_value: Any
     min_value: Any
-    # _parse_max_value = validator('max_value',
-    #  allow_reuse=True, always=True, pre=True)(parse_correct_type)
+    _parse_max_value = validator('max_value',
+     allow_reuse=True, always=True, pre=True)(parse_correct_type)
    
-    # _parse_min_value = validator('min_value',
-    #  allow_reuse=True, always=True, pre=True)(parse_correct_type)
+    _parse_min_value = validator('min_value',
+     allow_reuse=True, always=True, pre=True)(parse_correct_type)
 
 
 
 class TranslationRules(BaseModel):
     nsd_version: str
     input: List[InputParameter] = []
-    nsd_id: str
-    nst_id: str
+    nsd_id: str = None
+    nst_id: str = None
     blueprint_id: str
     nsd_info_id: str = None
     ns_instantiation_level_id: str = None
@@ -73,16 +73,16 @@ class TranslationRules(BaseModel):
 
 
 class VSBluePrint(BaseModel):
-    urllc_service_category: Any = None,
-    end_points: List = [],
-    inter_site: bool = True,
+    urllc_service_category: Any = None
+    end_points: List = []
+    inter_site: bool = True
     parameters: List[ParameterData] = []
     version: str
     blueprint_id: str
     service_sequence: List = []
     translation_rules: List[TranslationRules]
     name: str
-    description: None
+    description: Any = None
     atomic_components: List = []
     configurable_parameters: List = []
     application_metrics: List = []
@@ -95,7 +95,7 @@ class VSBluePrintInfo(BaseModel):
     on_boarded_nst_info_id: List = []
     on_boarded_mec_app_package_info_id: List = []
     on_boarded_vnf_package_info_id: List = []
-    owner: None
+    owner: Any =  None
     active_vsd_id: List
     vs_blueprint_id: str
     name: str

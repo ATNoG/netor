@@ -105,7 +105,7 @@ def prepare_translation(
                         nstId: str=None,
                         translation_set: List = []):
     obj = MessageSchemas.TranslationInfoData(
-        domaindId=domainId,
+        domainId=domainId,
         sliceEnabled=sliceEnabled,
         nsdId=nsdId,
         nstId=nstId

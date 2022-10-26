@@ -1,7 +1,7 @@
 # @Author: Daniel Gomes
 # @Date:   2022-07-26 16:07:53
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 15:43:59
+# @Last Modified time: 2022-10-24 16:34:59
 
 version: "3.6"
 services:
@@ -73,7 +73,7 @@ services:
       - ./config_files/config.ini:/app/config.ini
   manager:
     build:
-      dockerfile: docker/coordinator/Dockerfile
+      dockerfile: docker/manager/Dockerfile
       context: ./
     depends_on:
       - "db"
@@ -108,7 +108,7 @@ services:
       RABBIT_HOST: rabbitmq
       RABBIT_USERNAME: admin
       RABBIT_PASSWORD: admin
-      IDP_IP: tenant
+      IDP_IP: 10.0.12.149
       IDP_PORT: 8001
       IDP_ENDPOINT: /oauth/validate/
       ENVIRONMENT: prod
@@ -199,6 +199,25 @@ services:
       - IMAGE_NAME=REDIS
       - INFLUX_USERNAME=${INFLUXDB_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+  redisplacement:
+    build:
+      dockerfile: docker/redis/Dockerfile
+      context: ./
+    restart: always
+    command: redis-server --requirepass netorRedisPassword --port 6380
+    ports:
+      - "6380:6380"
+    volumes:
+      - thesisRedisPlacementVolume:/var/lib/redis
+      - thesisRedisPlacementDataVolume:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf 
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=REDISPLACEMENT
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
 
   rabbitmq:
     build:
@@ -224,6 +243,18 @@ services:
 
     volumes:
       - thesisRabbitVolume:/var/lib/rabbitmq
+  db_dns:
+    image: mariadb:latest
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=powerdnsadmin
+      - MYSQL_USER=pdns
+      - MYSQL_PASSWORD=mypdns
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - /pda-mysql:/var/lib/mysql
   pdns:
     #build: pdns
     image: pschiffe/pdns-mysql
@@ -286,6 +317,10 @@ volumes:
     external: false
   thesisRedisVolume:
     external: false
+  thesisRedisPlacementVolume:
+    external: false
+  thesisRedisPlacementDataVolume:
+    external: false
   thesisRedisDataVolume:
     external: false
   shard0_data:
@@ -297,3 +332,4 @@ networks:
   default:
     driver: bridge
     name: tickStack
+

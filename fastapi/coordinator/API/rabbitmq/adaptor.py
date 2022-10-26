@@ -29,7 +29,7 @@ class RabbitHandler:
     async def start_pool(self):
         self.connection_pool = Pool(self.get_connection, max_size=2)
         self.channel_pool = Pool(self.get_channel, max_size=10)
-        logging.info("Starting pool")
+        logging.info("Starting pool....")
 
     async def get_connection(self):
         return await connect_robust(self.uri)
@@ -53,7 +53,7 @@ class RabbitHandler:
                 durable=durable,
                 auto_delete=auto_delete
             )
-            logging.info("Created Queue...")
+            logging.info(f"Created Queue...{name}")
 
     async def consumeExchange(self, name, callback, queue='', durable=False,
                               auto_delete=True, ack=True):

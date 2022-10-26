@@ -60,8 +60,8 @@ class InputParameter(BaseModel):
 class TranslationRules(BaseModel):
     nsd_version: str
     input: List[InputParameter] = []
-    nsd_id: str
-    nst_id: str
+    nsd_id: str = None
+    nst_id: str = None
     blueprint_id: str
     nsd_info_id: str = None
     ns_instantiation_level_id: str = None
@@ -75,7 +75,7 @@ class TranslationRules(BaseModel):
 class VSBluePrint(BaseModel):
     urllc_service_category: Any = None,
     end_points: List = [],
-    inter_site: bool = True
+    inter_site: bool = True,
     parameters: List[ParameterData] = []
     version: str
     blueprint_id: str

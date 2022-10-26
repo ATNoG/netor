@@ -48,5 +48,5 @@ if [ -z "${RABBITMQ_USE_LONGNAME:-}" ] && [ "$(hostname)" != "$(hostname -s)" ];
 fi
 # Run metric collector - telegraf
 export HOST=$IMAGE_NAME-$(hostname) 
-eval  "telegraf --config rabbitmq_telegraf.conf &"
+#eval  "telegraf --config rabbitmq_telegraf.conf &"
 exec "$@"

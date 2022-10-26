@@ -25,7 +25,7 @@ echo "Postgres started"
 # save ip in an environment variable
 export HOST=$IMAGE_NAME-$(hostname) 
 # Run metric collector - telegraf
-eval "telegraf --config telegraf.conf &"
+#eval "telegraf --config telegraf.conf &"
 #run poetry and fastapi server
 #poetry run alembic upgrade head
 uvicorn main:app --host 0.0.0.0 --port 80
