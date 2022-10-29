@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-19 21:47:35
+# @Last Modified time: 2022-10-29 11:17:25
 
 
 from fastapi.responses import JSONResponse
@@ -44,8 +44,8 @@ def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
                    " resource. This is resource is only available to")
 
 
-def check_admin_role(data: AuthSchemas.Tenant):
-    return "ADMIN" in data.roles
+def check_admin_role(user):
+   return Constants.IDP_ADMIN_USER in user.roles
 
 
 def get_tenant_info(token):
@@ -68,6 +68,7 @@ def get_tenant_info(token):
         print(e)
         raise CouldNotConnectToTenant()
 
+
 def get_domain_info(token, domain_id):
     url = f"http://{Constants.DOMAIN_HOST}:{Constants.DOMAIN_PORT}"\
           + f"/domain/{domain_id}"
@@ -82,7 +83,6 @@ def get_domain_info(token, domain_id):
         return data['data']
     except Exception:
         raise CouldNotConnectToDomain()
-
 
 
 def get_catalogue_vsd_info(token, vsd_id):

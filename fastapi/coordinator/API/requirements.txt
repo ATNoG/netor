@@ -11,3 +11,4 @@ typing==3.7.4.3
 aio-pika==8.1.1
 python-powerdns==2.1.0
 cryptography==37.0.4
+fastapi_keycloak==1.0.7

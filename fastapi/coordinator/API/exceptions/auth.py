@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-25 15:19:23
+# @Last Modified time: 2022-10-29 11:27:28
 from http import HTTPStatus
 
 
@@ -142,12 +142,12 @@ class NotEnoughPrivileges(Exception):
         operation -- intended operation
     """
     def __init__(self, username=None, operation=None):
-        if username:
+        if username and operation:
             self.username = username
             self.operation = operation
             self.message = f'Not enough privileges for user {self.username} to perform the operation {self.operation}'
         else:
-           self.message = 'Not enough privileges'
+            self.message = 'Not enough privileges'
         super().__init__(self.message)
 
     def __str__(self):

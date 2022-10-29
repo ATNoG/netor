@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-26 16:08:50
+# @Last Modified time: 2022-10-29 10:27:29
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -40,16 +40,19 @@ def verify_vsi_ownership(
             raise NotEnoughPrivileges()
     return True
 
+
 def getAllVSs(db: Session):
     vss = db.query(models.VerticalServiceInstance)\
                 .all()
 
     return [x.as_dict() for x in vss]
 
+
 def getVSActionsByVsiId(db: Session, vsi_id: str):
     vs_actions = db.query(models.VSIAction)\
                    .filter(models.VSIAction.vsiId == vsi_id).all()
     return [action.as_dict() for action in vs_actions]
+
 
 def getVSById(db: Session, vsi_id: str, include_actions=False):
     vs = db.query(models.VerticalServiceInstance)\

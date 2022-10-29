@@ -1,3 +1,9 @@
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:49
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-29 12:08:04
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -6,10 +12,10 @@ from datetime import datetime, timedelta
 from typing import Optional
 import aux.constants as Constants 
 from exceptions.auth import CouldNotDecodeBearerToken
-
+from idp.idp import idp
 # constants
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=idp.token_uri)
 
 
 def verify_password(plain_password, hashed_password):
