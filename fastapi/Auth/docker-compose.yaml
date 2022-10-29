@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+# @Author: Rafael Direito
+# @Date:   2022-10-24 14:17:09
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-29 09:50:19
+version: '3'
+
+volumes:
+  postgres_data:
+    driver: local
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: testkeycloakdb
+      POSTGRES_USER: testkeycloakuser
+      POSTGRES_PASSWORD: testkeycloakpassword
+    restart:
+      always
+
+  keycloak:
+    image: jboss/keycloak:18.0.2 
+    command:
+      - " -b 0.0.0.0 "
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: testkeycloakdb
+      DB_USER: testkeycloakuser
+      DB_SCHEMA: public
+      DB_PASSWORD: testkeycloakpassword
+      KEYCLOAK_USER: keycloakuser
+      KEYCLOAK_PASSWORD: keycloakpassword
+      PROXY_ADDRESS_FORWARDING: "true"
+      KEYCLOAK_LOGLEVEL: DEBUG
+      MY_REALM_NAME: netor
+      MY_REALM_CLIENT: netor-client
+      MY_REALM_CLIENT_SECRET: dummy_client_secret
+      MY_REALM_ADMIN_SECRET: dummy_admin_secret
+      MY_REALM_REDIRECT_URI: http://localhost:8000/*
+      REALM_ROLES: NetOr-Admin:NetOr Admin;NetOr-Tenant:NetOr Tenant
+      REALM_USERS: admin:password:NetOr-Admin;user:user-password:None
+
+    ports:
+      - '8085:8080'
+    depends_on:
+      - postgres
+    restart:
+      always
