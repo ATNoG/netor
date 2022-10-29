@@ -3,10 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-26 17:54:17
-
-
-
+# @Last Modified time: 2022-10-29 13:45:04
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
 ALGORITHM = "HS256"
@@ -15,7 +12,8 @@ DEFAULT_ADMIN_CREDENTIALS = {
     "username": "admin",
     "password": "admin"
 }
-USER_ROLES = ["ADMIN", "USER"]
+IDP_ADMIN_USER = "NetOr-Admin"
+IDP_TENANT_USER = "NetOr-Tenant"
 
 DB_NAME = None
 DB_LOCATION = None
@@ -33,9 +31,12 @@ REDIS_PASS = None
 REDIS_IP = None
 REDIS_PORT = None
 
-
-TENANT_HOST = None
-TENANT_PORT = None
+IDP_IP = None
+IDP_CLIENTID = None
+IDP_ClIENT_SECRET = None
+IDP_ADMIN_ClIENTSECRET = None
+IDP_REALM = None
+IDP_CALLBACK_URI = None
 
 DOMAIN_HOST = None
 DOMAIN_PORT = None

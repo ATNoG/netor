@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-29 10:57:02
+# @Last Modified time: 2022-10-29 13:40:58
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -40,8 +40,6 @@ def load_config():
         Constants.RABBITMQ_PORT = config['RabbitMQ']['Port']
         Constants.RABBITMQ_USER = config['RabbitMQ']['User']
         Constants.RABBITMQ_PASS = config['RabbitMQ']['Password']
-        Constants.TENANT_HOST = config['Tenant']['Host']
-        Constants.TENANT_PORT = config['Tenant']['Port']
     except Exception:
         return False, """The config file should have the folling sections with
                          the following variables:

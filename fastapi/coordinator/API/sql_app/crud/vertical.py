@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 10:27:29
+# @Last Modified time: 2022-10-29 14:34:35
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ import schemas.vertical as VerticalSchemas
 import aux.constants as Constants
 from sql_app.database import SessionLocal
 import schemas.message as MessageSchemas
+from fastapi_keycloak import OIDCUser
 # Logger
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
@@ -34,9 +35,9 @@ def get_db():
 
 def verify_vsi_ownership(
                          vsi_db: models.VerticalServiceInstance,
-                         auth_data: AuthSchemas.Tenant):
+                         auth_data: OIDCUser):
     if not Utils.check_admin_role(auth_data):
-        if vsi_db.tenantId != auth_data.username:
+        if vsi_db.tenantId != auth_data.sub:
             raise NotEnoughPrivileges()
     return True
 
@@ -74,6 +75,7 @@ def createVSiAction(db: Session, vsiId,
     db.commit()
     db.refresh(action_in)
     return action_in.as_dict()
+
 
 def createNewVS(db: Session,
                 tenantId: str,

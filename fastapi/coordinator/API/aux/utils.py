@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 11:17:25
+# @Last Modified time: 2022-10-29 14:35:13
 
 
 from fastapi.responses import JSONResponse
@@ -30,22 +30,8 @@ def create_response(status_code=200, data=[], errors=[],
                         headers={"Access-Control-Allow-Origin": "*"})
 
 
-def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
-    try:
-        data = get_tenant_info(token)['data']['user_info']
-        userdata = Tenant(**data)
-        userdata.token = token
-        return userdata
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=400,
-            detail="Insufficient permissions to access this" +
-                   " resource. This is resource is only available to")
-
-
 def check_admin_role(user):
-   return Constants.IDP_ADMIN_USER in user.roles
+    return Constants.IDP_ADMIN_USER in user.roles
 
 
 def get_tenant_info(token):
@@ -116,6 +102,7 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.commit()
         db.refresh(db_obj)
     return db_obj
+
 
 def parse_dns_params_to_vnf(vs_in: VerticalSchemas.VSICreate):
     key = Fernet.generate_key()

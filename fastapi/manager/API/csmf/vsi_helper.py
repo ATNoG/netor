@@ -3,9 +3,9 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-26 23:24:51
+# @Last Modified time: 2022-10-29 23:04:15
 import json
-from manager.API.csmf.polling import Polling
+from csmf.polling import Polling
 from redis.handler import redis_handler
 from rabbitmq.adaptor import rabbit_handler
 import schemas.message as MessageSchemas
@@ -14,11 +14,13 @@ import yaml
 import aux.constants as Constants
 import aux.utils as Utils
 import logging
+import schemas.auth as AuthSchemas
 
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
     level=logging.INFO
 )
+
 
 class VsiHelper:
     def __init__(self) -> None:
@@ -40,13 +42,18 @@ class VsiHelper:
     async def instantiateVSI(self, payload: MessageSchemas.Message):
         cached_vsi_data = await redis_handler.hget_all(payload.vsiId)
         allVsiData = {}
-        for key,value in cached_vsi_data.items():
+        for key, value in cached_vsi_data.items():
             # load and parse data 
-            allVsiData[key.decode()] = MessageSchemas.Message(
-                **json.loads(value))
-            if allVsiData[key.decode()].error:
-                #raise InvalidPlacementInformation()
-                pass
+            if key == Constants.TOPIC_TENANTINFO:
+                    allVsiData[key] = AuthSchemas.Tenant(
+                        **json.loads(value)
+            )
+            else:
+                allVsiData[key.decode()] = MessageSchemas.Message(
+                    **json.loads(value))
+                if allVsiData[key.decode()].error:
+                    # raise InvalidPlacementInformation()
+                    pass
         domainInfo = allVsiData['domainInfo']
         vsiRequestInfo = allVsiData['createVSI']
         catalogueInfo = allVsiData['catalogueInfo']
@@ -102,7 +109,7 @@ class VsiHelper:
             await rabbit_handler.publish_queue(
                 Constants.QUEUE_DOMAIN,
                 json.dumps(res.dict()))
-            composingComponentId+=1 #TODO: Check this, will be changed...
+            composingComponentId += 1 #TODO: Check this, will be changed...
 
 
         res.msgType = Constants.TOPIC_VSI_STATUS

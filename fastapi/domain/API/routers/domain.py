@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-19 17:21:41
+# @Last Modified time: 2022-10-29 13:42:17
 
 from fastapi import Depends
 # generic imports
@@ -17,7 +17,7 @@ import os
 import sql_app.crud.domain as CRUDDomain
 import schemas.domain as DomainSchemas
 import aux.utils as Utils
-import aux.auth as auth
+from idp.idp import idp
 from exceptions.domain import DomainAlreadyExists
 import aux.constants as Constants
 from exceptions.domain import DomainLayerTypeNotSupported,\
@@ -57,9 +57,10 @@ router = APIRouter()
     description="Return all the Domains in the system",
 )
 def getAllDomains(
-                  userdata=Depends(Utils.rbacencforcer),
+                  user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                   db: Session = Depends(get_db)):
-    domains = CRUDDomain.getAllDomains(db, userdata)
+    domains = CRUDDomain.getAllDomains(db, user)
     return Utils.create_response(
         data=domains,
         message="Success obtaining Domains"
@@ -74,7 +75,8 @@ def getAllDomains(
 )
 def getDomainById(
                   domainId: str,
-                  userdata=Depends(Utils.rbacencforcer),
+                  user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                   db: Session = Depends(get_db)):
     try:
         domain = CRUDDomain.getDomainById(db, domainId)
@@ -99,7 +101,8 @@ def getDomainById(
 )
 def createNewDomain(
                     domain_data: DomainSchemas.DomainCreate,
-                    userdata=Depends(Utils.rbacencforcer),
+                    user=Depends(idp.get_current_user(
+                        required_roles=[Constants.IDP_ADMIN_USER])),
                     db: Session = Depends(get_db)):
     try:
         # Check if there's already a Domain with this Id
@@ -144,7 +147,8 @@ def createNewDomain(
 def updateDomain(
                   domainId: str,
                   domain_data: DomainSchemas.DomainUpdate,
-                  userdata=Depends(Utils.rbacencforcer),
+                  user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                   db: Session = Depends(get_db)):
     try:
         domain = CRUDDomain.getDomainById(db, domainId)
@@ -174,7 +178,8 @@ def updateDomain(
 )
 def deleteDomain(
                   domainId: str,
-                  userdata=Depends(Utils.rbacencforcer),
+                  user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                   db: Session = Depends(get_db)):
     try:
         domain = CRUDDomain.getDomainById(db, domainId)

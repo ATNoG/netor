@@ -3,12 +3,12 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-25 14:09:45
+# @Last Modified time: 2022-10-29 20:35:27
 import os
 
-
 class Config(object):
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'wz3DefHxgQTElMvACRAs1KgAUDPHgTqq')
+    SECRET_KEY = os.environ.get('SECRET_KEY',
+                                'wz3DefHxgQTElMvACRAs1KgAUDPHgTqq')
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
     CACHE_TYPE = 'simple'
@@ -20,6 +20,8 @@ class Config(object):
         'port': 27017,
         'db': os.environ.get('MONGO_DB', 'catalogues')
     }
+    OIDC_CLIENT_SECRETS = "./api/client_secrets.json"
+    OIDC_OPENID_REALM = 'netor'
 
 
 class AuthConfig:
@@ -36,5 +38,5 @@ class ProdConfig(Config):
 
 class DevConfig(Config):
     """Development configurations"""
-    DEBUG = True
+    DEBUG = False
     ENV = 'dev'

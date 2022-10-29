@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-29 10:51:24
+# @Last Modified time: 2022-10-29 14:36:21
 
 # generic imports
 from typing import List
@@ -11,8 +11,8 @@ from pydantic import BaseModel
 
 
 class Tenant(BaseModel):
+    id: str
     username: str
-    group: str
     roles: List[str]
 
 

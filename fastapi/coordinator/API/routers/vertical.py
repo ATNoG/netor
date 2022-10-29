@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 12:21:50
+# @Last Modified time: 2022-10-29 22:28:49
 
 import json
 from fastapi import Depends
@@ -69,7 +69,6 @@ def getAllVerticals(
         if not Utils.check_admin_role(user):
             raise NotEnoughPrivileges(user.preferred_username)
         vss = CRUDVertical.getAllVSs(db)
-
         return Utils.create_response(
             data=vss,
             message="Success obtaining All Verticals",
@@ -96,7 +95,6 @@ async def createnewVS(
                     required_roles=[Constants.IDP_ADMIN_USER])),
                 db: Session = Depends(get_db)):
     try:
-
         db_vs = CRUDVertical.getVSById(db, vs_in.vsiId)
         if db_vs:
             raise VerticalAlreadyExists(vs_in.vsiId)
@@ -110,7 +108,7 @@ async def createnewVS(
             if not data:
                 raise DomainNotFound(domain_id=domain.domainId)
         # Store in DB
-        vs_out = CRUDVertical.createNewVS(db, user.preffered_username, vs_in)
+        vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
 
         # dns_info = original_request["DNSInfo"]
         power_dns_client = Netor_DNS_SD(
@@ -125,7 +123,7 @@ async def createnewVS(
         msg = MessageSchemas.Message(
             vsiId=vs_in.vsiId,
             msgType=Constants.TOPIC_CREATEVSI,
-            tenantId=user.preffered_username
+            tenantId=user.sub
         )
 
         data = MessageSchemas.CreateVsiData(**vs_in.dict())
@@ -159,7 +157,6 @@ async def getVsiById(
                 user=Depends(idp.get_current_user(
                     required_roles=[Constants.IDP_ADMIN_USER])),
                 db: Session = Depends(get_db)):
-    
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId, include_actions=True)
         if not db_vs:

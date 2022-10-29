@@ -3,21 +3,19 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-25 10:12:34
+# @Last Modified time: 2022-10-29 22:55:23
 
 
 from typing import List
 from fastapi.responses import JSONResponse
-from fastapi import Depends, HTTPException
-from exceptions.auth import CouldNotConnectToTenant, CouldNotConnectToDomain
 from schemas.auth import Tenant
-import requests
-import aux.auth as auth
 from sqlalchemy.orm import Session
 import aux.constants as Constants
 import schemas.auth as AuthSchemas
 from fastapi.encoders import jsonable_encoder
-import schemas.message as MessageSchemas 
+import schemas.message as MessageSchemas
+from idp.idp import idp
+import json
 # custom imports
 
 
@@ -29,57 +27,8 @@ def create_response(status_code=200, data=[], errors=[],
                         headers={"Access-Control-Allow-Origin": "*"})
 
 
-def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
-    try:
-        data = get_tenant_info(token)['data']['user_info']
-        userdata = Tenant(**data)
-        userdata.token = token
-        return userdata
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=400,
-            detail="Insufficient permissions to access this" +
-                   " resource. This is resource is only available to")
-
-
 def check_admin_role(data: AuthSchemas.Tenant):
-    return "ADMIN" in data.roles
-
-
-
-def get_tenant_info(token):
-    url = f"http://{Constants.TENANT_HOST}:{Constants.TENANT_PORT}"\
-          + "/oauth/validate"
-    try:
-        r = requests.get(
-            url=url,
-            headers={'Authorization': f'Bearer {token}'},
-            timeout=5,
-            verify=False
-        )
-        if r.status_code != 200:
-            raise CouldNotConnectToTenant()
-        data = r.json()
-        
-        return data
-    except Exception:
-        raise CouldNotConnectToTenant()
-
-def get_domain_info(token, domain_id):
-    url = f"http://{Constants.DOMAIN_HOST}:{Constants.DOMAIN_PORT}"\
-          + f"/domain/{domain_id}"
-    try:
-        r = requests.get(
-            url=url,
-            headers={'Authorization': f'Bearer {token}'},
-            timeout=5,
-            verify=False
-        )
-        data = r.json()
-        return data['data']
-    except Exception:
-        raise CouldNotConnectToDomain()
+    return Constants.IDP_ADMIN_USER in data.roles
 
 
 def update_db_object(db: Session, db_obj: object, obj_in: dict,
@@ -98,11 +47,12 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.refresh(db_obj)
     return db_obj
 
+
 def prepare_translation(
                         domainId: str,
-                        sliceEnabled: bool, 
-                        nsdId: str=None, 
-                        nstId: str=None,
+                        sliceEnabled: bool,
+                        nsdId: str = None,
+                        nstId: str = None,
                         translation_set: List = []):
     obj = MessageSchemas.TranslationInfoData(
         domainId=domainId,
@@ -115,3 +65,16 @@ def prepare_translation(
     else:
         translation_set = [obj]
     return translation_set
+
+
+async def store_tenant_data(caching, vsiId: str, tenantId: str) -> Tenant:
+    roles = idp.get_user_roles(user_id=tenantId)
+    parsed_roles = [role.name for role in roles]
+    username = idp.get_user(user_id=tenantId).username
+    tenant = Tenant(id=tenantId, roles=parsed_roles, username=username)
+    await caching.set_hash_key(
+            vsiId,
+            Constants.TOPIC_TENANTINFO,
+            json.dumps(tenant.dict())
+        )
+    return tenant
