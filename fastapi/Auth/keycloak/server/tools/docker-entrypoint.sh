@@ -1,8 +1,8 @@
 #!/bin/bash
 # @Author: Rafael Direito
 # @Date:   2022-10-24 19:20:02
-# @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 09:40:56
+# @Last Modified by:   Rafael Direito
+# @Last Modified time: 2022-10-29 17:56:12
 #!/bin/bash
 set -eou pipefail
 
@@ -347,7 +347,7 @@ export ADMIN_CLI_ID=$(./kcadm.sh get clients -r $MY_REALM_NAME --fields clientId
     "defaultClientScopes": ["web-origins","role_list","roles","profile","email"],
     "optionalClientScopes": ["address","phone","offline_access","microprofile-jwt"],
     "fullScopeAllowed": true,
-    "redirectUris": ["http://localhost:8000/*", "http://localhost:8001/*", "http://localhost:8002/*", "http://localhost:8003/*", "http://localhost:8004/*", "http://localhost:5010/*"],
+    "redirectUris": [$MY_REALM_REDIRECT_URI],
     "rootUrl": "",
     "baseUrl": ""
   }
@@ -379,17 +379,22 @@ do
 
     username=${user_info[0]}
     password=${user_info[1]}
-    role=${user_info[2]}
+    roles_str=${user_info[2]}
 
     echo "Adding user '$username'..."
     ./kcadm.sh create users -r $MY_REALM_NAME -s username=$username -s enabled=true
     ./kcadm.sh set-password -r $MY_REALM_NAME --username $username --new-password $password
     echo "Added user '$username'."
-    if [[ $role != "None" ]]
+    if [[ $roles_str != "None" ]]
     then
-        echo "Adding role '$role' to user '$username'..."
-        ./kcadm.sh add-roles --uusername $username --rolename $role -r $MY_REALM_NAME
-        echo "Added role '$role' to user '$username'."
+        IFS=","
+        read -a roles <<< "$roles_str"
+        for role in "${roles[@]}"
+        do
+            echo "Adding role '$role' to user '$username'..."
+            ./kcadm.sh add-roles --uusername $username --rolename $role -r $MY_REALM_NAME
+            echo "Added role '$role' to user '$username'."
+        done
     else
         echo "User '$username' was added without any role."
     fi

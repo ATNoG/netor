@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 22:51:27
+# @Last Modified time: 2022-10-30 22:07:12
 
 import json
 from fastapi import FastAPI
@@ -109,13 +109,13 @@ async def startup_event():
         messaging=rabbit_handler,
         caching=redis_handler)
     await message_receiver.start()
-    await rabbit_handler.publish_exchange(
-        Constants.EXCHANGE_MGMT,
-        json.dumps(teste.dict()))
-    await rabbit_handler.publish_exchange(
-        Constants.EXCHANGE_MGMT,
-        json.dumps(b.dict()))
-    await rabbit_handler.publish_exchange(
-        Constants.EXCHANGE_MGMT,
-        json.dumps(c.dict())
-    )
+    # await rabbit_handler.publish_exchange(
+    #     Constants.EXCHANGE_MGMT,
+    #     json.dumps(teste.dict()))
+    # await rabbit_handler.publish_exchange(
+    #     Constants.EXCHANGE_MGMT,
+    #     json.dumps(b.dict()))
+    # await rabbit_handler.publish_exchange(
+    #     Constants.EXCHANGE_MGMT,
+    #     json.dumps(c.dict())
+    # )

@@ -2,7 +2,7 @@
 # @Author: Rafael Direito
 # @Date:   2022-10-24 14:17:09
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 09:50:19
+# @Last Modified time: 2022-10-30 22:00:40
 version: '3'
 
 volumes:
@@ -21,6 +21,7 @@ services:
 
   keycloak:
     image: jboss/keycloak:18.0.2 
+    container_name: keycloak
     command:
       - " -b 0.0.0.0 "
     environment:
@@ -38,13 +39,21 @@ services:
       MY_REALM_CLIENT: netor-client
       MY_REALM_CLIENT_SECRET: dummy_client_secret
       MY_REALM_ADMIN_SECRET: dummy_admin_secret
-      MY_REALM_REDIRECT_URI: http://localhost:8000/*
+      # MY_REALM_REDIRECT_URI: "\"<uri_1>\",\"<uri_2>\""
+      MY_REALM_REDIRECT_URI: "\"http://coordinator:8000/*\",\"http://tenant:8001/*\", \"http://domain:8002/*\", \"http://placement:8003/*\", \"http://manager:8004/*\", \"http://catalogue:5010/*\""
+      # REALM_ROLES: <role_1_name>:<role_1_description>;<role_2_name>:<role_2_description>
       REALM_ROLES: NetOr-Admin:NetOr Admin;NetOr-Tenant:NetOr Tenant
-      REALM_USERS: admin:password:NetOr-Admin;user:user-password:None
+      # REALM_USERS: <user_1_username>:<user_1_password>:<user_1_role_1>,<user_1_role_2>;<user_2_username>:<user_2_password>:<user_2_role_1>,<user_2_role_2>
+      REALM_USERS: admin:password:NetOr-Admin,NetOr-Tenant;user:password:None
 
     ports:
-      - '8085:8080'
+      - '8080:8080'
     depends_on:
       - postgres
     restart:
       always
+    
+networks:
+  default:
+    driver: bridge
+    name: tickStack
