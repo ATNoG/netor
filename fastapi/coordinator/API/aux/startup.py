@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 23:50:31
+# @Last Modified time: 2022-10-29 09:57:38
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -40,8 +40,6 @@ def load_config():
         Constants.RABBITMQ_PORT = config['RabbitMQ']['Port']
         Constants.RABBITMQ_USER = config['RabbitMQ']['User']
         Constants.RABBITMQ_PASS = config['RabbitMQ']['Password']
-        Constants.TENANT_HOST = config['Tenant']['Host']
-        Constants.TENANT_PORT = config['Tenant']['Port']
         Constants.DOMAIN_HOST = config['Domain']['Host']
         Constants.DOMAIN_PORT = config['Domain']['Port']
         Constants.CATALOGUE_HOST = config['Catalogue']['Host']

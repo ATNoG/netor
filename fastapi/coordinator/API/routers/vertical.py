@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-19 22:09:23
+# @Last Modified time: 2022-10-29 22:28:49
 
 import json
 from fastapi import Depends
@@ -26,7 +26,8 @@ import schemas.vertical as VerticalSchemas
 import schemas.message as MessageSchemas
 from exceptions.vertical import VerticalAlreadyExists, VerticalNotFound
 from rabbitmq.adaptor import rabbit_handler
-
+from idp.idp import idp
+import aux.auth as auth
 # import from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(
                              inspect.currentframe())))
@@ -61,13 +62,13 @@ router = APIRouter()
     description="Return all the Vertical Services in the system",
 )
 def getAllVerticals(
-                  userdata=Depends(Utils.rbacencforcer),
+                  user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                   db: Session = Depends(get_db)):
     try:
-        if not Utils.check_admin_role(userdata):
-            raise NotEnoughPrivileges(userdata.username)
+        if not Utils.check_admin_role(user):
+            raise NotEnoughPrivileges(user.preferred_username)
         vss = CRUDVertical.getAllVSs(db)
-
         return Utils.create_response(
             data=vss,
             message="Success obtaining All Verticals",
@@ -79,6 +80,7 @@ def getAllVerticals(
             errors=[str(exception)]
         )
 
+
 @router.post(
     "/vs",
     tags=["vs"],
@@ -87,26 +89,26 @@ def getAllVerticals(
 )
 async def createnewVS(
                 vs_in: VerticalSchemas.VSICreate,
-                userdata=Depends(Utils.rbacencforcer),
+                token: auth.OAuth2PasswordBearer = Depends(
+                    auth.oauth2_scheme),
+                user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                 db: Session = Depends(get_db)):
     try:
-
         db_vs = CRUDVertical.getVSById(db, vs_in.vsiId)
         if db_vs:
             raise VerticalAlreadyExists(vs_in.vsiId)
-        
         # verify if VS Descriptor exists
-        data = Utils.get_catalogue_vsd_info(userdata.token, vs_in.vsdId)
-        if not data:
-            raise VSDNotFound(vs_in.vsdId)
-
-        # # verify if domain placements exists
+        #data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
+        # if not data:
+        #     raise VSDNotFound(vs_in.vsdId)
+        # # # verify if domain placements exists
         for domain in vs_in.domainPlacements:
-            data = Utils.get_domain_info(userdata.token, domain.domainId)
+            data = Utils.get_domain_info(token, domain.domainId)
             if not data:
                 raise DomainNotFound(domain_id=domain.domainId)
         # Store in DB
-        vs_out = CRUDVertical.createNewVS(db, userdata.username, vs_in)
+        vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
 
         # dns_info = original_request["DNSInfo"]
         power_dns_client = Netor_DNS_SD(
@@ -115,13 +117,13 @@ async def createnewVS(
             vsi_id=vs_out.vsiId,
             api_key=Constants.DNS_API_KEY
         )
-        power_dns_client.create_zone()
-        vs_in = Utils.parse_dns_params_to_vnf(vs_in)
+        # power_dns_client.create_zone()
+        # vs_in = Utils.parse_dns_params_to_vnf(vs_in)
         # Send Message to the MessageBus
         msg = MessageSchemas.Message(
             vsiId=vs_in.vsiId,
             msgType=Constants.TOPIC_CREATEVSI,
-            tenantId=userdata.username
+            tenantId=user.sub
         )
 
         data = MessageSchemas.CreateVsiData(**vs_in.dict())
@@ -152,14 +154,14 @@ async def createnewVS(
 )
 async def getVsiById(
                 vsiId: str,
-                userdata=Depends(Utils.rbacencforcer),
+                user=Depends(idp.get_current_user(
+                    required_roles=[Constants.IDP_ADMIN_USER])),
                 db: Session = Depends(get_db)):
-    
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId, include_actions=True)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, userdata)
+        CRUDVertical.verify_vsi_ownership(db_vs, user)
         return Utils.create_response(
             data=db_vs,
             message="Success Getting a new VS",
@@ -179,24 +181,26 @@ async def getVsiById(
     summary="Executes a primitive over an existent Vertical Slice",
     description="Executes a primitive over an existent Vertical Slice"
 )
-async def executePrimitive(vsiId: str,
-                     primitive_data: MessageSchemas.PrimitiveData,
-                     userdata=Depends(Utils.rbacencforcer),
-                     db: Session = Depends(get_db)):
+async def executePrimitive(
+                    vsiId: str,
+                    primitive_data: MessageSchemas.PrimitiveData,
+                    user=Depends(idp.get_current_user(
+                        required_roles=[Constants.IDP_ADMIN_USER])),
+                    db: Session = Depends(get_db)):
     try:
-        db_vs = CRUDVertical.getVSById(db, vsiId )
+        db_vs = CRUDVertical.getVSById(db, vsiId)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, userdata)
+        CRUDVertical.verify_vsi_ownership(db_vs, user)
 
         db_obj = CRUDVertical.createVSiAction(db, vsiId, primitive_data)
 
         message = MessageSchemas.Message(vsiId=vsiId,
-         msgType=Constants.TOPIC_PRIMITIVE)
+                                         msgType=Constants.TOPIC_PRIMITIVE)
         message.data = primitive_data
-        # await rabbit_handler.publish_exchange(
-        #     Constants.EXCHANGE_MGMT,
-        #     message=message)
+        await rabbit_handler.publish_exchange(
+            Constants.EXCHANGE_MGMT,
+            message=json.dumps(message.dict()))
         return Utils.create_response(
             message="Primitive as been executed",
             data=db_obj)
@@ -208,7 +212,6 @@ async def executePrimitive(vsiId: str,
         )
 
 
-
 @router.get(
     "/vs/{vsiId}/status",
     tags=["vs"],
@@ -216,14 +219,14 @@ async def executePrimitive(vsiId: str,
     description="Returns All Status that a Vertical Slice has been through",
 )
 def getVSiStatusHistory(vsiId: str,
-                        userdata=Depends(Utils.rbacencforcer),
+                        user=Depends(idp.get_current_user(
+                            required_roles=[Constants.IDP_ADMIN_USER])),
                         db: Session = Depends(get_db)):
     try:
-        db_vs = CRUDVertical.getVSById(db, vsiId )
-        print(db_vs)
+        db_vs = CRUDVertical.getVSById(db, vsiId)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, userdata)
+        CRUDVertical.verify_vsi_ownership(db_vs, user)
         data = CRUDVertical.getAllVSIStatus(db, vsiId)
         return Utils.create_response(
             data=data,
@@ -236,3 +239,43 @@ def getVSiStatusHistory(vsiId: str,
             errors=[str(exception)]
         )
 
+
+@router.delete(
+    "/vs/{vsiId}",
+    tags=["vs"],
+    summary="Deletes the Vertical Service requested",
+    description="Deletes the Vertical Service requested",
+)
+async def deleteVSI(vsiId: str,
+                    user=Depends(idp.get_current_user(
+                            required_roles=[Constants.IDP_ADMIN_USER])),
+                    force: bool = False,
+                    db: Session = Depends(get_db)):
+    try:
+        db_vs = CRUDVertical.getVSById(db, vsiId)
+        if not db_vs:
+            raise VerticalNotFound(vsiId)
+        CRUDVertical.verify_vsi_ownership(db_vs, user)
+        data = CRUDVertical.deleteVSI(db, vsiId)
+        msg_data = MessageSchemas.DeleteVsiData(
+            force=force
+        )
+        message = MessageSchemas.Message(
+            vsiId=vsiId,
+            msgType=Constants.TOPIC_PRIMITIVE,
+            data=msg_data
+        )
+        await rabbit_handler.publish_exchange(
+            Constants.EXCHANGE_MGMT,
+            json.dumps(message.dict())
+        )
+        return Utils.create_response(
+            data=data,
+            message="Success Deleting Vertical",
+        )
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        )

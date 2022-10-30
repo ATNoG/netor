@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-24 21:58:48
+# @Last Modified time: 2022-10-29 22:17:07
 import aioredis
 import aux.constants as Constants
 from aux.startup import load_config
@@ -46,16 +46,16 @@ class RedisHandler:
     async def has_required_placement_info(self, vsiId, data):
         create_vsi = await self.get_hash_value(
             Constants.TOPIC_CREATEVSI, vsiId)
-        return create_vsi.decode() == "create" and \
-               set(["catalogueInfo","domainInfo","tenantInfo"])\
-               .issubset(data)
-    
+        return create_vsi != None and create_vsi.decode() == "create" and \
+                set(["catalogueInfo", "domainInfo", "tenantInfo"])\
+                .issubset(data)
+
     async def store_vsi_initial_data(self, vsiId):
         await self.set_hash_key(
             Constants.TOPIC_CREATEVSI,
             vsiId,
             "create")
-    
+
     async def update_vsi_running_data(self, vsiId):
         await self.set_hash_key(
             Constants.TOPIC_CREATEVSI,

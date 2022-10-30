@@ -1,3 +1,9 @@
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:50
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-29 15:10:49
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext

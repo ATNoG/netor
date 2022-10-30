@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-20 16:42:46
+# @Last Modified time: 2022-10-29 14:33:07
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -31,14 +31,6 @@ def get_db():
     finally:
         db.close()
 
-
-def verify_vsi_ownership(
-                         vsi_db: models.VerticalServiceInstance,
-                         auth_data: AuthSchemas.Tenant):
-    if not Utils.check_admin_role(auth_data):
-        if vsi_db.tenantId != auth_data.username:
-            raise NotEnoughPrivileges()
-    return True
 
 def getAllVSs(db: Session):
     vss = db.query(models.VerticalServiceInstance)\

@@ -3,9 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:56:15
-import asyncio
-import threading
+# @Last Modified time: 2022-10-29 22:42:29
 from arbitrator.arbitrator import Arbitrator
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
@@ -15,6 +13,7 @@ import logging
 import schemas.message as MessageSchemas
 import aux.constants as Constants
 from sql_app.database import SessionLocal
+import aux.utils as Utils
 
 # Dependency
 def get_db():
@@ -29,7 +28,6 @@ logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
     level=logging.INFO
 )
-
 
 
 class MessageReceiver():
@@ -64,6 +62,10 @@ class MessageReceiver():
 
             if payload.msgType == Constants.TOPIC_CREATEVSI:
                 await self.caching.store_vsi_initial_data(payload.vsiId)
+                await Utils.store_tenant_data(
+                    caching=self.caching,
+                    vsiId=payload.vsiId,
+                    tenantId=payload.tenantId)
 
             if payload.msgType == Constants.TOPIC_REMOVEVSI:
                 await self.caching.tear_down_vsi_data(payload.vsiId)

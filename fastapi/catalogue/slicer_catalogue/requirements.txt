@@ -20,3 +20,4 @@ flask_cors==3.0.10
 flask-swagger-DanielGomes14==0.0.2
 jinja2<3.1.0
 werkzeug==2.0.3
+flask-oidc==1.4.0

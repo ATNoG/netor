@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 11:38:19
+# @Last Modified time: 2022-10-29 14:36:10
 from fastapi import HTTPException, Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -41,7 +41,7 @@ def override_oauth2_scheme(token: str):
 def override_rbac_enforcer(token:str = Depends(oauth2_scheme)):
     print(token)
     if token == 'mytoken':
-        userdata = Tenant(username="admin",group="ADMIN", roles=["ADMIN"])
+        userdata = Tenant(username="admin", roles=["ADMIN"])
         return userdata
     raise HTTPException(
             status_code=400,

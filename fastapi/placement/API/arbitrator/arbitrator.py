@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-25 10:37:53
+# @Last Modified time: 2022-10-29 22:59:49
 import json
 from typing import Dict, List
 from exceptions.translator import InvalidQoSRange, InvalidPlacementInformation
@@ -15,7 +15,7 @@ from redis.handler import RedisHandler
 import aux.constants as Constants
 import aux.utils as Utils
 import logging
-
+import schemas.auth as AuthSchemas
 
 # Logger
 logging.basicConfig(
@@ -60,12 +60,20 @@ class Arbitrator:
                 if key not in Constants.INFO_TOPICS:
                     logging.info("Skipping creatVSI request")
                     continue
-                # load and parse data 
-                allVsiData[key] = MessageSchemas.Message(
-                    **json.loads(value))
+                # Tenant Messsage
+                if key == Constants.TOPIC_TENANTINFO:
+                    print("ENTREI")
+                    allVsiData[key] = AuthSchemas.Tenant(
+                        **json.loads(value)
+                    )
+                else:
+                    # load and parse data 
+                    allVsiData[key] = MessageSchemas.Message(
+                        **json.loads(value))
+                    if allVsiData[key].error:
+                        raise InvalidPlacementInformation()
                 logging.info(f"Cached Data {json.loads(value)}")
-                if allVsiData[key].error:
-                    raise InvalidPlacementInformation()
+
             domainInfo = allVsiData["domainInfo"]
             catalogueInfo = allVsiData['catalogueInfo']
             logging.info("Starting translation...")

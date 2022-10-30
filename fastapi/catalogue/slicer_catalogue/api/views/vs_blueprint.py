@@ -1,5 +1,11 @@
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:49
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-29 21:23:25
 import api.queries.vs_blueprint as queries
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from http import HTTPStatus
 from marshmallow import ValidationError
 from api.serializers.vs_blueprint import VsBlueprintInfoSerializer
@@ -8,18 +14,21 @@ from api.serializers.ns_template import NstSerializer
 from api.views.utils import response_template
 from api.exceptions.utils import handle_exception
 from api.exceptions.exceptions import BadVsBlueprintBody
-from api.auth import login_required, current_user
-
+from oidc import oidc
+import logging
+import api.auth as auth
 # noinspection PyRedeclaration
 app = Blueprint('vsblueprint', __name__)
 
 handle_exception(app)  # Handle errors
 
+
 @app.route('/vsblueprint', methods=('GET',))
-@login_required
+@oidc.accept_token(True)
 def get_vs_blueprints():
+    tenant = auth.parse_token_data(g)
     args = {
-        'tenant_id': current_user.name,
+        'tenant_id': tenant.id,
         'vsb_id': request.args.get('vsb_id'),
         'vsb_name': request.args.get('vsb_name'),
         'vsb_version': request.args.get('vsb_version'),
@@ -32,7 +41,7 @@ def get_vs_blueprints():
 
 
 @app.route('/vsblueprint', methods=('DELETE',))
-@login_required
+@oidc.accept_token(True)
 def delete_vs_blueprint():
     vsb_id = request.args.get('vsb_id')
 
@@ -42,7 +51,7 @@ def delete_vs_blueprint():
 
 
 @app.route('/vsblueprint', methods=('POST',))
-@login_required
+@oidc.accept_token(True)
 def create_vs_blueprint():
     request_data = request.get_json()
 
@@ -59,7 +68,7 @@ def create_vs_blueprint():
 
 # NST
 @app.route('/nst', methods=('GET',))
-@login_required
+@oidc.accept_token(True)
 def get_nst():
     serializer = NstSerializer(many=True)
     data = serializer.dump(queries.get_nst())
@@ -67,7 +76,7 @@ def get_nst():
 
 
 @app.route('/nst', methods=('DELETE',))
-@login_required
+@oidc.accept_token(True)
 def delete_nst():
     nst_id = request.args.get('nst_id')
 

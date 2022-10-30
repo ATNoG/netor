@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-21 15:54:38
+# @Last Modified time: 2022-10-29 15:14:47
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -44,8 +44,6 @@ def load_config():
         Constants.REDIS_PORT = config['RedisPlacement']['Port']
         Constants.REDIS_USER = config['RedisPlacement']['User']
         Constants.REDIS_PASS = config['RedisPlacement']['Password']
-        Constants.TENANT_HOST = config['Tenant']['Host']
-        Constants.TENANT_PORT = config['Tenant']['Port']
         Constants.DOMAIN_HOST = config['Domain']['Host']
         Constants.DOMAIN_PORT = config['Domain']['Port']
     except Exception:

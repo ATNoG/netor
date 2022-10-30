@@ -3,23 +3,20 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-01 08:44:12
+# @Last Modified time: 2022-10-29 15:02:24
 
 
 import json
-from typing import List
 from fastapi.responses import JSONResponse
-from fastapi import Depends, HTTPException
-from exceptions.auth import CouldNotConnectToTenant, CouldNotConnectToDomain
 from schemas.auth import Tenant
+from exceptions.auth import CouldNotConnectToDomain
 import requests
-import aux.auth as auth
 from sqlalchemy.orm import Session
 import aux.constants as Constants
-import schemas.auth as AuthSchemas
 import schemas.message as MessageSchemas
 from fastapi.encoders import jsonable_encoder
 from sql_app.crud import csmf as CsmfCRUD
+from idp.idp import idp
 # custom imports
 
 
@@ -32,49 +29,21 @@ def create_response(status_code=200, data=[], errors=[],
 
 
 def prepare_message(msg_base: MessageSchemas.Message, data=None,
-                    error=False, msg="", tenantId=None):
+                    error=False, msg="", tenantId=None,
+                    msgType=None
+                    ):
     msg_base.data = data
     msg_base.message = msg
     msg_base.tenantId = tenantId
     msg_base.error = error
+    if msgType:
+        msg_base.msgType = msgType
     return msg_base
 
-def rbacencforcer(token: str = Depends(auth.oauth2_scheme)):
-    try:
-        data = get_tenant_info(token)['data']['user_info']
-        userdata = Tenant(**data)
-        userdata.token = token
-        return userdata
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=400,
-            detail="Insufficient permissions to access this" +
-                   " resource. This is resource is only available to")
 
+def check_admin_role(user):
+    return Constants.IDP_ADMIN_USER in user.roles
 
-def check_admin_role(data: AuthSchemas.Tenant):
-    return "ADMIN" in data.roles
-
-
-
-def get_tenant_info(token):
-    url = f"http://{Constants.TENANT_HOST}:{Constants.TENANT_PORT}"\
-          + "/oauth/validate"
-    try:
-        r = requests.get(
-            url=url,
-            headers={'Authorization': f'Bearer {token}'},
-            timeout=5,
-            verify=False
-        )
-        if r.status_code != 200:
-            raise CouldNotConnectToTenant()
-        data = r.json()
-        
-        return data
-    except Exception:
-        raise CouldNotConnectToTenant()
 
 def get_domain_info(token, domain_id):
     url = f"http://{Constants.DOMAIN_HOST}:{Constants.DOMAIN_PORT}"\
@@ -116,6 +85,7 @@ async def is_csmf_data_stored(db: Session, caching, mainkey, key):
     data = CsmfCRUD.getCSMFByVSiId(db, key)
     return data
 
+
 async def verify_resource_operate_status(status: str,
                                          nsidata=None, nsdata=None):
     if (not nsidata and nsdata) or (nsidata and nsdata):
@@ -125,3 +95,16 @@ async def verify_resource_operate_status(status: str,
         return json_nsiInfo['operational-status'] == status
     json_nsInfo = json.loads(nsidata.nsInfo)
     return json_nsInfo['operational-status'] == status
+
+
+async def store_tenant_data(caching, vsiId: str, tenantId: str) -> Tenant:
+    roles = idp.get_user_roles(user_id=tenantId)
+    parsed_roles = [role.name for role in roles]
+    username = idp.get_user(user_id=tenantId).username
+    tenant = Tenant(id=tenantId, roles=parsed_roles, username=username)
+    await caching.set_hash_key(
+            vsiId,
+            Constants.TOPIC_TENANTINFO,
+            json.dumps(tenant.dict())
+        )
+    return tenant

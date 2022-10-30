@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 16:36:59
+# @Last Modified time: 2022-10-29 14:57:38
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -16,6 +16,7 @@ class AdditionalConf(BaseModel):
     primitive: str
     primitive_params: Dict = {}
 
+
 class CreateVsiData(BaseModel):
     name: str
     description: str
@@ -24,24 +25,21 @@ class CreateVsiData(BaseModel):
     domainPlacements: List[DomainPlacementBase] = []
     additionalConf: List[Dict] = []
 
+
 class RemoveVSIData(BaseModel):
     force: bool
+
 
 class StatusUpdateData(BaseModel):
     status: Union[str, Dict]
 
+
 class DomainInfoData(BaseModel):
     domainIds: List
 
-
-class TenantInfoData(BaseModel):
-    username: str
-    group: str
-    roles: List[str]
-
 class CatalogueInfoData(BaseModel):
     vs_blueprint_info: VSBluePrintInfo
-    vsd : VSDData
+    vsd: VSDData
     nsts: List[NST]
     vsb_actions: List = []
 
@@ -109,13 +107,23 @@ class ActionUpdateData(BaseModel):
     status: str
     output: str
 
+class DeleteNsiData(BaseModel):
+    domainId: str
+    nsiId: str
+    force: bool
+
+class DeleteNsData(BaseModel):
+    domainId: str
+    nsId: str
+    force: bool
+
 class Message(BaseModel):
     vsiId: str
     msgType: str = None
     message: str = ""
     error: bool = False
     tenantId: str = None
-    data: Union[DomainInfoData, CreateVsiData, TenantInfoData,
+    data: Union[DomainInfoData, CreateVsiData,
                 CatalogueInfoData, RemoveVSIData, List[PlacementInfoData],
                 ActionResponseData,  ActionUpdateData, NsiInfoData, 
                 UpdateResourcesNfvoIdsData, PrimitiveData, ActionNsData,

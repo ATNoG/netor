@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 16:48:04
+# @Last Modified time: 2022-10-29 14:49:07
 
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
@@ -17,6 +17,7 @@ import aux.utils as Utils
 from csmf.csmf_handler import csmf_handler
 from fastapi_events.dispatcher import dispatch
 from apscheduler.events import *
+
 # Dependency
 def get_db():
     db = SessionLocal()
@@ -24,6 +25,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
@@ -56,46 +58,48 @@ class MessageReceiver():
             try:
                 payload = MessageSchemas.Message(**msg)
             except Exception:
-                logging.info(f"Message Not supposted: {msg}")
+                logging.info(f"Message Not supported: {msg}")
                 # if the message was not suposed to be received
                 return
             logging.info(f"Received message in Manager: {payload}")
             res = MessageSchemas.Message(vsiId=payload.vsiId)
-            #try:
             if payload.msgType == Constants.TOPIC_CREATEVSI:
-                a = await Utils.is_csmf_data_stored(db,
+                a = await Utils.is_csmf_data_stored(
+                    db,
                     self.caching,
-                    Constants.TOPIC_CREATEVSI,payload.vsiId
+                    Constants.TOPIC_CREATEVSI,
+                    payload.vsiId
                     )
+                if a:
+                    return
                 # If its Neither in Cache or in Database then store data
-                if not a:
-                    logging.info("NO Information found, starting CSMF")
-                    await csmf_handler.store_new_csmf(db, payload)
-                    data = MessageSchemas.StatusUpdateData(
-                        status=Constants.CREATING_STATUS
-                    )
-                    res = Utils.prepare_message(
-                        res,
-                        data=data,
-                        msg="Created Management Function, waiting to" \
-                            + "receive all necessary information"
-                    )
+                logging.info("NO Information found, starting CSMF")
+                await csmf_handler.store_new_csmf(db, payload)
+                # store tenant info, similarly to catalogue info
+
+                data = MessageSchemas.StatusUpdateData(
+                    status=Constants.CREATING_STATUS
+                )
+                res = Utils.prepare_message(
+                    res,
+                    data=data,
+                    msg="Created Management Function, waiting to"\
+                        + "receive all necessary information"
+                )
             if payload.msgType == Constants.TOPIC_REMOVEVSI:
                 self.caching.delete_hash_key(Constants.TOPIC_CREATEVSI,
-                                        payload.vsiId)
+                                             payload.vsiId)
             elif payload.msgType in Constants.INFO_TOPICS:
                 dispatch(f'event-{payload.msgType}',
-                    payload=(payload, db),
-                    middleware_id=Constants.EVENT_HANDLER_ID)
+                         payload=(payload, db),
+                         middleware_id=Constants.EVENT_HANDLER_ID)
             else:
                 dispatch(payload.msgType,
-                        payload=(payload, db),
-                        middleware_id=Constants.EVENT_HANDLER_ID)
+                         payload=(payload, db),
+                         middleware_id=Constants.EVENT_HANDLER_ID)
             # except Exception as e:
             #      logging.info(f"Error in Manager {e}")
 
-                
-                
     def stop(self):
         try:
             self.messaging.stopConsuming()

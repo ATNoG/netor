@@ -3,18 +3,15 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-09-07 18:34:48
+# @Last Modified time: 2022-10-29 14:39:15
 from typing import List
 from pydantic import BaseModel
 
+
 class Tenant(BaseModel):
+    id: str
     username: str
-    group: str
     roles: List[str]
-    token: str = None
-    @classmethod
-    def is_admin(self):
-        return "ADMIN" in self.roles
 
 
 class Token(BaseModel):

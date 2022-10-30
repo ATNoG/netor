@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 17:01:50
+# @Last Modified time: 2022-10-29 21:03:07
 import os
 
 from mongoengine import connect
@@ -14,7 +14,7 @@ from api.models.ns_descriptor import Nsd
 from api.models.vs_blueprint import VsdNsdTranslationRule, VsBlueprint, VsBlueprintInfo, VsComponent
 from api.models.vnf import OnBoardVnfPackageRequest
 from api.models.vs_descriptor import VsDescriptor
-
+from oidc import oidc
 connection_data = {
     # 'username': os.environ.get('MONGO_USERNAME', 'root'),
     # 'password': os.environ.get('MONGO_PASSWORD', 'root'),
@@ -49,6 +49,7 @@ mixer = MyMixer()
 if __name__ == '__main__':
     for i in range(5):
         nsd = mixer.blend(Nsd)
+        oidc.g
         vsd_nsd_translation_rule = mixer.blend(VsdNsdTranslationRule, blueprint_id=str(i))
         on_board_vnf_package_request = mixer.blend(OnBoardVnfPackageRequest)
         args = dict(blueprint_id=f'{i}', version=f'version_{i}', name=f'name_{i}')

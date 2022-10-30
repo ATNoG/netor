@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 08:57:11
+# @Last Modified time: 2022-10-26 23:39:38
 
 from functools import wraps
 from osmclient import client
@@ -61,7 +61,14 @@ class OSMDriver(DomainDriver):
         )
         if r.status_code != 200:
             raise CouldNotAuthenticatetoNFVO()
-
+    def get_tunnel_additional_data(self, nsiData):
+        nssNsrId = {}
+        tunnelServiceId = None
+        for nss in nsiData["_admin"]["nsrs-detailed-list"]:
+            if nss["nss-id"] == "tunnel-as-a-service-sd-tunnel-peer":
+                tunnelServiceId = nss["nsrId"]
+            nssNsrId[nss["nss-id"]] = nss["nsrId"]
+        return tunnelServiceId, nssNsrId
     @require_session(remove_prefix=True)
     def instantiateNSI(self, nsiName, nstName, vimAccount,
                        additionalConf=None):
@@ -91,5 +98,5 @@ class OSMDriver(DomainDriver):
         return self.osm_client.nsi.get(nsiId)
 
     @require_session(remove_prefix=True)
-    def terminateNSI(self, nsiId):
-        return self.osm_client.nsi.delete(nsiId)
+    def terminateNSI(self, nsiId, force):
+        return self.osm_client.nsi.delete(nsiId, force=force)

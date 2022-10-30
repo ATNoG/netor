@@ -3,13 +3,13 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 17:26:54
+# @Last Modified time: 2022-10-29 15:07:25
 
 from pydantic import BaseModel
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 from schemas.catalogue import VSBluePrintInfo, VSDData
 from schemas.nst import NST
-from schemas.vertical import DomainPlacement, DomainPlacementBase
+from schemas.vertical import DomainPlacementBase
 
 
 class CreateVsiData(BaseModel):
@@ -20,19 +20,17 @@ class CreateVsiData(BaseModel):
     domainPlacements: List[DomainPlacementBase] = []
     additionalConf: List[Dict] = []
 
+
 class DomainInfoData(BaseModel):
     domainIds: List
 
-class TenantInfoData(BaseModel):
-    username: str
-    group: str
-    roles: List[str]
 
 class CatalogueInfoData(BaseModel):
     vs_blueprint_info: VSBluePrintInfo
-    vsd : VSDData
+    vsd: VSDData
     nsts: List[NST]
     vsb_actions: List = []
+
 
 class TranslationInfoData(BaseModel):
     domainId: str
@@ -40,8 +38,10 @@ class TranslationInfoData(BaseModel):
     nsdId: str = None
     nstId: str = None
 
+
 class RemoveVSIData(BaseModel):
     force: bool
+
 
 class Message(BaseModel):
     vsiId: str
@@ -49,7 +49,7 @@ class Message(BaseModel):
     message: str = ""
     error: bool = False
     tenantId: str = None
-    data: Union[DomainInfoData, CreateVsiData, TenantInfoData,
+    data: Union[DomainInfoData, CreateVsiData,
                 CatalogueInfoData, RemoveVSIData,
                 List[TranslationInfoData]] = None
 

@@ -1,4 +1,10 @@
-from flask import Blueprint, request
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:49
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-10-29 21:23:18
+from flask import Blueprint, request, g
 from marshmallow import ValidationError
 from http import HTTPStatus
 from api.exceptions.utils import handle_exception
@@ -7,17 +13,19 @@ from api.views.utils import response_template
 from api.exceptions.exceptions import BadVsBlueprintBody
 from api.auth import login_required, current_user
 import api.queries.vs_descriptor as queries
-
+from oidc import oidc
+import api.auth as auth
 app = Blueprint('vsdescriptor', __name__)
 
 handle_exception(app)  # Handle errors
 
 
 @app.route("/vsdescriptor", methods=('GET',))
-@login_required
+@oidc.accept_token(True)
 def get_vs_descriptors():
+    current_user = auth.parse_token_data(g)
     args = {
-        'tenant_id': current_user.name,
+        'tenant_id': current_user.id,
         'vsd_id': request.args.get('vsd_id'),
         'is_admin': current_user.is_admin()
     }
@@ -29,10 +37,11 @@ def get_vs_descriptors():
 
 
 @app.route('/vsdescriptor', methods=('DELETE',))
-@login_required
+@oidc.accept_token(True)
 def delete_vs_descriptor():
+    current_user = auth.parse_token_data(g)
     args = {
-        'tenant_id': current_user.name,
+        'tenant_id': current_user.id,
         'vsd_id': request.args.get('vsd_id'),
         'is_admin': current_user.is_admin()
     }
@@ -42,10 +51,9 @@ def delete_vs_descriptor():
 
 
 @app.route('/vsdescriptor', methods=('POST',))
-@login_required
+@oidc.accept_token(True)
 def create_vs_descriptor():
     request_data = request.get_json()
-
     serializer = VsDescriptorSerializer()
     try:
         validated_data = serializer.load(request_data)

@@ -1,7 +1,7 @@
 # @Author: Daniel Gomes
 # @Date:   2022-07-26 16:07:53
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-24 16:34:59
+# @Last Modified time: 2022-10-30 22:18:46
 
 version: "3.6"
 services:
@@ -23,22 +23,23 @@ services:
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
       - ./config_files/config.ini:/app/config.ini
-  tenant:
-    build:
-      dockerfile: docker/tenant/Dockerfile
-      context: ./
-    depends_on:
-      - "db"
-    ports:
-      - 8001:80
-    environment:
-      - INFLUX_DB_URL=${INFLUXDB_URL}
-      - INFLUX_DB_NAME=${INFLUXDB_NAME}
-      - IMAGE_NAME=TENANT
-      - INFLUX_USERNAME=${INFLUXDB_USER}
-      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
-    volumes:
-      - ./config_files/config.ini:/app/config.ini
+
+  # tenant:
+  #   build:
+  #     dockerfile: docker/tenant/Dockerfile
+  #     context: ./
+  #   depends_on:
+  #     - "db"
+  #   ports:
+  #     - 8001:80
+  #   environment:
+  #     - INFLUX_DB_URL=${INFLUXDB_URL}
+  #     - INFLUX_DB_NAME=${INFLUXDB_NAME}
+  #     - IMAGE_NAME=TENANT
+  #     - INFLUX_USERNAME=${INFLUXDB_USER}
+  #     - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+  #   volumes:
+  #     - ./config_files/config.ini:/app/config.ini
   domain:
     build:
       dockerfile: docker/domain/Dockerfile
@@ -89,6 +90,7 @@ services:
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
      - ./config_files/config.ini:/app/config.ini
+  
   catalogue:
     build:
         dockerfile: docker/catalogue/Dockerfile
@@ -117,7 +119,8 @@ services:
       IMAGE_NAME: CATALOGUE
       INFLUX_USERNAME: ${INFLUXDB_USER}
       INFLUXDB_PASSWORD: ${INFLUXDB_USER_PASSWORD}
-  
+    volumes:
+     - ./config_files/client_secrets.json:/app/api/client_secrets.json
   db:
     build:
       dockerfile: postgresql/Dockerfile
@@ -199,6 +202,7 @@ services:
       - IMAGE_NAME=REDIS
       - INFLUX_USERNAME=${INFLUXDB_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+  
   redisplacement:
     build:
       dockerfile: docker/redis/Dockerfile
@@ -218,6 +222,7 @@ services:
       - IMAGE_NAME=REDISPLACEMENT
       - INFLUX_USERNAME=${INFLUXDB_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+  
 
   rabbitmq:
     build:
@@ -308,8 +313,7 @@ services:
       - GUNICORN_TIMEOUT=60
       - GUNICORN_WORKERS=2
       - GUNICORN_LOGLEVEL=DEBUG
-
-  
+ 
 volumes:
   thesisPostgresVolume:
     external: false
@@ -327,9 +331,8 @@ volumes:
     external: false
   cfg_data:
     external: false
-
+  
 networks:
   default:
     driver: bridge
     name: tickStack
-

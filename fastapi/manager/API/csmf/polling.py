@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:10:06
+# @Last Modified time: 2022-10-26 23:20:24
 import copy
 import json
 from typing import Dict
@@ -63,8 +63,14 @@ class Polling:
         self.scheduler.add_listener(self.my_listener,
          EVENT_JOB_ERROR | EVENT_JOB_MISSED)
     
+    def stop_vsi_polling_csmf(self, vsiId):
+        if not self.is_job_already_running(vsiId):
+            logging.info(f"Job for vsi {vsiId} already running."\
+                         + " No additional job will be created")
+            return
+        self.scheduler.remove_job(job_id=vsiId)
+        logging.info(f"CSMF Polling stopped for VSI {vsiId}")
     def my_listener(self, event):
-        print(event.__dict__)
         if e:=event.exception:
             logging.warn(f"CSMF Polling for VSI {event.job_id} failed. Reason: {e}")
         else:

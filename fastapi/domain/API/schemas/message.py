@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 10:20:58
+# @Last Modified time: 2022-10-26 23:43:38
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -55,6 +55,15 @@ class NsiInfoData(BaseModel):
     nsiId: str
     nsiInfo: Any = None
 
+class DeleteNsiData(BaseModel):
+    domainId: str
+    nsiId: str
+    force: bool
+
+class DeleteNsData(BaseModel):
+    domainId: str
+    nsId: str
+    force: bool
 
 class Message(BaseModel):
     vsiId: int
@@ -65,4 +74,5 @@ class Message(BaseModel):
     data: Union[DomainInfoData,
                 InstantiateNsiData, UpdateResourcesNfvoIdsData,
                 ActionNsData, ActionResponseData, FetchPrimitiveData,
-                FecthNsiInfoData, NsiInfoData] = None
+                FecthNsiInfoData, NsiInfoData, DeleteNsiData,
+                DeleteNsData] = None
