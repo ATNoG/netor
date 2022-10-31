@@ -57,7 +57,7 @@ class CSMF_Handler():
             vsiId=payload.vsiId, tenantId=payload.tenantId)      
     
     # Handles catalogueInfo and domainInfo Messages
-    @local_handler.register(event_name=Constants.TOPIC_CATALOGUEINFO)
+    @local_handler.register(event_name=f'event-*Info')
     async def handle_required_info(event: Event):
         _, event_args = event
         payload, db = event_args

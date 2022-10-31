@@ -99,10 +99,10 @@ async def createnewVS(
         if db_vs:
             raise VerticalAlreadyExists(vs_in.vsiId)
         # verify if VS Descriptor exists
-        #data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
-        # if not data:
-        #     raise VSDNotFound(vs_in.vsdId)
-        # # # verify if domain placements exists
+        data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
+        if not data:
+            raise VSDNotFound(vs_in.vsdId)
+        # # verify if domain placements exists
         for domain in vs_in.domainPlacements:
             data = Utils.get_domain_info(token, domain.domainId)
             if not data:
@@ -117,8 +117,8 @@ async def createnewVS(
             vsi_id=vs_out.vsiId,
             api_key=Constants.DNS_API_KEY
         )
-        # power_dns_client.create_zone()
-        # vs_in = Utils.parse_dns_params_to_vnf(vs_in)
+        power_dns_client.create_zone()
+        vs_in = Utils.parse_dns_params_to_vnf(vs_in)
         # Send Message to the MessageBus
         msg = MessageSchemas.Message(
             vsiId=vs_in.vsiId,

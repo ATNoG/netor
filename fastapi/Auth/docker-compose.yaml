@@ -32,6 +32,7 @@ services:
       DB_SCHEMA: public
       DB_PASSWORD: testkeycloakpassword
       KEYCLOAK_USER: keycloakuser
+      KEYCLOAK_HOSTNAME: keycloak
       KEYCLOAK_PASSWORD: keycloakpassword
       PROXY_ADDRESS_FORWARDING: "true"
       KEYCLOAK_LOGLEVEL: DEBUG

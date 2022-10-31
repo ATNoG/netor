@@ -86,9 +86,6 @@ class MessageReceiver():
                     msg="Created Management Function, waiting to"\
                         + "receive all necessary information"
                 )
-            if payload.msgType == Constants.TOPIC_REMOVEVSI:
-                self.caching.delete_hash_key(Constants.TOPIC_CREATEVSI,
-                                             payload.vsiId)
             elif payload.msgType in Constants.INFO_TOPICS:
                 dispatch(f'event-{payload.msgType}',
                          payload=(payload, db),

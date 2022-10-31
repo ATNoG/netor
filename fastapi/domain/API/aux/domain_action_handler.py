@@ -59,7 +59,7 @@ class DomainActionHandler:
                         self.payload.data.nstId,
                         domainLayer.vimAccount,
                         self.payload.data.additionalConf)
-                nssNsrId, tunnelServiceId = driver.get_tunnel_additional_data(
+                tunnelServiceId, nssNsrId = driver.get_tunnel_additional_data(
                     nsiData
                 )
                

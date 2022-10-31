@@ -44,14 +44,15 @@ class VsiHelper:
         allVsiData = {}
         for key, value in cached_vsi_data.items():
             # load and parse data 
+            key = key.decode()
             if key == Constants.TOPIC_TENANTINFO:
-                    allVsiData[key] = AuthSchemas.Tenant(
-                        **json.loads(value)
+                allVsiData[key] = AuthSchemas.Tenant(
+                    **json.loads(value)
             )
             else:
-                allVsiData[key.decode()] = MessageSchemas.Message(
+                allVsiData[key] = MessageSchemas.Message(
                     **json.loads(value))
-                if allVsiData[key.decode()].error:
+                if allVsiData[key].error:
                     # raise InvalidPlacementInformation()
                     pass
         domainInfo = allVsiData['domainInfo']
