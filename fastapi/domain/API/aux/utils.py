@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 13:38:37
+# @Last Modified time: 2022-11-01 16:25:11
 
 from fastapi.responses import JSONResponse
 from fastapi import Depends, HTTPException
@@ -85,4 +85,5 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
+    print(",,,", db_obj.__dict__)
     return db_obj

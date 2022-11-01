@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 10:11:40
+# @Last Modified time: 2022-11-01 16:23:09
 
 import logging
 from sqlalchemy.orm import Session
@@ -52,6 +52,7 @@ def getDomainsIds(db: Session = get_db()):
 
 
 def getDomainLayerById(db: Session, layer: DomainSchemas.OwnedLayersCreate):
+
     domain = db.query(models.DomainLayer)\
                .filter(models.DomainLayer.domainLayerId
                        == layer.domainLayerId)\
@@ -141,6 +142,7 @@ def updateDomainLayer(db: Session,
     if db_layer:
         db_layer = Utils.update_db_object(
                 db=db, db_obj=db_layer, obj_in=domain_layer, add_to_db=False)
+        print(db_layer)
     else:
         if domain_layer.domainLayerType == Constants.OSM_LAYER_TYPE:
             db_layer = models.OsmDomainLayer(
@@ -163,7 +165,9 @@ def updateDomain(db: Session,
         db.commit()
         db.refresh(db_domain)
     domain_obj = Utils.update_db_object(db, db_domain, domain_data)
-    return domain_obj.as_dict()
+    domain_dict = domain_obj.as_dict()
+    domain_dict['ownedLayers'] = [x.as_dict() for x in domain_obj.ownedLayers]
+    return domain_dict
 
 
 def deleteDomain(db: Session, db_domain):

@@ -3,10 +3,11 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 11:31:49
+# @Last Modified time: 2022-11-01 15:35:50
 
 from typing import List
-from pydantic import BaseModel, AnyHttpUrl
+from pydantic import BaseModel, AnyHttpUrl, validator
+import aux.constants as Constants
 
 
 class OwnedLayersBase(BaseModel):
@@ -15,6 +16,12 @@ class OwnedLayersBase(BaseModel):
     username: str
     project: str
     vimAccount: str
+
+    @validator('domainLayerType')
+    def layer_type_must_be_valid(cls, v):
+        if v not in Constants.DOMAIN_LAYER_TYPES:
+            raise ValueError('Domain Layer Type not supported')
+        return v
 
 
 class OwnedLayersCreate(OwnedLayersBase):
@@ -48,7 +55,7 @@ class DomainCreate(DomainBase):
     ownedLayers: List[OwnedLayersCreate]
 
 
-class DomainUpdate(DomainCreate):
+class DomainUpdate(BaseModel):
     name: str = None
     description: str = None
     owner: str = None
