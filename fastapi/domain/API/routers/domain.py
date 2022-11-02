@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 13:42:17
+# @Last Modified time: 2022-11-01 15:36:32
 
 from fastapi import Depends
 # generic imports
@@ -51,7 +51,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/domain/",
+    "/domains",
     tags=["domain"],
     summary="Return all the Domains in the system",
     description="Return all the Domains in the system",
@@ -127,6 +127,7 @@ def createNewDomain(
         driver.authenticate()
         domain_data = CRUDDomain.createDomain(db, domain_data)
         return Utils.create_response(
+            status_code=201,
             message="Success Creating new Domain",
             data=domain_data.as_dict()
         )
@@ -154,6 +155,9 @@ def updateDomain(
         domain = CRUDDomain.getDomainById(db, domainId)
         if not domain:
             raise DomainNotFound(domain_id=domainId)
+        for layer in domain_data.ownedLayers:
+            if layer.domainLayerType not in Constants.DOMAIN_LAYER_TYPES:
+                raise DomainLayerTypeNotSupported(layer.domainLayerType)
         domain = CRUDDomain.updateDomain(db, domain, domain_data)
         driver = CRUDDomain.getDomainDriver(db, domain_data)
         # try to authenticate to the NFVO

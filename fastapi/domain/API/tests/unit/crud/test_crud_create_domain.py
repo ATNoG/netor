@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# @Author: Rafael Direito
+# @Author: Daniel Gomes
 # @Date:   2022-10-17 21:13:44
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-20 13:21:56
+# @Last Modified time: 2022-11-01 16:05:03
 
 # general imports
 import pytest
@@ -11,14 +11,36 @@ from pydantic import ValidationError
 # custom imports
 from schemas import domain as DomainSchemas
 from sql_app.crud import domain as CRUDDomain
-from sql_app.database import Base
-from configure_test_db import override_get_db
-from configure_test_db import engine
+from configure_test_idp import (
+    setup_test_idp,
+)
+
+
+def import_modules():
+    # additional custom imports
+    from configure_test_db import (
+        engine as imported_engine,
+        test_client as imported_test_client,
+        override_get_db as imported_override_get_db
+    )
+    from sql_app.database import Base as imported_base
+    global engine
+    engine = imported_engine
+    global Base
+    Base = imported_base
+    global test_client
+    test_client = imported_test_client
+    global override_get_db
+    override_get_db = imported_override_get_db
 
 
 # Create the DB before each test and delete it afterwards
 @pytest.fixture(autouse=True)
-def test_db():
+def setup(monkeypatch, mocker):
+    # Setup Test IDP.
+    # This is required before loading the other modules
+    setup_test_idp(monkeypatch, mocker)
+    import_modules()
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
@@ -74,7 +96,7 @@ def test_medium_domain_database_creation():
     )
 
     assert created_domain.name == "ITAv domain"
-    assert created_domain.auth == False
+    assert not created_domain.auth
     assert created_domain.owner == "admin"
     assert created_domain.admin == "ITAv"
     assert created_domain.description == "ITAv domain description"
@@ -113,9 +135,9 @@ def test_complex_domain_database_creation():
         domainId=result.domainId
     )
     assert len(created_domain.ownedLayers) > 0
-
-    assert created_domain.ownedLayers[0].domainLayerId == ownedLayer.domainLayerId
-    assert created_domain.ownedLayers[0].domainLayerType == ownedLayer.domainLayerType
+    _layer = created_domain.ownedLayers[0]
+    assert _layer.domainLayerId == ownedLayer.domainLayerId
+    assert _layer.domainLayerType == ownedLayer.domainLayerType
 
 
 def test_error_domain_database_creation():

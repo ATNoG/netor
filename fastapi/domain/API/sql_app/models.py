@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-29 10:49:03
+# @Last Modified time: 2022-11-01 12:00:50
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
@@ -73,4 +73,7 @@ class OsmDomainLayer(DomainLayer):
     }
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        layer = {c.name: getattr(self, c.name)
+                 for c in self.__table__.columns}
+        del layer['password']
+        return layer

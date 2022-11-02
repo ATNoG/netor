@@ -3,13 +3,14 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-08-23 10:11:40
+# @Last Modified time: 2022-11-01 23:22:58
 
 import logging
 from sqlalchemy.orm import Session
 from exceptions.domain import DomainLayerTypeNotSupported
-import aux.utils as Utils
+from sqlalchemy.orm import with_polymorphic
 # custom imports
+import aux.utils as Utils
 from .. import models
 import schemas.auth as AuthSchemas
 import schemas.domain as DomainSchemas
@@ -52,8 +53,9 @@ def getDomainsIds(db: Session = get_db()):
 
 
 def getDomainLayerById(db: Session, layer: DomainSchemas.OwnedLayersCreate):
-    domain = db.query(models.DomainLayer)\
-               .filter(models.DomainLayer.domainLayerId
+    entity = with_polymorphic(models.DomainLayer, "*")
+    domain = db.query(entity)\
+               .filter(entity.domainLayerId
                        == layer.domainLayerId)\
                .first()
     return domain
@@ -139,6 +141,7 @@ def updateDomainLayer(db: Session,
         raise DomainLayerTypeNotSupported(domain_layer.domainLayerType)
     db_layer = getDomainLayerById(db, domain_layer)
     if db_layer:
+        print(db_layer.__dict__)
         db_layer = Utils.update_db_object(
                 db=db, db_obj=db_layer, obj_in=domain_layer, add_to_db=False)
     else:
@@ -163,7 +166,9 @@ def updateDomain(db: Session,
         db.commit()
         db.refresh(db_domain)
     domain_obj = Utils.update_db_object(db, db_domain, domain_data)
-    return domain_obj.as_dict()
+    domain_dict = domain_obj.as_dict()
+    domain_dict['ownedLayers'] = [x.as_dict() for x in domain_obj.ownedLayers]
+    return domain_dict
 
 
 def deleteDomain(db: Session, db_domain):
