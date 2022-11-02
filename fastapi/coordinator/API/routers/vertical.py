@@ -262,7 +262,7 @@ async def deleteVSI(vsiId: str,
         )
         message = MessageSchemas.Message(
             vsiId=vsiId,
-            msgType=Constants.TOPIC_PRIMITIVE,
+            msgType=Constants.TOPIC_REMOVEVSI,
             data=msg_data
         )
         await rabbit_handler.publish_exchange(
@@ -270,7 +270,7 @@ async def deleteVSI(vsiId: str,
             json.dumps(message.dict())
         )
         return Utils.create_response(
-            data=data,
+            data=data.as_dict(),
             message="Success Deleting Vertical",
         )
     except Exception as exception:

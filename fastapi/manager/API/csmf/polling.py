@@ -138,3 +138,5 @@ class Polling:
                 await rabbit_handler.publish_queue(
                     Constants.QUEUE_DOMAIN,
                     json.dumps(msg.dict()))
+
+poller = Polling()

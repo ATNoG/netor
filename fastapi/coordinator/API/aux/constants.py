@@ -45,6 +45,7 @@ DNS_API_KEY = None
 DNS_API_PORT = None
 
 TOPIC_CREATEVSI = "createVSI"
+TOPIC_REMOVEVSI = "removeVSI"
 TOPIC_DOMAININFO = "domainInfo"
 TOPIC_INSTANTIATE_NSI = "instantiateNsi"
 TOPIC_DELETE_NSI = "deleteNSI"

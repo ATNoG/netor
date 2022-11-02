@@ -13,6 +13,16 @@ class DomainInfoData(BaseModel):
     domainIds: List
 
 
+class CreateVsiData(BaseModel):
+    name: str
+    description: str
+    vsdId: str
+    vsiId: str
+    domainPlacements: Any
+    additionalConf: Any
+
+
+
 class InstantiateNsiData(BaseModel):
     name: str
     description: str = None
@@ -43,8 +53,8 @@ class ActionResponseData(BaseModel):
 
 
 class FecthNsiInfoData(BaseModel):
-    domainId: str = None
-    nsiId: str = None
+    domainId: str
+    nsiId: str
 
 class FetchPrimitiveData(BaseModel):
     domainId: str
@@ -71,8 +81,8 @@ class Message(BaseModel):
     message: str = ""
     error: bool = False
     tenantId: str = None
-    data: Union[DomainInfoData,
+    data: Union[DomainInfoData, CreateVsiData,
                 InstantiateNsiData, UpdateResourcesNfvoIdsData,
                 ActionNsData, ActionResponseData, FetchPrimitiveData,
-                FecthNsiInfoData, NsiInfoData, DeleteNsiData,
+                DeleteNsiData, FecthNsiInfoData, NsiInfoData,
                 DeleteNsData] = None

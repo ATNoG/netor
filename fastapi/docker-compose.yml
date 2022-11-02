@@ -297,7 +297,7 @@ services:
     image: ngoduykhanh/powerdns-admin:latest
     container_name: powerdns_admin
     ports:
-      - "8080:80"
+      - "8083:80"
     depends_on:
       - db_dns
     restart: always

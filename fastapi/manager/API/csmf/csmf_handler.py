@@ -8,7 +8,7 @@
 import aux.constants as Constants
 from aux.enums import VSIStatus
 from csmf.vsi_helper import vsi_helper
-from csmf.polling import Polling
+from csmf.polling import poller
 from redis.handler import redis_handler
 from rabbitmq.adaptor import rabbit_handler
 import schemas.message as MessageSchemas
@@ -31,11 +31,11 @@ logging.basicConfig(
 class CSMF_Handler():
     def __init__(self) -> None:
         self.counter = 0
-        self.poller = Polling()
+        #self.poller = poller
         
     def start(self):
         logging.info("Starting CSMF Poller...")
-        self.poller.start_all_jobs()
+        poller.start_all_jobs()
 
     async def store_new_csmf(self, db: Session,
                              payload: MessageSchemas.Message):
@@ -51,7 +51,7 @@ class CSMF_Handler():
         CsmfCRUD.createCSMF(db, payload)
         # Create CSMF Polling CronJob,
         #  which will ask the Domain Service for Info regarding the Vsi Services
-        self.poller.start_vsi_polling_csmf(payload.vsiId)
+        poller.start_vsi_polling_csmf(payload.vsiId)
         await Utils.store_tenant_data(
             caching=redis_handler,
             vsiId=payload.vsiId, tenantId=payload.tenantId)      
@@ -167,7 +167,7 @@ class CSMF_Handler():
             "terminated", nsidata=nsi_info_data):
             await vsi_helper.tearDownComponent(
                 payload.vsiId,
-                
+                nsi_info_data.nsiId
             )
             pass
         return

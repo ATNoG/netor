@@ -118,7 +118,7 @@ def createNewVS(db: Session,
     
 def changeVsiStatus(db: Session, payload: MessageSchemas.Message):
     vsi = getVSById(db, payload.vsiId)
-    if payload.data.status != None:
+    if vsi and payload.data.status != None:
         if Constants.FAILING_STATUS not in vsi.all_status:
             logging.info("Updating Status of VSI...")
             vsi.status = payload.data.status
