@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 14:33:07
+# @Last Modified time: 2022-11-03 00:40:51
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -39,7 +39,7 @@ def getAllVSs(db: Session):
     return [x.as_dict() for x in vss]
 
 
-def getVSById(db: Session, vsi_id: str):
+def getVSById(db: Session, vsi_id: int):
     vs = db.query(models.VerticalServiceInstance)\
            .filter(models.VerticalServiceInstance.vsiId == vsi_id)\
            .first()

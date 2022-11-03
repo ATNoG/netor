@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-11 22:13:28
+# @Last Modified time: 2022-11-03 00:38:46
 from pydantic import BaseModel
 from typing import Dict, List, Optional
 
@@ -27,7 +27,7 @@ class DomainPlacement(DomainPlacementBase):
 
 
 class VSIBase(BaseModel):
-    vsiId: str
+    vsiId: int
     description: str
     name: str
     vsdId: str

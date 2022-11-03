@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 17:20:07
+# @Last Modified time: 2022-11-03 17:48:38
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -26,7 +26,6 @@ class DomainPlacement(DomainPlacementBase):
     domainPlacementId: int
 
 class VSIBase(BaseModel):
-    vsiId: str
     description: str
     name: str
     vsdId: str
@@ -37,6 +36,7 @@ class VSICreate(VSIBase):
     domainPlacements: List[DomainPlacementCreate]
     
 class VSI(VSIBase):
+    vsiId: int
     statusMessage: Optional[str] = None
     altitude: Optional[float] = None
     latitude: Optional[float] = None

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-10 12:00:19
+# @Last Modified time: 2022-11-03 00:40:47
 from datetime import datetime
 import json
 import logging
@@ -25,7 +25,7 @@ logging.basicConfig(
 
 
 
-def getCSMFByVSiId(db: Session, vsi_id: str):
+def getCSMFByVSiId(db: Session, vsi_id: int):
     vs = db.query(models.CSMF)\
            .filter(models.CSMF.vsiId == vsi_id)\
            .first()

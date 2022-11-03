@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 15:07:25
+# @Last Modified time: 2022-11-03 00:38:13
 
 from pydantic import BaseModel
 from typing import Dict, List, Union
@@ -16,7 +16,7 @@ class CreateVsiData(BaseModel):
     name: str
     description: str
     vsdId: str
-    vsiId: str
+    vsiId: int
     domainPlacements: List[DomainPlacementBase] = []
     additionalConf: List[Dict] = []
 
@@ -44,7 +44,7 @@ class RemoveVSIData(BaseModel):
 
 
 class Message(BaseModel):
-    vsiId: str
+    vsiId: int
     msgType: str = None
     message: str = ""
     error: bool = False

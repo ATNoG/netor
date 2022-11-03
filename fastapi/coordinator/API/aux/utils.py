@@ -3,24 +3,18 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 14:35:13
+# @Last Modified time: 2022-11-03 17:38:50
 
 
 from fastapi.responses import JSONResponse
-from fastapi import Depends, HTTPException
 from exceptions.auth import CouldNotConnectToTenant, CouldNotConnectToDomain
-from schemas.auth import Tenant
 import requests
-import aux.auth as auth
 from sqlalchemy.orm import Session
 import aux.constants as Constants
-import schemas.auth as AuthSchemas
 from fastapi.encoders import jsonable_encoder
-import schemas.vertical as VerticalSchemas
 from cryptography.fernet import Fernet
 import json
-# custom imports
-
+from schemas import vertical as VerticalSchemas
 
 def create_response(status_code=200, data=[], errors=[],
                     success=True, message=""):
@@ -104,7 +98,7 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
     return db_obj
 
 
-def parse_dns_params_to_vnf(vs_in: VerticalSchemas.VSICreate):
+def parse_dns_params_to_vnf(vsiId: int, vs_in: VerticalSchemas.VSICreate):
     key = Fernet.generate_key()
     dns_params = {
             "dns_ip": Constants.DNS_IP,
@@ -112,14 +106,14 @@ def parse_dns_params_to_vnf(vs_in: VerticalSchemas.VSICreate):
             "dns_api_port": Constants.DNS_API_PORT,
             "dns_api_key": Constants.DNS_API_KEY,
             "dns_encryption_key": str(key.decode()),
-            "dns_zone": f"vsi-{vs_in.vsiId}.netor."
+            "dns_zone": f"vsi-{vsiId}.netor.",
+            "vsi_id": str(vsiId)
         }
     for peer in vs_in.additionalConf:
         peer_conf = json.loads(peer.conf)
-        vnf_params = peer_conf['netslice-subnet'][0]\
-                              ['additionalParamsForVnf']
+        vnf_params = peer_conf['netslice-subnet'][0]['additionalParamsForVnf']
         for vnf in vnf_params:
             for param in dns_params:
-                vnf['additionalParams'][param] = dns_params[param] 
+                vnf['additionalParams'][param] = dns_params[param]
         peer.conf = json.dumps(peer_conf)
     return vs_in

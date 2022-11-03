@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-26 23:20:24
+# @Last Modified time: 2022-11-03 00:38:35
 import copy
 import json
 from typing import Dict
@@ -88,7 +88,7 @@ class Polling:
             await self.poll_vsi_primitive_status(vsiId, primitives_running)
     
     async def poll_vsi_primitive_status(self,
-                                        vsiId: str,
+                                        vsiId: int,
                                         data: Dict[str,
                                         VerticalSchemas.PrimitiveStatus]):
         data_copy = copy.deepcopy(data)
@@ -117,7 +117,7 @@ class Polling:
          data_copy, parse_dict=True)
             
     async def poll_vsi_service_composition(self,
-                                           vsiId: str,
+                                           vsiId: int,
                                            composition_data: Dict[str,
                                            VerticalSchemas.ServiceComposition]):
         for component_name, data in composition_data.items():

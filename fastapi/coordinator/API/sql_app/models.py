@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 09:29:03
+# @Last Modified time: 2022-11-03 00:31:53
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
@@ -17,7 +17,7 @@ from .database import Base
 class VSIStatus(Base):
   __tablename__ = 'vsiStatus'
   status_id = Column(Integer, primary_key=True)
-  vsiId = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vsiId = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   status=Column(String)
   statusMessage=Column(String)
   timestamp = Column(DateTime, default=datetime.utcnow)
@@ -31,7 +31,7 @@ class VSIAction(Base):
   __tablename__ = 'vsiAction'
   actstatus_id = Column(Integer, primary_key=True)
   primitiveName = Column(String)
-  vsiId = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vsiId = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   status = Column(String, nullable=True)
   output = Column(String, nullable=True)
   def as_dict(self):
@@ -41,7 +41,7 @@ class VSIAction(Base):
 
 class VerticalServiceInstance(Base):
   __tablename__ = 'verticalServiceInstance'
-  vsiId = Column(String, primary_key=True)
+  vsiId = Column(Integer, primary_key=True)
   description=Column(String)
   domainId=Column(String)
   statusMessage=Column(String)
@@ -57,7 +57,7 @@ class VerticalServiceInstance(Base):
   all_status= relationship('VSIStatus')
   tenantId=Column(String)
   vsdId=Column(String)
-  nestedParentId = Column(String,
+  nestedParentId = Column(Integer,
                           ForeignKey('verticalServiceInstance.vsiId'))
   nestedVsi=relationship("VerticalServiceInstance",
                          remote_side=[vsiId])
@@ -77,7 +77,7 @@ class VerticalServiceInstance(Base):
 class ComponentConfigs(Base):
   __tablename__ = 'componentConfigs'
   domainPlacementId = Column(Integer, primary_key=True)
-  vertical_service_instance_id = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vertical_service_instance_id = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   vertical_service_instance = relationship("VerticalServiceInstance", back_populates="additionalConf")
   componentName=Column(String)
   conf=Column(String)
@@ -89,7 +89,7 @@ class ComponentConfigs(Base):
 class DomainPlacements(Base):
   __tablename__ = 'domainPlacement'
   domainPlacementId = Column(Integer, primary_key=True)
-  vertical_service_instance_id = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vertical_service_instance_id = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   vertical_service_instance = relationship("VerticalServiceInstance", back_populates="domainPlacements")
   componentName=Column(String)
   domainId=Column(String)
@@ -106,7 +106,7 @@ class NetworkSliceSubnetInstance(Base):
   ns_instantiation_level_id=Column(String)
   nsst_id=Column(String)
   status=Column(Integer)
-  vertical_service_instance_id = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vertical_service_instance_id = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   vertical_service_instance = relationship("VerticalServiceInstance", back_populates="nssis") 
   vnfs = relationship("NetworkSliceSubnetInstanceVnfPlacement", back_populates="network_slice_subnet_instance")
   network_slice_instance_id = Column(Integer, ForeignKey('networkSliceInstance.nsiId'))
@@ -135,7 +135,7 @@ class VerticalSubserviceInstance(Base):
   domain_id=Column(String)
   instance_id=Column(String)
   vertical_service_status=Column(Integer)
-  vertical_service_instance_id = Column(String, ForeignKey('verticalServiceInstance.vsiId'))
+  vertical_service_instance_id = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   vertical_service_instance = relationship("VerticalServiceInstance", back_populates="vssis")
   parameters=relationship("VerticalSubserviceInstanceParameters", back_populates="vertical_subservice_instance")
 

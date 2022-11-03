@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 13:33:47
+# @Last Modified time: 2022-11-02 09:41:27
 
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
@@ -26,6 +26,9 @@ RABBITMQ_USER = None
 RABBITMQ_PASS = None
 RABBITMQ_IP = None
 RABBITMQ_PORT = None
+
+COORDINATOR_HOST = None
+COORDINATOR_PORT = None
 
 
 IDP_IP = None

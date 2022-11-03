@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 22:55:23
+# @Last Modified time: 2022-11-03 00:38:05
 
 
 from typing import List
@@ -67,7 +67,7 @@ def prepare_translation(
     return translation_set
 
 
-async def store_tenant_data(caching, vsiId: str, tenantId: str) -> Tenant:
+async def store_tenant_data(caching, vsiId: int, tenantId: str) -> Tenant:
     roles = idp.get_user_roles(user_id=tenantId)
     parsed_roles = [role.name for role in roles]
     username = idp.get_user(user_id=tenantId).username
