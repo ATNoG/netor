@@ -47,8 +47,9 @@ class CSMF_Handler():
         logging.info("Starting CSMF Poller...")
         poller.start_all_jobs()
 
-    async def store_new_csmf(self, db: Session,
+    async def store_new_csmf(self,
                              payload: MessageSchemas.Message):
+        db = next(get_db())
         #  add VSI status on Cache
         await redis_handler.store_vsi_initial_data(payload.vsiId) 
         # Store Received Message on Cache
