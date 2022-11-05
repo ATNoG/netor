@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 14:49:07
+# @Last Modified time: 2022-11-05 21:20:57
 
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
@@ -16,7 +16,7 @@ from sql_app.database import SessionLocal
 import aux.utils as Utils
 from csmf.csmf_handler import csmf_handler
 from fastapi_events.dispatcher import dispatch
-from apscheduler.events import *
+
 
 # Dependency
 def get_db():
@@ -35,7 +35,7 @@ logging.basicConfig(
 
 class MessageReceiver():
 
-    def __init__(self, messaging=None, caching= None):
+    def __init__(self, messaging=None, caching=None):
         self.messaging = messaging
         self.caching = caching
         if not messaging:
@@ -74,7 +74,7 @@ class MessageReceiver():
                     return
                 # If its Neither in Cache or in Database then store data
                 logging.info("NO Information found, starting CSMF")
-                await csmf_handler.store_new_csmf(db, payload)
+                await csmf_handler.store_new_csmf(payload)
                 # store tenant info, similarly to catalogue info
 
                 data = MessageSchemas.StatusUpdateData(
@@ -88,11 +88,11 @@ class MessageReceiver():
                 )
             elif payload.msgType in Constants.INFO_TOPICS:
                 dispatch(f'event-{payload.msgType}',
-                         payload=(payload, db),
+                         payload=payload,
                          middleware_id=Constants.EVENT_HANDLER_ID)
             else:
                 dispatch(payload.msgType,
-                         payload=(payload, db),
+                         payload=payload,
                          middleware_id=Constants.EVENT_HANDLER_ID)
             # except Exception as e:
             #      logging.info(f"Error in Manager {e}")
@@ -106,7 +106,7 @@ class MessageReceiver():
     def run(self):
         try:
             logging.info('Started Consuming RabbitMQ Topics')
-            
+   
         except Exception as e:
             logging.info("Stop consuming now!")
             logging.error("Pika exception: "+str(e))

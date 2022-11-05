@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 00:37:50
+# @Last Modified time: 2022-11-05 14:02:58
 
 from pydantic import BaseModel
 from typing import Any, Dict, List, Union
@@ -19,7 +19,6 @@ class CreateVsiData(BaseModel):
     vsdId: str
     domainPlacements: Any
     additionalConf: Any
-
 
 
 class InstantiateNsiData(BaseModel):

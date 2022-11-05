@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 23:04:15
+# @Last Modified time: 2022-11-05 14:08:48
 import json
 from csmf.polling import poller
 from redis.handler import redis_handler
@@ -43,19 +43,19 @@ class VsiHelper:
         cached_vsi_data = await redis_handler.hget_all(payload.vsiId)
         allVsiData = {}
         for key, value in cached_vsi_data.items():
-            # load and parse data 
+            # load and parse data
             key = key.decode()
             if key == Constants.TOPIC_TENANTINFO:
                 allVsiData[key] = AuthSchemas.Tenant(
                     **json.loads(value)
-            )
+                )
             else:
                 allVsiData[key] = MessageSchemas.Message(
                     **json.loads(value))
                 if allVsiData[key].error:
                     # raise InvalidPlacementInformation()
                     pass
-        domainInfo = allVsiData['domainInfo']
+        _ = allVsiData['domainInfo']
         vsiRequestInfo = allVsiData['createVSI']
         catalogueInfo = allVsiData['catalogueInfo']
         placementInfo = payload.data
@@ -76,9 +76,9 @@ class VsiHelper:
                 if self.is_interdomain(catalogueInfo.data):
                     config = None
                     for conf_component in vsiRequestInfo.data.additionalConf:
-                        #TODO: check better component name verification
+                        # TODO: check better component name verification
                         if conf_component['componentName'] == component_name:
-                            config = json.loads(conf_component['conf'])
+                            config = conf_component['conf']
                             data.additionalConf = yaml.safe_dump(config)
                             break
             # store on redis VSI Service Composition
@@ -110,40 +110,42 @@ class VsiHelper:
             await rabbit_handler.publish_queue(
                 Constants.QUEUE_DOMAIN,
                 json.dumps(res.dict()))
-            composingComponentId += 1 #TODO: Check this, will be changed...
-
+            #TODO: Check this, will be changed...
+            composingComponentId += 1
 
         res.msgType = Constants.TOPIC_VSI_STATUS
         data = MessageSchemas.StatusUpdateData(
             status=Constants.DEPLOYING_STATUS
         )
-        res = Utils.prepare_message(res, data, 
+        res = Utils.prepare_message(
+            res,
+            data,
             msg="Sent all instantiation requests to the appropriate domains")
         await rabbit_handler.publish_queue(
             Constants.QUEUE_COORDINATOR,
             json.dumps(res.dict())
         )
-        
-    
+
     async def prepare_primitive_exec(self, payload: MessageSchemas.Message):
         primivite_data = payload.data
         allVsiData = await redis_handler.get_all_vsi_data(payload.vsiId)
-        service_composition = await redis_handler.\
-                get_vsi_servicecomposition(payload.vsiId)
+        service_composition = await redis_handler.get_vsi_servicecomposition(
+            payload.vsiId)
         catalogueInfo = allVsiData['catalogueInfo']
         cat_data = catalogueInfo.data
 
-        actions = {x['action_id']: x['parameters'] for x in cat_data.vsb_actions}
+        actions = {x['action_id']: x['parameters']
+                   for x in cat_data.vsb_actions}
         if primivite_data.primitiveName not in actions:
             # raise excpetion, invalid primitive
             return
 
         if primivite_data.primitiveTarget not in service_composition:
-            #raise exception, invalid primitive, not running yet
+            # raise exception, invalid primitive, not running yet
             return
         service = service_composition[primivite_data.primitiveTarget]
         if service.sliceEnabled:
-            #TODO: processing with the Subnet NS Id because 
+            # TODO: processing with the Subnet NS Id because
             # OSM currently doesn't support NSI actions
             pass
         
@@ -175,12 +177,12 @@ class VsiHelper:
         await rabbit_handler.publish_queue(
             Constants.QUEUE_DOMAIN, json.dumps(message.dict()))
         
-        #Store new primitive data on Cache to later fetch from Domain the op
+        # Store new primitive data on Cache to later fetch from Domain the op
         # execution status
         action_data = VerticalSchemas.PrimitiveStatus(
             actionId=primivite_data.actionId,
             domainId=service.domainId,
-            nfvoId="5d7bc1b5-7e38-49f7-a3ec-848dfc4525e8"
+            nfvoId=service.nfvoId
         )
         running_actions = await redis_handler.get_primitive_op_status(
             payload.vsiId, store_objects=False)
@@ -198,6 +200,7 @@ class VsiHelper:
         await redis_handler.store_primitive_op_status(
             payload.vsiId, actions_cached
         )
+
     async def deleteVSI(self, payload: MessageSchemas.Message):
         serviceComposition = await redis_handler.get_vsi_servicecomposition(
                 vsiId=payload.vsiId)
@@ -250,8 +253,7 @@ class VsiHelper:
             json.dumps(lcm_message.dict())
         )
 
-        #TODO: Perhap delete Here
-    
+        # TODO: Perhap delete Here
 
     async def tearDownComponent(self, vsiId, componentName):
         serviceComposition = await redis_handler.get_vsi_servicecomposition(
@@ -262,14 +264,14 @@ class VsiHelper:
             serviceComposition[componentName].status = Constants.\
                                                         TERMINATED_STATUS
         all_terminated = all([
-            (x,y) for (x,y) in serviceComposition.items() \
+            (x, y) for (x, y) in serviceComposition.items()
             if y.status == Constants.TERMINATED_STATUS
-        ])    
+        ])
         if all_terminated:
             logging.info("All Components terminated, deleting Vsi Data")
             await redis_handler.tear_down_vsi_data(vsiId=vsiId)
             poller.stop_vsi_polling_csmf(vsiId=vsiId)
-        
+
         update_data = MessageSchemas.StatusUpdateData(
             status=Constants.TERMINATED_STATUS
         )
@@ -283,9 +285,5 @@ class VsiHelper:
             json.dumps(lcm_message.dict())
         )
 
-        
-
 
 vsi_helper = VsiHelper()
-
-        

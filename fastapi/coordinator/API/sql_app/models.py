@@ -3,9 +3,10 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 00:31:53
+# @Last Modified time: 2022-11-05 18:05:07
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float,\
+                       JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql.sqltypes import DateTime
@@ -70,7 +71,7 @@ class ComponentConfigs(Base):
   vertical_service_instance_id = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
   vertical_service_instance = relationship("VerticalServiceInstance", back_populates="additionalConf")
   componentName=Column(String)
-  conf=Column(String)
+  conf=Column(JSON)
 
   def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

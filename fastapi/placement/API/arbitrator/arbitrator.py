@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 22:59:49
+# @Last Modified time: 2022-11-05 14:10:19
 import json
 from typing import Dict, List
 from exceptions.translator import InvalidQoSRange, InvalidPlacementInformation
@@ -28,14 +28,14 @@ class Arbitrator:
                  redis_handler: RedisHandler) -> None:
         self.redis_handler = redis_handler
 
-    async def processAction(self , data: MessageSchemas.Message):
+    async def processAction(self, data: MessageSchemas.Message):
         await self.redis_handler.set_hash_key(
             data.vsiId,
             data.msgType,
             json.dumps(data.dict(exclude_none=True, exclude_unset=True))
         )
         vsi_current_data = await self.redis_handler.get_hash_keys(data.vsiId)
-        parsed_info = [ x.decode() for x in vsi_current_data]
+        parsed_info = [x.decode() for x in vsi_current_data]
         # First we Assert if we have the necessary data to carry on to the 
         # processing of the entities placement 
         if await self.redis_handler.has_required_placement_info(

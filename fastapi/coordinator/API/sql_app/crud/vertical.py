@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 17:28:40
+# @Last Modified time: 2022-11-05 18:04:37
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 23:02:36
+# @Last Modified time: 2022-11-05 21:15:04
 
 import aux.constants as Constants
 from aux.enums import VSIStatus
@@ -14,6 +14,7 @@ from rabbitmq.adaptor import rabbit_handler
 import schemas.message as MessageSchemas
 import schemas.vertical as VerticalSchemas
 import sql_app.crud.csmf as CsmfCRUD
+from sql_app.database import SessionLocal
 from sqlalchemy.orm import Session
 import aux.utils as Utils
 from fastapi_events.handlers.local import local_handler
@@ -28,11 +29,20 @@ logging.basicConfig(
 )
 
 
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 class CSMF_Handler():
     def __init__(self) -> None:
         self.counter = 0
-        #self.poller = poller
-        
+        # self.poller = poller
+
     def start(self):
         logging.info("Starting CSMF Poller...")
         poller.start_all_jobs()
@@ -50,42 +60,45 @@ class CSMF_Handler():
         # Store in database
         CsmfCRUD.createCSMF(db, payload)
         # Create CSMF Polling CronJob,
-        #  which will ask the Domain Service for Info regarding the Vsi Services
+        #  which will ask the Domain Service for Info 
+        #  regarding the Vsi Services
         poller.start_vsi_polling_csmf(payload.vsiId)
         await Utils.store_tenant_data(
             caching=redis_handler,
-            vsiId=payload.vsiId, tenantId=payload.tenantId)      
-    
+            vsiId=payload.vsiId, tenantId=payload.tenantId)
+        return
+
     # Handles catalogueInfo and domainInfo Messages
-    @local_handler.register(event_name=f'event-*Info')
+    @local_handler.register(event_name='event-*Info')
     async def handle_required_info(event: Event):
         _, event_args = event
-        payload, db = event_args
+        payload = event_args
         logging.info(f"Storing {payload.msgType} Info")
         await redis_handler.set_hash_key(
             payload.vsiId,
             payload.msgType,
             json.dumps(payload.dict())
         )
-    
+
     # Handles PlacementInfo Message: to Start the Instantiation of a VSi
     @local_handler.register(event_name=Constants.TOPIC_PLACEMENTINFO)
     async def handle_vsi_instantiation(event: Event):
         _, event_args = event
-        payload, db = event_args
-        #Store Placement Info
+        payload = event_args
+        db = next(get_db())
+        # Store Placement Info
         await redis_handler.set_hash_key(
             payload.vsiId,
             payload.msgType,
             json.dumps(payload.dict(exclude_none=True, exclude_unset=True))
         )
         logging.info(f"Stored placement Info for Vsi {payload.vsiId}")
-        #Retrieve current stored data in Cache
+        # Retrieve current stored data in Cache
         vsi_current_data = await redis_handler.get_hash_keys(payload.vsiId)
-        parsed_info = [ x.decode() for x in vsi_current_data]
-        
+        parsed_info = [x.decode() for x in vsi_current_data]
+
         if not await redis_handler.has_required_vsi_instation_info(
-            payload.vsiId, parsed_info):
+                payload.vsiId, parsed_info):
             # throw exception
             return
         logging.info("VSi has necessary info, starting to instantiate..")
@@ -93,15 +106,15 @@ class CSMF_Handler():
         CsmfCRUD.updateCSMFStatus(db, payload.vsiId, VSIStatus.INSTATIATING)
         await redis_handler.update_vsi_running_data(payload.vsiId)
         await vsi_helper.instantiateVSI(payload)
-
-    # Updates on Cache the Ids of the Resources created acording to the NFVO id's
+        return
+    
+    # Updates on Cache the Ids of the Resources created acording to the NFVOIds
     @local_handler.register(event_name=Constants.TOPIC_UPDATE_NFVO_IDS)
     async def handle_nfvo_ids_update(event: Event):
         _, event_args = event
-        payload, db = event_args
+        payload = event_args
         # UpdateResourcesNfvoIdsData Message
-        nfvo_data = payload.data 
-        
+        nfvo_data = payload.data
         service_composition = await redis_handler.get_vsi_servicecomposition(
             payload.vsiId)
         # store servicecomposition on Cache
@@ -113,17 +126,19 @@ class CSMF_Handler():
             data = VerticalSchemas.ServiceComposition(
                 nfvoId=payload.componentId)
             service_composition = {nfvo_data.componentName: data.dict()}
-        
+
         await redis_handler.store_vsi_service_composition(
             payload.vsiId, service_composition, parse_dict=True
         )
+        return
 
     # Handle NSI Status Messages from Domain
 
     @local_handler.register(event_name=Constants.TOPIC_NSI_INFO)
     async def handle_nsi_info_message(event: Event):
         _, event_args = event
-        payload, db = event_args
+        payload = event_args
+        db = next(get_db())
         # NsiInfoData Message
         nsi_info_data = payload.data
         data = MessageSchemas.StatusUpdateData(status=nsi_info_data.nsiInfo)
@@ -149,7 +164,7 @@ class CSMF_Handler():
             else:
                 data = VerticalSchemas.ServiceComposition(
                     status=Constants.INSTANTIATED_STATUS)
-                service_composition = { nsi_info_data.nsiId: data.dict()}
+                service_composition = {nsi_info_data.nsiId: data.dict()}
             # parse object to dict again
             await redis_handler.store_vsi_service_composition(
                 payload.vsiId, service_composition, parse_dict=True
@@ -164,7 +179,7 @@ class CSMF_Handler():
                                                         already_running=True)
 
         elif await Utils.verify_resource_operate_status(
-            "terminated", nsidata=nsi_info_data):
+                "terminated", nsidata=nsi_info_data):
             await vsi_helper.tearDownComponent(
                 payload.vsiId,
                 nsi_info_data.nsiId
@@ -179,13 +194,13 @@ class CSMF_Handler():
         _, event_args = event
         payload, db = event_args
         # PrimitiveData Message
-        primivite_data = payload.data
+        _ = payload.data
         running = await redis_handler.is_vsi_running(vsiId=payload.vsiId)
         if not running:
             # throw exception
-            print("not running")
             pass
         await vsi_helper.prepare_primitive_exec(payload)
+        return
 
     # Receives the Primitive Execution Status From Domain
     @local_handler.register(event_name=Constants.TOPIC_ACTION_RESPONSE)
@@ -196,9 +211,8 @@ class CSMF_Handler():
         running_actions = await redis_handler.get_primitive_op_status(
             payload.vsiId
         )
-        logging.info(f"RUNNING ACTIONS {running_actions}")
-        logging.info(f"action id {primivite_data.actionId}")
-        stored_action_data = running_actions.get(str(primivite_data.actionId), None)
+        stored_action_data = running_actions.get(str(primivite_data.actionId),
+                                                 None)
         if stored_action_data:
             stored_action_data.nfvoId = primivite_data.nfvoId
             if stored_action_data.status != primivite_data.status:
@@ -213,7 +227,7 @@ class CSMF_Handler():
                     msgType=Constants.TOPIC_ACTION_STATUS,
                     data=data
                 )
-                logging.info(f"New Action State, sending to coordinator: "\
+                logging.info("New Action State, sending to coordinator: "
                              + f"{msg.dict}")
                 await rabbit_handler.publish_queue(
                     Constants.QUEUE_COORDINATOR,
@@ -225,6 +239,7 @@ class CSMF_Handler():
         await redis_handler.store_primitive_op_status(
             payload.vsiId, running_actions, parse_dict=True
         )
+        return
 
     @local_handler.register(event_name=Constants.TOPIC_REMOVEVSI)
     async def handle_vsi_removal(event: Event):
@@ -239,6 +254,7 @@ class CSMF_Handler():
         if not a:
             logging.info("Cannot Delete VSI, since it is not stored")
             return
+        return
 
 
 csmf_handler = CSMF_Handler()

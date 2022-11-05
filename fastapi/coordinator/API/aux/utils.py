@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 17:38:50
+# @Last Modified time: 2022-11-05 18:04:05
 
 
 from fastapi.responses import JSONResponse
@@ -110,7 +110,7 @@ def parse_dns_params_to_vnf(vsiId: int, vs_in: VerticalSchemas.VSICreate):
             "vsi_id": str(vsiId)
         }
     for peer in vs_in.additionalConf:
-        peer_conf = json.loads(peer.conf)
+        peer_conf = peer.conf
         vnf_params = peer_conf['netslice-subnet'][0]['additionalParamsForVnf']
         for vnf in vnf_params:
             for param in dns_params:

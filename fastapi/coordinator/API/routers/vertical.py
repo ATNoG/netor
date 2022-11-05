@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 17:55:43
+# @Last Modified time: 2022-11-05 18:03:16
 
 import json
 from fastapi import Depends
@@ -94,69 +94,69 @@ async def createnewVS(
                 user=Depends(idp.get_current_user(
                     required_roles=[Constants.IDP_ADMIN_USER])),
                 db: Session = Depends(get_db)):
-    try:
-        #
-        # verify if VS Descriptor exists
-        data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
-        # if not data:
-        #     raise VSDNotFound(vs_in.vsdId)
-        # # # verify if domain placements exists
-        for domain in vs_in.domainPlacements:
-            data = Utils.get_domain_info(token, domain.domainId)
-            if not data:
-                raise DomainNotFound(domain_id=domain.domainId)
-        # Store in DB
-        vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
-        # create zone
-        power_dns_client = Netor_DNS_SD(
-            dns_ip=Constants.DNS_IP,
-            api_port=Constants.DNS_API_PORT,
-            vsi_id=vs_out.vsiId,
-            api_key=Constants.DNS_API_KEY
-        )
-        power_dns_client.create_zone()
-        # Now that we have a vertical Id we may customize the component names
-        # to be easier to parse and inject the vertical Id on component's 
-        # configuration
-        # TODO: Find a better way to do this
-        for i in range(len(vs_in.domainPlacements)):
-            domain_placement = vs_in.domainPlacements[i]
-            config = vs_in.additionalConf[i]
-            new_name = f"{vs_out.vsiId}_{domain_placement.componentName}"
-            CRUDVertical.updateComponentsNames(
-                db,
-                vsiId=vs_out.vsiId,
-                previous_name=domain_placement.componentName,
-                new_name=new_name)
-            domain_placement.componentName = new_name
-            config.componentName = new_name
-
-        vs_in = Utils.parse_dns_params_to_vnf(vs_out.vsiId, vs_in)
-        # Send Message to the MessageBus
-        msg = MessageSchemas.Message(
+    #try:
+    #
+    # verify if VS Descriptor exists
+    # data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
+    # # if not data:
+    # #     raise VSDNotFound(vs_in.vsdId)
+    # # # # verify if domain placements exists
+    # for domain in vs_in.domainPlacements:
+    #     data = Utils.get_domain_info(token, domain.domainId)
+    #     if not data:
+    #         raise DomainNotFound(domain_id=domain.domainId)
+    # Store in DB
+    vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
+    # create zone
+    power_dns_client = Netor_DNS_SD(
+        dns_ip=Constants.DNS_IP,
+        api_port=Constants.DNS_API_PORT,
+        vsi_id=vs_out.vsiId,
+        api_key=Constants.DNS_API_KEY
+    )
+    #power_dns_client.create_zone()
+    # Now that we have a vertical Id we may customize the component names
+    # to be easier to parse and inject the vertical Id on component's 
+    # configuration
+    # TODO: Find a better way to do this
+    for i in range(len(vs_in.domainPlacements)):
+        domain_placement = vs_in.domainPlacements[i]
+        config = vs_in.additionalConf[i]
+        new_name = f"{vs_out.vsiId}_{domain_placement.componentName}"
+        CRUDVertical.updateComponentsNames(
+            db,
             vsiId=vs_out.vsiId,
-            msgType=Constants.TOPIC_CREATEVSI,
-            tenantId=user.sub
-        )
+            previous_name=domain_placement.componentName,
+            new_name=new_name)
+        domain_placement.componentName = new_name
+        config.componentName = new_name
 
-        data = MessageSchemas.CreateVsiData(**vs_in.dict())
-        msg.data = data
-        await rabbit_handler.publish_exchange(
-            Constants.EXCHANGE_MGMT,
-            json.dumps(msg.dict())
-        )
+    vs_in = Utils.parse_dns_params_to_vnf(vs_out.vsiId, vs_in)
+    # Send Message to the MessageBus
+    msg = MessageSchemas.Message(
+        vsiId=vs_out.vsiId,
+        msgType=Constants.TOPIC_CREATEVSI,
+        tenantId=user.sub
+    )
 
-        return Utils.create_response(
-            status_code=201,
-            data=vs_out.as_dict(),
-            message="Success creating a new VS",
-        )
-    except Exception as exception:
-        return Utils.create_response(
-            status_code=400,
-            success=False,
-            errors=[str(exception)]
-        )
+    data = MessageSchemas.CreateVsiData(**vs_in.dict())
+    msg.data = data
+    await rabbit_handler.publish_exchange(
+        Constants.EXCHANGE_MGMT,
+        json.dumps(msg.dict())
+    )
+
+    return Utils.create_response(
+        status_code=201,
+        data=vs_out.as_dict(),
+        message="Success creating a new VS",
+    )
+    # except Exception as exception:
+    #     return Utils.create_response(
+    #         status_code=400,
+    #         success=False,
+    #         errors=[str(exception)]
+    #     )
 
 
 @router.get(

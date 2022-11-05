@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-26 23:39:38
+# @Last Modified time: 2022-11-05 13:33:23
 
 from functools import wraps
 from osmclient import client
@@ -17,6 +17,8 @@ logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
     level=logging.INFO
 )
+
+
 class OSMDriver(DomainDriver):
     def __init__(self, host, username, password, project) -> None:
         self.host = self.parse_host(host)
@@ -93,13 +95,14 @@ class OSMDriver(DomainDriver):
                                               op_data=additionalConf)
         logging.info(f"NFVOID {nfvoId}")
         actionInfo = self.osm_client.ns.get_op(nfvoId)
-        
+
         return actionInfo
 
     @require_session(remove_prefix=True)
     def get_primitive_state(self, nfvoId):
         actionInfo = self.osm_client.ns.get_op(nfvoId)
         return actionInfo
+
     @require_session(remove_prefix=True)
     def getNSI(self, nsiId):
         return self.osm_client.nsi.get(nsiId)
