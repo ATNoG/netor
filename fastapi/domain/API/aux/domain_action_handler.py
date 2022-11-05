@@ -76,9 +76,14 @@ class DomainActionHandler:
                     self.payload.data.nsId,
                     self.payload.data.additionalConf
                 )
-                output = res['detailed-status']
-                if type(output) == dict:
-                    output = json.dumps(output)
+                logging.info(f"RES {res}")
+                
+                if 'detailed-status' not in res:
+                    output = "No Output Yet.."
+                else:
+                    output = res['detailed-status']
+                    if type(output) == dict:
+                        output = json.dumps(output)
                 data = MessageSchemas.ActionResponseData(
                     primitiveName=self.payload.data.primitiveName,
                     actionId=self.payload.data.actionId,

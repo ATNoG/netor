@@ -28,9 +28,10 @@ class PrimitiveData(BaseModel):
     primitiveTarget: str
     primitiveInternalTarget: str
     primitiveParams: Dict = {}
+    actionId: int = None
 
 class ActionUpdateData(BaseModel):
-    actionId: str
+    actionId: int
     status: str
     output: str
 

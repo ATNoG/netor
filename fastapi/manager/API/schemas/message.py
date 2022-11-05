@@ -21,7 +21,6 @@ class CreateVsiData(BaseModel):
     name: str
     description: str
     vsdId: str
-    vsiId: int
     domainPlacements: List[DomainPlacementBase] = []
     additionalConf: List[Dict] = []
 
@@ -68,7 +67,7 @@ class FetchNsInfoData(BaseModel):
 class FetchPrimitiveData(BaseModel):
     domainId: str = None
     nfvoId: str
-    actionId: str = None
+    actionId: int = None
 
 class UpdateResourcesNfvoIdsData(BaseModel):
     componentName: str
@@ -84,26 +83,26 @@ class PrimitiveData(BaseModel):
     primitiveTarget: str
     primitiveInternalTarget: str
     primitiveParams: Dict = {}
-    actionId: str
+    actionId: int
 
 class ActionNsData(BaseModel):
     primitiveName: str = None
     domainId: str
     nsId: str = None
-    actionId: str = None # Id given by the Coordinator to identify the Action
+    actionId: int = None # Id given by the Coordinator to identify the Action
     additionalConf: Dict
 
 
 class ActionResponseData(BaseModel):
     primitiveName: str = None
-    actionId: str # Id given by the Coordinator to identify the Action(Primitive)
+    actionId: int # Id given by the Coordinator to identify the Action(Primitive)
     nfvoId: str # Id given by the NFVO to identify the Action(Primitive)
     status: str
     output: str
 
 # Message to inform the Coordinator of a update on the Action(Primitive) lifecyle
 class ActionUpdateData(BaseModel):
-    actionId: str
+    actionId: int
     status: str
     output: str
 

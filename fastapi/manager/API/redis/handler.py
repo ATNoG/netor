@@ -13,6 +13,7 @@ from aux.startup import load_config
 from aux.enums import VSIStatus
 from schemas.vertical import PrimitiveStatus, ServiceComposition
 import schemas.message as MessageSchemas
+import schemas.auth as AuthSchemas
 
 
 class RedisHandler:
@@ -85,8 +86,14 @@ class RedisHandler:
         allVsiData = {}
         for key,value in cached_vsi_data.items():
             # load and parse data 
-            allVsiData[key.decode()] = MessageSchemas.Message(
-                **json.loads(value))
+            key = key.decode()
+            if key == Constants.TOPIC_TENANTINFO:
+                allVsiData[key] = AuthSchemas.Tenant(
+                    **json.loads(value)
+            )
+            else:
+                allVsiData[key] = MessageSchemas.Message(
+                    **json.loads(value))
         return allVsiData
 
     async def store_vsi_service_composition(self, vsiId, data, parse_dict=False):

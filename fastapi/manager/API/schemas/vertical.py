@@ -60,7 +60,7 @@ class ServiceComposition(BaseModel):
 
 
 class PrimitiveStatus(BaseModel):
-    actionId: str = None
+    actionId: int = None
     domainId: str = None
     nfvoId: str = None # id of the operation given by the nfvo
     status: str = None

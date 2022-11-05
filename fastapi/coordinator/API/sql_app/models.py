@@ -27,16 +27,6 @@ class VSIStatus(Base):
     data['timestamp'] = str(data['timestamp'])
     return data
 
-class VSIAction(Base):
-  __tablename__ = 'vsiAction'
-  actstatus_id = Column(Integer, primary_key=True)
-  primitiveName = Column(String)
-  vsiId = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
-  status = Column(String, nullable=True)
-  output = Column(String, nullable=True)
-  def as_dict(self):
-    data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
-    return data
 
 
 class VerticalServiceInstance(Base):
@@ -85,6 +75,16 @@ class ComponentConfigs(Base):
   def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+class VSIAction(Base):
+  __tablename__ = 'vsiAction'
+  actstatus_id = Column(Integer, primary_key=True)
+  primitiveName = Column(String)
+  vsiId = Column(Integer, ForeignKey('verticalServiceInstance.vsiId'))
+  status = Column(String, nullable=True)
+  output = Column(String, nullable=True)
+  def as_dict(self):
+    data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    return data
 
 class DomainPlacements(Base):
   __tablename__ = 'domainPlacement'

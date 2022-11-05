@@ -196,7 +196,9 @@ class CSMF_Handler():
         running_actions = await redis_handler.get_primitive_op_status(
             payload.vsiId
         )
-        stored_action_data = running_actions.get(primivite_data.actionId, None)
+        logging.info(f"RUNNING ACTIONS {running_actions}")
+        logging.info(f"action id {primivite_data.actionId}")
+        stored_action_data = running_actions.get(str(primivite_data.actionId), None)
         if stored_action_data:
             stored_action_data.nfvoId = primivite_data.nfvoId
             if stored_action_data.status != primivite_data.status:

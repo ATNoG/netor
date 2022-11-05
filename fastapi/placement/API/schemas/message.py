@@ -16,7 +16,6 @@ class CreateVsiData(BaseModel):
     name: str
     description: str
     vsdId: str
-    vsiId: int
     domainPlacements: List[DomainPlacementBase] = []
     additionalConf: List[Dict] = []
 

@@ -210,6 +210,7 @@ async def executePrimitive(
         message = MessageSchemas.Message(vsiId=vsiId,
                                          msgType=Constants.TOPIC_PRIMITIVE)
         message.data = primitive_data
+        message.data.actionId = db_obj['actstatus_id']
         await rabbit_handler.publish_exchange(
             Constants.EXCHANGE_MGMT,
             message=json.dumps(message.dict()))

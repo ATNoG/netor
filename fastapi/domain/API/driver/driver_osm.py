@@ -10,8 +10,13 @@ from osmclient import client
 from driver.driver import DomainDriver
 import requests
 from exceptions.domain import CouldNotAuthenticatetoNFVO
+import logging
 
-
+# Logger
+logging.basicConfig(
+    format="%(module)-15s:%(levelname)-10s| %(message)s",
+    level=logging.INFO
+)
 class OSMDriver(DomainDriver):
     def __init__(self, host, username, password, project) -> None:
         self.host = self.parse_host(host)
@@ -86,7 +91,9 @@ class OSMDriver(DomainDriver):
 
         nfvoId = self.osm_client.ns.exec_op(nsId, "action",
                                               op_data=additionalConf)
+        logging.info(f"NFVOID {nfvoId}")
         actionInfo = self.osm_client.ns.get_op(nfvoId)
+        
         return actionInfo
 
     @require_session(remove_prefix=True)

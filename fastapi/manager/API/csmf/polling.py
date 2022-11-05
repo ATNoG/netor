@@ -49,10 +49,12 @@ class Polling:
             self.start_vsi_polling_csmf(csmf.vsiId)
 
     def is_job_already_running(self, vsiId):
+        vsiId = str(vsiId)
         vsis_running = self.scheduler.get_jobs('default')
         return any([vsi.id == vsiId for vsi in vsis_running ])
 
     def start_vsi_polling_csmf(self, vsiId):
+        vsiId = str(vsiId)
         if self.is_job_already_running(vsiId):
             logging.info(f"Job for vsi {vsiId} already running."\
                          + " No additional job will be created")
@@ -64,6 +66,7 @@ class Polling:
          EVENT_JOB_ERROR | EVENT_JOB_MISSED)
     
     def stop_vsi_polling_csmf(self, vsiId):
+        vsiId = str(vsiId)
         if not self.is_job_already_running(vsiId):
             logging.info(f"Job for vsi {vsiId} already running."\
                          + " No additional job will be created")

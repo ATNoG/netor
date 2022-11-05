@@ -17,7 +17,6 @@ class CreateVsiData(BaseModel):
     name: str
     description: str
     vsdId: str
-    vsiId: int
     domainPlacements: Any
     additionalConf: Any
 
@@ -40,13 +39,14 @@ class UpdateResourcesNfvoIdsData(BaseModel):
 class ActionNsData(BaseModel):
     primitiveName: str = None
     domainId: str = None
+    actionId: int # Id given by the Coordinator to identify the Action
     nsId: str = None
     additionalConf: Dict
 
 
 class ActionResponseData(BaseModel):
     primitiveName: str = None
-    actionId: str # Id given by the Coordinator to identify the Action
+    actionId: int # Id given by the Coordinator to identify the Action
     nfvoId: str # Id given by the NFVO to identify the Action
     status: str 
     output: str
@@ -59,7 +59,7 @@ class FecthNsiInfoData(BaseModel):
 class FetchPrimitiveData(BaseModel):
     domainId: str
     nfvoId: str
-    actionId: str
+    actionId: int
 
 class NsiInfoData(BaseModel):
     nsiId: str

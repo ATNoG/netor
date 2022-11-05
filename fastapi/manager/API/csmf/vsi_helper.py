@@ -132,8 +132,8 @@ class VsiHelper:
                 get_vsi_servicecomposition(payload.vsiId)
         catalogueInfo = allVsiData['catalogueInfo']
         cat_data = catalogueInfo.data
-        actions = {x['action_id']: x['parameters'] for x in cat_data.vsb_actions}
 
+        actions = {x['action_id']: x['parameters'] for x in cat_data.vsb_actions}
         if primivite_data.primitiveName not in actions:
             # raise excpetion, invalid primitive
             return
@@ -163,6 +163,7 @@ class VsiHelper:
             primitiveName=primivite_data.primitiveName,
             domainId=service.domainId,
             nsId=service.nfvoId,
+            actionId=primivite_data.actionId,
             additionalConf=additional_conf
         )
         message = MessageSchemas.Message(
@@ -185,17 +186,17 @@ class VsiHelper:
             payload.vsiId, store_objects=False)
         
         if not running_actions:
-            actions = {primivite_data.actionId: action_data.dict(
+            actions_cached = {primivite_data.actionId: action_data.dict(
                 exclude_unset=True,
             )}
         else:
-            actions[primivite_data.actionId] = action_data.dict(
+            actions_cached[primivite_data.actionId] = action_data.dict(
                 exclude_unset=True,
             )
             
-        logging.info(f"Storing on Redis Primitive Operational Status.. {actions}")
+        logging.info(f"Storing on Redis Primitive Operational Status.. {actions_cached}")
         await redis_handler.store_primitive_op_status(
-            payload.vsiId, actions
+            payload.vsiId, actions_cached
         )
     async def deleteVSI(self, payload: MessageSchemas.Message):
         serviceComposition = await redis_handler.get_vsi_servicecomposition(
