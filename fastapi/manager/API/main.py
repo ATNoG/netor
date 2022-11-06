@@ -3,18 +3,16 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-13 12:09:58
+# @Last Modified time: 2022-11-06 10:21:28
 
-import json
+from contextlib import contextmanager
 from fastapi import FastAPI
 import logging
 import inspect
 import sys
 import os
-import time
-# custom imports
 from sql_app import models
-from sql_app.database import SessionLocal, engine
+from sql_app.database import engine, get_db
 from rabbitmq.adaptor import rabbit_handler
 import aux.constants as Constants
 import schemas.message as MessageSchemas
@@ -22,13 +20,15 @@ from rabbitmq.messaging_manager import MessageReceiver
 import aux.startup as Startup
 from redis.handler import redis_handler
 from csmf.csmf_handler import csmf_handler
+from fastapi_events.middleware import EventHandlerASGIMiddleware
+from fastapi_events.handlers.local import local_handler
 # import from parent directory
 currentdir = os.path.dirname(os.path.abspath(
              inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
-from fastapi_events.middleware import EventHandlerASGIMiddleware
-from fastapi_events.handlers.local import local_handler
+
+
 # Start Fast API
 app = FastAPI(
     title="FastAPI Base Project",
@@ -42,24 +42,9 @@ app = FastAPI(
 Constants.EVENT_HANDLER_ID = id(app)
 app.add_middleware(EventHandlerASGIMiddleware,
                    handlers=[local_handler],  # registering handler(s)
-                   middleware_id=Constants.EVENT_HANDLER_ID)  # register custom middleware id
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+                   middleware_id=Constants.EVENT_HANDLER_ID)
 
 
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.on_event("startup")
@@ -70,24 +55,12 @@ async def startup_event():
     if not ret:
         logging.critical(message)
         return exit(1)
+  
+    models.Base.metadata.create_all(bind=engine)
 
-    # Connect to Database
-    for i in range(10):
-        try:
-            models.Base.metadata.create_all(bind=engine)
-            Constants.MODELS_INITIALIZED = True
-            break
-        except Exception as e:
-            print(f"entering..{e}")
-            time.sleep(10)
-
-    if not Constants.MODELS_INITIALIZED:
-        exit(2)
-
-    db = SessionLocal()
-
+    with contextmanager(get_db)() as db:
     # Store Initial Data in Database
-    Startup.fill_database(db)
+        Startup.fill_database(db)
     csmf_handler.start()
     await rabbit_handler.start_pool()
     redis_handler.start_connection()

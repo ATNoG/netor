@@ -1,7 +1,14 @@
+# @Author: Daniel Gomes
+# @Date:   2022-10-19 14:56:50
+# @Email:  dagomes@av.it.pt
+# @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-11-06 10:21:03
 import aux.constants as Constants
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 import configparser
 import time
 import logging
@@ -48,3 +55,15 @@ for i in range(10):
 if not DB_OK:
     logging.critical("Unable to connect to database. Exception:", e)
     exit(2)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception:
+        # if we fail somehow rollback the connection
+        db.rollback()
+        raise
+    finally:
+        db.close()

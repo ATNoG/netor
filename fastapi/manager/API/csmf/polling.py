@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 21:18:58
+# @Last Modified time: 2022-11-06 10:23:36
 import copy
 import json
 from typing import Dict
@@ -16,22 +16,14 @@ import aux.constants as Constants
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_MISSED
 import logging
-from sql_app.database import SessionLocal
+from contextlib import contextmanager
+from sql_app.database import get_db
 import sql_app.crud.csmf as CSMFCrud
 
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
     level=logging.INFO
 )
-
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class Polling:
@@ -44,11 +36,10 @@ class Polling:
                                      ActionStatus.FAILED.value]
 
     def start_all_jobs(self):
-        db_gen = get_db()
-        db = next(db_gen)
-        all_csmfs = CSMFCrud.getAllCSMFs(db)
-        for csmf in all_csmfs:
-            self.start_vsi_polling_csmf(csmf.vsiId)
+        with contextmanager(get_db)() as db:
+            all_csmfs = CSMFCrud.getAllCSMFs(db)
+            for csmf in all_csmfs:
+                self.start_vsi_polling_csmf(csmf.vsiId)
 
     def is_job_already_running(self, vsiId):
         vsiId = str(vsiId)

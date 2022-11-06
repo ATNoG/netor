@@ -3,8 +3,9 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 21:20:57
+# @Last Modified time: 2022-11-06 10:25:15
 
+from contextlib import contextmanager
 from redis.handler import RedisHandler
 from rabbitmq.adaptor import RabbitHandler
 from aio_pika import IncomingMessage
@@ -12,19 +13,10 @@ import json
 import logging
 import schemas.message as MessageSchemas
 import aux.constants as Constants
-from sql_app.database import SessionLocal
 import aux.utils as Utils
 from csmf.csmf_handler import csmf_handler
 from fastapi_events.dispatcher import dispatch
-
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from sql_app.database import get_db
 
 
 logging.basicConfig(
@@ -51,8 +43,6 @@ class MessageReceiver():
             
     async def callback(self, message: IncomingMessage):
         async with message.process():
-            db_gen = get_db()
-            db = next(db_gen)
             msg = message.body.decode()
             msg = json.loads(msg)
             try:
@@ -64,14 +54,15 @@ class MessageReceiver():
             logging.info(f"Received message in Manager: {payload}")
             res = MessageSchemas.Message(vsiId=payload.vsiId)
             if payload.msgType == Constants.TOPIC_CREATEVSI:
-                a = await Utils.is_csmf_data_stored(
-                    db,
-                    self.caching,
-                    Constants.TOPIC_CREATEVSI,
-                    payload.vsiId
-                    )
-                if a:
-                    return
+                with contextmanager(get_db)() as db:
+                    a = await Utils.is_csmf_data_stored(
+                        db,
+                        self.caching,
+                        Constants.TOPIC_CREATEVSI,
+                        payload.vsiId
+                        )
+                    if a:
+                        return
                 # If its Neither in Cache or in Database then store data
                 logging.info("NO Information found, starting CSMF")
                 await csmf_handler.store_new_csmf(payload)

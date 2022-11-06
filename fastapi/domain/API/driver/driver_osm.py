@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 13:33:23
+# @Last Modified time: 2022-11-06 14:01:19
 
 from functools import wraps
 from osmclient import client
@@ -91,9 +91,10 @@ class OSMDriver(DomainDriver):
     @require_session(remove_prefix=True)
     def sendActionNS(self, nsId, additionalConf=None):
 
-        nfvoId = self.osm_client.ns.exec_op(nsId, "action",
-                                              op_data=additionalConf)
-        logging.info(f"NFVOID {nfvoId}")
+        nfvoId = self.osm_client.ns.exec_op(
+            nsId,
+            "action",
+            op_data=additionalConf)
         actionInfo = self.osm_client.ns.get_op(nfvoId)
 
         return actionInfo
