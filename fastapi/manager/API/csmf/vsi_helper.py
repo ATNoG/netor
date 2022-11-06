@@ -78,8 +78,10 @@ class VsiHelper:
                     for conf_component in vsiRequestInfo.data.additionalConf:
                         # TODO: check better component name verification
                         if conf_component['componentName'] == component_name:
-                            config = conf_component['conf']
+                            config = json.loads(conf_component['conf'])
                             data.additionalConf = yaml.safe_dump(config)
+                            logging.info(f"AFTER {data.additionalConf}")
+
                             break
             # store on redis VSI Service Composition
             serviceComposition = await redis_handler.get_vsi_servicecomposition(

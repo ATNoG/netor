@@ -114,7 +114,7 @@ async def createnewVS(
         vsi_id=vs_out.vsiId,
         api_key=Constants.DNS_API_KEY
     )
-    #power_dns_client.create_zone()
+    power_dns_client.create_zone()
     # Now that we have a vertical Id we may customize the component names
     # to be easier to parse and inject the vertical Id on component's 
     # configuration
