@@ -1,10 +1,19 @@
 # @Author: Daniel Gomes
 # @Date:   2022-07-26 16:07:53
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-30 22:18:46
+# @Last Modified time: 2022-11-09 22:36:42
 
 version: "3.6"
 services:
+
+  netor_up_nginx: 
+    image: nginx:latest
+    restart: always
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8010:80
+
   coordinator:
     build:
         dockerfile: docker/coordinator/Dockerfile
@@ -24,22 +33,22 @@ services:
     volumes:
       - ./config_files/config.ini:/app/config.ini
 
-  # tenant:
-  #   build:
-  #     dockerfile: docker/tenant/Dockerfile
-  #     context: ./
-  #   depends_on:
-  #     - "db"
-  #   ports:
-  #     - 8001:80
-  #   environment:
-  #     - INFLUX_DB_URL=${INFLUXDB_URL}
-  #     - INFLUX_DB_NAME=${INFLUXDB_NAME}
-  #     - IMAGE_NAME=TENANT
-  #     - INFLUX_USERNAME=${INFLUXDB_USER}
-  #     - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
-  #   volumes:
-  #     - ./config_files/config.ini:/app/config.ini
+  tenant:
+    build:
+      dockerfile: docker/tenant/Dockerfile
+      context: ./
+    depends_on:
+      - "db"
+    ports:
+      - 8001:80
+    environment:
+      - INFLUX_DB_URL=${INFLUXDB_URL}
+      - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      - IMAGE_NAME=TENANT
+      - INFLUX_USERNAME=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+    volumes:
+      - ./config_files/config.ini:/app/config.ini
   domain:
     build:
       dockerfile: docker/domain/Dockerfile

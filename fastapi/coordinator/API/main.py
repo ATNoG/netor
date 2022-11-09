@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 09:59:48
+# @Last Modified time: 2022-11-09 22:24:48
 
 from fastapi import FastAPI
 import logging
@@ -34,6 +34,7 @@ app = FastAPI(
         "name": "User",
         "email": "user@av.it.pt",
     },
+    root_path="/lcm"
 )
 # app.add_middleware(
 #     CORSMiddleware,

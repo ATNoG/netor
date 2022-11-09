@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-12 16:07:32
+# @Last Modified time: 2022-11-09 22:35:34
 
 import json
 from fastapi import FastAPI
@@ -37,6 +37,7 @@ app = FastAPI(
         "name": "User",
         "email": "user@av.it.pt",
     },
+    root_path="/domain"
 )
 # app.add_middleware(
 #     CORSMiddleware,
