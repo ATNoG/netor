@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-03 09:39:22
+# @Last Modified time: 2022-11-07 10:22:44
 
 class VerticalAlreadyExists(Exception):
     def __init__(self, vs_id=None):
@@ -33,7 +33,7 @@ class VerticalNotFound(Exception):
 
 class InvalidComponentName(Exception):
     def __init__(self):
-        self.message = "Components should have the same naming and number"
+        self.message = "Components should have the same naming and size"
         super().__init__(self.message)
 
     def __str__(self):

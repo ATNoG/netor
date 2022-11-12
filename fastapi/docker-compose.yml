@@ -1,7 +1,7 @@
 # @Author: Daniel Gomes
 # @Date:   2022-07-26 16:07:53
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-09 22:36:42
+# @Last Modified time: 2022-11-12 14:03:44
 
 version: "3.6"
 services:
@@ -33,18 +33,32 @@ services:
     volumes:
       - ./config_files/config.ini:/app/config.ini
 
-  tenant:
+  # tenant:
+  #   build:
+  #     dockerfile: docker/tenant/Dockerfile
+  #     context: ./
+  #   depends_on:
+  #     - "db"
+  #   ports:
+  #     - 8001:80
+  #   environment:
+  #     - INFLUX_DB_URL=${INFLUXDB_URL}
+  #     - INFLUX_DB_NAME=${INFLUXDB_NAME}
+  #     - IMAGE_NAME=TENANT
+  #     - INFLUX_USERNAME=${INFLUXDB_USER}
+  #     - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+  #   volumes:
+  #     - ./config_files/config.ini:/app/config.ini
+  testmanager:
     build:
-      dockerfile: docker/tenant/Dockerfile
-      context: ./
-    depends_on:
-      - "db"
+        dockerfile: docker/test_manager/Dockerfile
+        context: ./
     ports:
-      - 8001:80
+      - 8005:80
     environment:
       - INFLUX_DB_URL=${INFLUXDB_URL}
       - INFLUX_DB_NAME=${INFLUXDB_NAME}
-      - IMAGE_NAME=TENANT
+      - IMAGE_NAME=TESTMANAGER
       - INFLUX_USERNAME=${INFLUXDB_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
     volumes:
@@ -131,20 +145,18 @@ services:
     volumes:
      - ./config_files/client_secrets.json:/app/api/client_secrets.json
   db:
-    build:
-      dockerfile: postgresql/Dockerfile
-      context: ./
+    image: postgres:12.2-alpine
     ports:
       - '5432:5432'
     environment:
       - POSTGRES_PASSWORD=password 
       - POSTGRES_USER=postgres
       - POSTGRES_DB=5gasp 
-      - INFLUX_DB_URL=${INFLUXDB_URL}
-      - INFLUX_DB_NAME=${INFLUXDB_NAME}
-      - IMAGE_NAME=DB
-      - INFLUX_USERNAME=${INFLUXDB_USER}
-      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}    
+      # - INFLUX_DB_URL=${INFLUXDB_URL}
+      # - INFLUX_DB_NAME=${INFLUXDB_NAME}
+      # - IMAGE_NAME=DB
+      # - INFLUX_USERNAME=${INFLUXDB_USER}
+      # - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}    
     volumes:
       - thesisPostgresVolume:/var/lib/postgresql/data
   

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 18:03:16
+# @Last Modified time: 2022-11-12 14:05:39
 
 import json
 from fastapi import Depends
@@ -24,7 +24,7 @@ import aux.utils as Utils
 import aux.constants as Constants
 import schemas.vertical as VerticalSchemas
 import schemas.message as MessageSchemas
-from exceptions.vertical import VerticalAlreadyExists, VerticalNotFound
+from exceptions.vertical import VerticalNotFound
 from rabbitmq.adaptor import rabbit_handler
 from idp.idp import idp
 import aux.auth as auth
@@ -92,71 +92,74 @@ async def createnewVS(
                 token: auth.OAuth2PasswordBearer = Depends(
                     auth.oauth2_scheme),
                 user=Depends(idp.get_current_user(
-                    required_roles=[Constants.IDP_ADMIN_USER])),
+                    required_roles=[Constants.IDP_TENANT_USER])),
                 db: Session = Depends(get_db)):
-    #try:
-    #
-    # verify if VS Descriptor exists
-    # data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
-    # # if not data:
-    # #     raise VSDNotFound(vs_in.vsdId)
-    # # # # verify if domain placements exists
-    # for domain in vs_in.domainPlacements:
-    #     data = Utils.get_domain_info(token, domain.domainId)
-    #     if not data:
-    #         raise DomainNotFound(domain_id=domain.domainId)
-    # Store in DB
-    vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
-    # create zone
-    power_dns_client = Netor_DNS_SD(
-        dns_ip=Constants.DNS_IP,
-        api_port=Constants.DNS_API_PORT,
-        vsi_id=vs_out.vsiId,
-        api_key=Constants.DNS_API_KEY
-    )
-    power_dns_client.create_zone()
-    # Now that we have a vertical Id we may customize the component names
-    # to be easier to parse and inject the vertical Id on component's 
-    # configuration
-    # TODO: Find a better way to do this
-    for i in range(len(vs_in.domainPlacements)):
-        domain_placement = vs_in.domainPlacements[i]
-        config = vs_in.additionalConf[i]
-        new_name = f"{vs_out.vsiId}_{domain_placement.componentName}"
-        CRUDVertical.updateComponentsNames(
-            db,
+    try:
+        # verify if VS Descriptor exists
+        data = Utils.get_catalogue_vsd_info(token, vs_in.vsdId)
+        if not data:
+            raise VSDNotFound(vs_in.vsdId)
+        # verify if domain placements exists
+        for domain in vs_in.domainPlacements:
+            data = Utils.get_domain_info(token, domain.domainId)
+            if not data:
+                raise DomainNotFound(domain_id=domain.domainId)
+        # Store in DB
+        vs_out = CRUDVertical.createNewVS(db, user.sub, vs_in)
+        # create zone
+        power_dns_client = Netor_DNS_SD(
+            dns_ip=Constants.DNS_IP,
+            api_port=Constants.DNS_API_PORT,
+            vsi_id=vs_out.vsiId,
+            api_key=Constants.DNS_API_KEY
+        )
+        power_dns_client.create_zone()
+        # Now that we have a vertical Id we may customize the component names
+        # to be easier to parse and inject the vertical Id on component's 
+        # configuration
+        # TODO: Find a better way to do this
+        for i in range(len(vs_in.domainPlacements)):
+            domain_placement = vs_in.domainPlacements[i]
+            config = vs_in.additionalConf[i]
+            new_name = f"{vs_out.vsiId}_{domain_placement.componentName}"
+            CRUDVertical.updateComponentsNames(
+                db,
+                vsiId=vs_out.vsiId,
+                previous_name=domain_placement.componentName,
+                new_name=new_name)
+            domain_placement.componentName = new_name
+            config.componentName = new_name
+
+        vs_in = Utils.parse_dns_params_to_vnf(vs_out.vsiId, vs_in)
+        # Send Message to the MessageBus
+        msg = MessageSchemas.Message(
             vsiId=vs_out.vsiId,
-            previous_name=domain_placement.componentName,
-            new_name=new_name)
-        domain_placement.componentName = new_name
-        config.componentName = new_name
+            msgType=Constants.TOPIC_CREATEVSI,
+            tenantId=user.sub
+        )
 
-    vs_in = Utils.parse_dns_params_to_vnf(vs_out.vsiId, vs_in)
-    # Send Message to the MessageBus
-    msg = MessageSchemas.Message(
-        vsiId=vs_out.vsiId,
-        msgType=Constants.TOPIC_CREATEVSI,
-        tenantId=user.sub
-    )
+        data = MessageSchemas.CreateVsiData(**vs_in.dict())
+        msg.data = data
+        await rabbit_handler.publish_exchange(
+            Constants.EXCHANGE_MGMT,
+            json.dumps(msg.dict())
+        )
+        Utils.send_instantiation_ts(
+            vsiId=vs_out.vsiId,
+            domain=None,
+            action=Constants.VSI_REQUEST_TS)
 
-    data = MessageSchemas.CreateVsiData(**vs_in.dict())
-    msg.data = data
-    await rabbit_handler.publish_exchange(
-        Constants.EXCHANGE_MGMT,
-        json.dumps(msg.dict())
-    )
-
-    return Utils.create_response(
-        status_code=201,
-        data=vs_out.as_dict(),
-        message="Success creating a new VS",
-    )
-    # except Exception as exception:
-    #     return Utils.create_response(
-    #         status_code=400,
-    #         success=False,
-    #         errors=[str(exception)]
-    #     )
+        return Utils.create_response(
+            status_code=201,
+            data=vs_out.as_dict(),
+            message="Success creating a new VS",
+        )
+    except Exception as exception:
+        return Utils.create_response(
+            status_code=400,
+            success=False,
+            errors=[str(exception)]
+        )
 
 
 @router.get(
@@ -168,13 +171,13 @@ async def createnewVS(
 async def getVsiById(
                 vsiId: int,
                 user=Depends(idp.get_current_user(
-                    required_roles=[Constants.IDP_ADMIN_USER])),
+                    required_roles=[Constants.IDP_TENANT_USER])),
                 db: Session = Depends(get_db)):
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId, include_actions=True)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, user)
+        CRUDVertical.verify_vsi_ownership(db, vsi_id=vsiId, auth_data=user)
         return Utils.create_response(
             data=db_vs,
             message="Success Getting a new VS",
@@ -197,13 +200,13 @@ async def executePrimitive(
                     vsiId: int,
                     primitive_data: MessageSchemas.PrimitiveData,
                     user=Depends(idp.get_current_user(
-                        required_roles=[Constants.IDP_ADMIN_USER])),
+                        required_roles=[Constants.IDP_TENANT_USER])),
                     db: Session = Depends(get_db)):
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, user)
+        CRUDVertical.verify_vsi_ownership(db, vsi_id=vsiId, auth_data=user)
 
         db_obj = CRUDVertical.createVSiAction(db, vsiId, primitive_data)
 
@@ -233,13 +236,13 @@ async def executePrimitive(
 )
 def getVSiStatusHistory(vsiId: int,
                         user=Depends(idp.get_current_user(
-                            required_roles=[Constants.IDP_ADMIN_USER])),
+                            required_roles=[Constants.IDP_TENANT_USER])),
                         db: Session = Depends(get_db)):
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, user)
+        CRUDVertical.verify_vsi_ownership(db, vsi_id=vsiId, auth_data=user)
         data = CRUDVertical.getAllVSIStatus(db, vsiId)
         return Utils.create_response(
             data=data,
@@ -261,14 +264,14 @@ def getVSiStatusHistory(vsiId: int,
 )
 async def deleteVSI(vsiId: int,
                     user=Depends(idp.get_current_user(
-                            required_roles=[Constants.IDP_ADMIN_USER])),
+                            required_roles=[Constants.IDP_TENANT_USER])),
                     force: bool = False,
                     db: Session = Depends(get_db)):
     try:
         db_vs = CRUDVertical.getVSById(db, vsiId)
         if not db_vs:
             raise VerticalNotFound(vsiId)
-        CRUDVertical.verify_vsi_ownership(db_vs, user)
+        CRUDVertical.verify_vsi_ownership(db, vsi_id=vsiId, auth_data=user)
         data = CRUDVertical.deleteVSI(db, vsiId)
         msg_data = MessageSchemas.DeleteVsiData(
             force=force

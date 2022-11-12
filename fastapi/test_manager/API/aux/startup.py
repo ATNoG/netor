@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-12 13:44:18
+# @Last Modified time: 2022-10-29 13:40:58
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -40,14 +40,6 @@ def load_config():
         Constants.RABBITMQ_PORT = config['RabbitMQ']['Port']
         Constants.RABBITMQ_USER = config['RabbitMQ']['User']
         Constants.RABBITMQ_PASS = config['RabbitMQ']['Password']
-        Constants.REDIS_IP = config['Redis']['IP']
-        Constants.REDIS_PORT = config['Redis']['Port']
-        Constants.REDIS_USER = config['Redis']['User']
-        Constants.REDIS_PASS = config['Redis']['Password']
-        Constants.DOMAIN_HOST = config['Domain']['Host']
-        Constants.DOMAIN_PORT = config['Domain']['Port']
-        Constants.TEST_MANAGER_HOST = config['TestManager']['Host']
-        Constants.TEST_MANAGER_PORT = config['TestManager']['Port']
     except Exception:
         return False, """The config file should have the folling sections with
                          the following variables:

@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 13:45:04
+# @Last Modified time: 2022-11-12 13:42:46
 
 SECRET_KEY = "99cb3e97787cf81a7f418c42b96a06f77ce25ddbb2f7f83a53cf3474896624f9"
 ALGORITHM = "HS256"
@@ -40,6 +40,9 @@ IDP_CALLBACK_URI = None
 
 DOMAIN_HOST = None
 DOMAIN_PORT = None
+
+TEST_MANAGER_HOST = None
+TEST_MANAGER_PORT = None
 
 MODELS_INITIALIZED = False
 
@@ -80,3 +83,6 @@ INSTANTIATED_STATUS = "instantiated"
 FAILING_STATUS = "fail"
 TERMINATING_STATUS = "terminating"
 TERMINATED_STATUS = "terminated"
+
+
+INSTANTIATE_VSI_TS = "INSTANTIATE_TS"

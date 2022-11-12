@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-29 09:57:38
+# @Last Modified time: 2022-11-12 13:57:35
 # @Description: Contains several functions that should be invoked on startup
 
 # custom imports
@@ -48,6 +48,8 @@ def load_config():
         Constants.DNS_API_KEY = config['DNS']['API_KEY']
         Constants.DNS_API_PORT = config['DNS']['API_PORT']
         Constants.DNS_PORT = config['DNS']['PORT']
+        Constants.TEST_MANAGER_HOST = config['TestManager']['Host']
+        Constants.TEST_MANAGER_PORT = config['TestManager']['Port']
     except Exception:
         return False, """The config file should have the folling sections with
                          the following variables:

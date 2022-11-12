@@ -3,8 +3,8 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 13:51:03
-from pydantic import BaseModel
+# @Last Modified time: 2022-11-07 10:23:58
+from pydantic import BaseModel, validator
 from typing import List, Optional, Dict
 
 
@@ -38,6 +38,15 @@ class VSIBase(BaseModel):
 class VSICreate(VSIBase):
     domainPlacements: List[DomainPlacementCreate]
 
+    @validator('domainPlacements', 'additionalConf')
+    def verify_component_names(cls, values):
+        if values:
+            print("VALUES", values)
+            check_naming = [v.componentName for v in values]
+            if len(set(check_naming)) != len(check_naming):
+                raise ValueError('The Component Names must be different')
+        return values
+
 
 class VSI(VSIBase):
     vsiId: int
@@ -50,4 +59,4 @@ class VSI(VSIBase):
     ranEndPointId: Optional[str] = None
     status: str
     domainPlacements: List[DomainPlacement]
-    #TODO: Return remaining info
+    # TODO: Return remaining info

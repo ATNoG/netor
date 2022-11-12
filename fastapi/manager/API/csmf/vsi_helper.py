@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 14:08:48
+# @Last Modified time: 2022-11-12 13:53:25
 import json
 from csmf.polling import poller
 from redis.handler import redis_handler
@@ -112,6 +112,11 @@ class VsiHelper:
             await rabbit_handler.publish_queue(
                 Constants.QUEUE_DOMAIN,
                 json.dumps(res.dict()))
+            # publish timestamp 
+            Utils.send_instantiation_ts(
+                vsiId=payload.vsiId,
+                domain=placement.domainId,
+                action=Constants.INSTANTIATE_VSI_TS)
             #TODO: Check this, will be changed...
             composingComponentId += 1
 

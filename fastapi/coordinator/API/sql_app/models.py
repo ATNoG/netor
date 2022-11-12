@@ -3,14 +3,14 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 18:05:07
+# @Last Modified time: 2022-11-07 10:52:59
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float,\
                        JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.sql.sqltypes import DateTime
-
+from sqlalchemy import inspect
 # custom imports
 from .database import Base
 
@@ -27,7 +27,6 @@ class VSIStatus(Base):
     data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
     data['timestamp'] = str(data['timestamp'])
     return data
-
 
 
 class VerticalServiceInstance(Base):

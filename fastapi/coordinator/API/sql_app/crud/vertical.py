@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-05 18:04:37
+# @Last Modified time: 2022-11-07 15:51:45
 from datetime import datetime
 import logging
 from sqlalchemy.orm import Session
@@ -32,10 +32,14 @@ def get_db():
         db.close()
 
 
-def verify_vsi_ownership(
-                         vsi_db: models.VerticalServiceInstance,
+def verify_vsi_ownership(db: Session,
+                         vsi_id: int,
                          auth_data: OIDCUser):
+    vsi_db = getVSById(db=db, vsi_id=vsi_id)
+    if not vsi_db:
+        return False
     if not Utils.check_admin_role(auth_data):
+        print(vsi_db.tenantId, auth_data.sub)
         if vsi_db.tenantId != auth_data.sub:
             raise NotEnoughPrivileges()
     return True
@@ -58,7 +62,7 @@ def getVSById(db: Session, vsi_id: int, include_actions=False):
     vs = db.query(models.VerticalServiceInstance)\
            .filter(models.VerticalServiceInstance.vsiId == vsi_id)\
            .first()
-    if include_actions:
+    if vs and include_actions:
         vs = vs.as_dict()
         actions = getVSActionsByVsiId(db, vsi_id)
         vs['actions'] = actions
@@ -91,6 +95,25 @@ def updateComponentsNames(db: Session, vsiId: int,
     db.commit()
 
 
+def createVsiStatus(db: Session,
+                    vsi: models.VerticalServiceInstance,
+                    status: str, message: str):
+    vsi.status = status
+    vsi.statusMessage = message
+
+    # Update list of all Status that the VSI has been through
+    status_obj = models.VSIStatus(
+        status=status,
+        statusMessage=message,
+        timestamp=datetime.utcnow()
+    )
+    vsi.all_status.append(status_obj)
+    db.add(vsi)
+    db.commit()
+    db.refresh(vsi)
+    return vsi
+
+
 def createNewVS(db: Session,
                 tenantId: str,
                 vs_in: VerticalSchemas.VSICreate):
@@ -119,20 +142,12 @@ def createNewVS(db: Session,
 
     vs_obj.tenantId = tenantId
     # Update Current Status
-    vs_obj.status = Constants.CREATING_STATUS
-    vs_obj.statusMessage = "Creating Vertical Service Instance"
-
-    # Update list of all Status that the VSI has been through
-    status_obj = models.VSIStatus(
-        status=Constants.CREATING_STATUS,
-        statusMessage="Creating Vertical Service Instance",
-        timestamp=datetime.utcnow()
-    )
-    vs_obj.all_status = [status_obj]
-    # Update Component Name to consider vsiId 
-    db.add(vs_obj)
-    db.commit()
-    db.refresh(vs_obj)
+    vs_obj = createVsiStatus(
+            db,
+            vsi=vs_obj,
+            status=Constants.CREATING_STATUS,
+            message="Creating Vertical Service Instance"
+        )
     return vs_obj
 
 
@@ -141,18 +156,13 @@ def changeVsiStatus(db: Session, payload: MessageSchemas.Message):
     if vsi and payload.data.status:
         if Constants.FAILING_STATUS not in vsi.all_status:
             logging.info("Updating Status of VSI...")
-            vsi.status = payload.data.status
-            vsi.statusMessage = payload.message
-            status_db = models.VSIStatus(
+            createVsiStatus(
+                db=db,
+                vsi=vsi,
                 status=payload.data.status,
-                statusMessage=payload.message,
-                timestamp=datetime.utcnow()
+                message=payload.message
             )
-            vsi.all_status.append(status_db)
             logging.info(f"Status of VSI {payload.vsiId} updated")
-            db.add(vsi)
-            db.commit()
-            db.refresh(vsi)
         if Constants.TERMINATED_STATUS in payload.data.status:
             db.delete(vsi)
             db.commit()

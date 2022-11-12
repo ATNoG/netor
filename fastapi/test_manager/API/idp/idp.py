@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-07 22:35:49
+# @Last Modified time: 2022-10-29 13:32:34
 # custom imports
 import aux.constants as Constants
 
@@ -35,7 +35,7 @@ def load_config():
         Constants.IDP_ClIENT_SECRET = config['IDP']['Client_Secret']
         Constants.IDP_ADMIN_ClIENTSECRET = config['IDP']['Admin_Client_Secret']
         Constants.IDP_REALM = config['IDP']['Realm']
-        Constants.IDP_CALLBACK_URI = "http://localhost/8000/*"
+        Constants.IDP_CALLBACK_URI = "http://localhost/8002/*"
     except Exception:
         return False, """The config file should have the IDP sectioN with
                          the following variables:"""
@@ -43,6 +43,7 @@ def load_config():
 
 
 load_config()
+print(Constants.IDP_IP)
 idp = FastAPIKeycloak(
     server_url=Constants.IDP_IP,
     client_id=Constants.IDP_CLIENTID,

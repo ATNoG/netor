@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-10-19 22:07:55
+# @Last Modified time: 2022-11-07 19:01:53
 import asyncio
 import threading
 from rabbitmq.adaptor import RabbitHandler
@@ -27,7 +27,6 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
 
 
 class MessageReceiver():
