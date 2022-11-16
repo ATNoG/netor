@@ -3,7 +3,7 @@
 # @Email:  dagomes@av.it.pt
 # @Copyright: Insituto de Telecomunicações - Aveiro, Aveiro, Portugal
 # @Last Modified by:   Daniel Gomes
-# @Last Modified time: 2022-11-12 11:16:20
+# @Last Modified time: 2022-11-16 17:15:41
 import schemas.timestamp as TimestampSchemas
 import aux.constants as Constants
 import json
@@ -24,14 +24,14 @@ class FileManager:
 
     def parse_file_content(self, vsi_id):
         file_name = f'./results_vsi_{vsi_id}.json'
-        f = open(file_name, 'r+')
         try:
+            f = open(file_name, 'r+')
             file_data = f.read()
             data = json.loads(file_data)
             print(type(file_data))
             data = TimestampSchemas.FileData(**data)
-        except Exception as e:
-            print(e)
+        except FileNotFoundError:
+            f = open(file_name, 'w+')
             data = TimestampSchemas.FileData()
         return f, data
 
