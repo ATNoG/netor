@@ -1,3 +1,8 @@
+#!/bin/bash
+# @Author: Daniel Gomes
+# @Date:   2022-10-26 15:20:56
+# @Last Modified by:   Daniel Gomes
+# @Last Modified time: 2022-11-18 11:33:41
 #!/bin/sh
 set -e
 
@@ -24,6 +29,7 @@ fi
 # save ip in an environment variable
 export HOST=$IMAGE_NAME-$(hostname)
 # Run metric collector - telegraf
-#eval  "telegraf --config redis_telegraf.conf &"
+eval  "telegraf --config redis_telegraf.conf &"
+echo "running telegraf..."
 
 exec "$@"

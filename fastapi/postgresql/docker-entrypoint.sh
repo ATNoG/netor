@@ -330,15 +330,13 @@ _main() {
 			echo
 		fi
 	fi
-    # changed/new
-    # save ip in an environment variable
+
     export HOST=$IMAGE_NAME-$(hostname)
     # Run metric collector - telegraf
     eval  "telegraf --config postgresql_telegraf.conf &"
-    # end changed/new 
-
-    exec "$@"
-    }
+    echo "running telegraf..."
+	exec "$@"
+}
 
 if ! _is_sourced; then
 	_main "$@"
