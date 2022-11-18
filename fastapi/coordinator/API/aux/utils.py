@@ -15,7 +15,7 @@ from fastapi.encoders import jsonable_encoder
 from cryptography.fernet import Fernet
 import json
 from schemas import vertical as VerticalSchemas
-import datetime
+from datetime import datetime
 import logging
 
 # Logger
@@ -84,7 +84,8 @@ def get_catalogue_vsd_info(token, vsd_id):
         )
         data = r.json()
         return data['data']
-    except Exception:
+    except Exception as e:
+        logging.info("Exception {e}")
         raise CouldNotConnectToDomain()
 
 
@@ -98,7 +99,7 @@ def send_instantiation_ts(vsiId, domain, action):
     }
     try:
         r = requests.post(
-            url=f"http://{Constants.TEST_MANAGER_HOST}/" +
+            url=f"http://{Constants.TEST_MANAGER_HOST}:" +
                 f"{Constants.TEST_MANAGER_PORT}/timestamp/{vsiId}",
             json=_json
         )
@@ -132,7 +133,8 @@ def update_db_object(db: Session, db_obj: object, obj_in: dict,
 def parse_dns_params_to_vnf(vsiId: int, vs_in: VerticalSchemas.VSICreate):
     key = Fernet.generate_key()
     dns_params = {
-            "dns_ip": Constants.DNS_IP,
+            'netor_ip': Constants.DNS_NETOR_IP,
+            "dns_ip": Constants.DNS_PEER_IP,
             "dns_port": Constants.DNS_PORT,
             "dns_api_port": Constants.DNS_API_PORT,
             "dns_api_key": Constants.DNS_API_KEY,
@@ -142,15 +144,20 @@ def parse_dns_params_to_vnf(vsiId: int, vs_in: VerticalSchemas.VSICreate):
         }
     for peer in vs_in.additionalConf:
         peer_conf = peer.conf
-        if 'netslice' not in peer_conf \
-            and not type(
-                        peer_conf['netslice-subnet']) == list:
-            break
-        if ['additionalParamsForVnf'] not in peer_conf['netslice-subnet']:
-            break
+        # if 'netslice' not in peer_conf \
+        #     and not type(
+        #                 peer_conf['netslice-subnet']) == list:
+        #     break
+        # if ['additionalParamsForVnf'] not in peer_conf['netslice-subnet']:
+        #     break
         vnf_params = peer_conf['netslice-subnet'][0]['additionalParamsForVnf']
         for vnf in vnf_params:
             for param in dns_params:
+                if param == 'dns_ip' and vnf['additionalParams']['dns_ip'] != dns_params['dns_ip']:
+                    logging.info("GOT HERE!!!")
+                    continue
                 vnf['additionalParams'][param] = dns_params[param]
         peer.conf = json.dumps(peer_conf)
+        logging.info(f"FINAL CONF {peer.conf}")
+
     return vs_in

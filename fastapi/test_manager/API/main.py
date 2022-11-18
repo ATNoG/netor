@@ -29,7 +29,7 @@ app = FastAPI(
         "name": "User",
         "email": "user@av.it.pt",
     },
-    root_path="/test_manager"
+    root_path="/tests"
 )
 # app.add_middleware(
 #     CORSMiddleware,

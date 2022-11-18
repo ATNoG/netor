@@ -47,7 +47,8 @@ DNS_IP = None
 DNS_PORT = None
 DNS_API_KEY = None
 DNS_API_PORT = None
-
+DNS_NETOR_IP = None
+DNS_PEER_IP = None
 TOPIC_CREATEVSI = "createVSI"
 TOPIC_REMOVEVSI = "removeVSI"
 TOPIC_DOMAININFO = "domainInfo"

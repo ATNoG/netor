@@ -48,6 +48,8 @@ def load_config():
         Constants.DNS_API_KEY = config['DNS']['API_KEY']
         Constants.DNS_API_PORT = config['DNS']['API_PORT']
         Constants.DNS_PORT = config['DNS']['PORT']
+        Constants.DNS_NETOR_IP = config['DNS']['NETOR_IP']
+        Constants.DNS_PEER_IP = config['DNS']['PEER_IP']
         Constants.TEST_MANAGER_HOST = config['TestManager']['Host']
         Constants.TEST_MANAGER_PORT = config['TestManager']['Port']
     except Exception:

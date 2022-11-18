@@ -32,6 +32,15 @@ class VsiHelper:
     def is_interdomain(self, cat_data: MessageSchemas.CatalogueInfoData):
         return cat_data.vs_blueprint_info.vs_blueprint.inter_site
 
+    def get_domain(self,
+                   componentName: str,
+                   vsirequest_data: MessageSchemas.CreateVsiData):
+        for domain in vsirequest_data.domainPlacements:
+            if domain.componentName == componentName:
+                logging.info(f"Got domain {domain.domainId}")
+                return domain.domainId
+        return None
+
     def default_value_exists(self, param, additional_conf):
 
         return "parameter_default_value" in param \
@@ -64,6 +73,9 @@ class VsiHelper:
         for placement in placementInfo:
             component_name = f"{payload.vsiId}_{composingComponentId}"\
                              + f"-{vsiRequestInfo.data.name}"
+            placement.domainId = self.get_domain(
+                componentName=component_name,
+                vsirequest_data=vsiRequestInfo.data)
             data = None
             if self.is_a_slice(placement):
                 data = MessageSchemas.InstantiateNsiData(
@@ -78,7 +90,9 @@ class VsiHelper:
                     for conf_component in vsiRequestInfo.data.additionalConf:
                         # TODO: check better component name verification
                         if conf_component['componentName'] == component_name:
-                            config = json.loads(conf_component['conf'])
+                            config = conf_component['conf']
+                            if type(config) == str: 
+                                config = json.loads(config)
                             data.additionalConf = yaml.safe_dump(config)
                             logging.info(f"AFTER {data.additionalConf}")
 

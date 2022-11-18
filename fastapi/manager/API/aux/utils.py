@@ -77,12 +77,12 @@ def send_instantiation_ts(vsiId, domain, action):
     }
     try:
         r = requests.post(
-            url=f"http://{Constants.TEST_MANAGER_HOST}/" +
+            url=f"http://{Constants.TEST_MANAGER_HOST}:" +
                 f"{Constants.TEST_MANAGER_PORT}/timestamp/{vsiId}",
             json=_json
         )
         if r.status_code != 200:
-            msg = r.json()['message']
+            msg = str(r.json())
             logging.error(f"Error publishing. Reason: {msg}")
             return msg
         else:
