@@ -48,7 +48,7 @@ class Message(BaseModel):
     message: str = ""
     error: bool = False
     tenantId: str = None
-    data: Union[DomainInfoData, CreateVsiData,
-                CatalogueInfoData, RemoveVSIData,
+    data: Union[CatalogueInfoData, DomainInfoData,
+                CreateVsiData, RemoveVSIData,
                 List[TranslationInfoData]] = None
 

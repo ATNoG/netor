@@ -183,13 +183,21 @@ def _on_board_ns_template(nst, nsds, vnf_packages):
     if Nst.objects.filter((Q(nst_name=nst_name) & Q(nst_version=nst_version)) | Q(nst_id=nst_id)).count() > 0:
         raise AlreadyExistingEntityException(
             f"NsTemplate with name {nst_name} and version {nst_version} or ID {nst_id} exists")
-
+    
     if len(nst) > 0:
         transaction_data += [
             {
                 'collection': Nst.get_collection(),
                 'operation': 'insert_one',
                 'args': (nst,)
+            }
+        ]
+        for nested_nsst in  nst.get('nsst'):
+           transaction_data += [
+            {
+                'collection': Nst.get_collection(),
+                'operation': 'insert_one',
+                'args': (nested_nsst,)
             }
         ]
     return transaction_data

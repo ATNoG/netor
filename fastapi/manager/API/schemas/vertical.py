@@ -5,7 +5,7 @@
 # @Last Modified by:   Daniel Gomes
 # @Last Modified time: 2022-11-05 14:01:18
 from pydantic import BaseModel
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 
 class ComponentConfigs(BaseModel):
@@ -59,9 +59,11 @@ class ServiceComposition(BaseModel):
     status: str
 
 
+
 class PrimitiveStatus(BaseModel):
-    actionId: int = None
+    actionId: Union[int, str] = None
     domainId: str = None
     nfvoId: str = None # id of the operation given by the nfvo
     status: str = None
     output: str = None
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions

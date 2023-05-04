@@ -29,6 +29,16 @@ class InstantiateNsiData(BaseModel):
     additionalConf: str = None
 
 
+class InstantiateNsData(BaseModel):
+    name: str
+    description: str = None
+    domainId: str = None
+    nsdId: str = None
+    additionalConf: str = None
+
+
+
+
 class UpdateResourcesNfvoIdsData(BaseModel):
     componentName: str
     componentId: str
@@ -38,15 +48,17 @@ class UpdateResourcesNfvoIdsData(BaseModel):
 class ActionNsData(BaseModel):
     primitiveName: str = None
     domainId: str = None
-    actionId: int # Id given by the Coordinator to identify the Action
+    actionId: str # Id given by the Coordinator to identify the Action
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
     nsId: str = None
     additionalConf: Dict
 
 
 class ActionResponseData(BaseModel):
     primitiveName: str = None
-    actionId: int # Id given by the Coordinator to identify the Action
+    actionId: str # Id given by the Coordinator to identify the Action
     nfvoId: str # Id given by the NFVO to identify the Action
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
     status: str 
     output: str
 
@@ -55,14 +67,23 @@ class FecthNsiInfoData(BaseModel):
     domainId: str
     nsiId: str
 
+class FetchNsInfoData(BaseModel):
+    domainId: str
+    nsId: str
+
 class FetchPrimitiveData(BaseModel):
     domainId: str
     nfvoId: str
-    actionId: int
+    actionId: Union[int, str]
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
 
 class NsiInfoData(BaseModel):
     nsiId: str
     nsiInfo: Any = None
+
+class NsInfoData(BaseModel):
+    nsId: str
+    nsInfo: Any = None
 
 class DeleteNsiData(BaseModel):
     domainId: str
@@ -75,13 +96,13 @@ class DeleteNsData(BaseModel):
     force: bool
 
 class Message(BaseModel):
-    vsiId: int
+    vsiId: Union[int,str]
     msgType: str = None
     message: str = ""
     error: bool = False
     tenantId: str = None
-    data: Union[DomainInfoData, CreateVsiData,
-                InstantiateNsiData, UpdateResourcesNfvoIdsData,
+    data: Union[DomainInfoData, CreateVsiData,InstantiateNsData,
+                InstantiateNsData, UpdateResourcesNfvoIdsData,
                 ActionNsData, ActionResponseData, FetchPrimitiveData,
-                DeleteNsiData, FecthNsiInfoData, NsiInfoData,
-                DeleteNsData] = None
+                DeleteNsiData, FetchNsInfoData, FecthNsiInfoData,
+                 NsiInfoData, NsInfoData, DeleteNsData] = None

@@ -207,6 +207,9 @@ class CSMF_Handler():
         _, event_args = event
         payload = event_args
         primivite_data = payload.data
+        if primivite_data.isAlarm:
+            #ignore alarm primitives
+            return
         running_actions = await redis_handler.get_primitive_op_status(
             payload.vsiId
         )

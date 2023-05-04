@@ -60,7 +60,7 @@ class Nst(Document):
     nst_provider = StringField()
     geographical_area_info_list = EmbeddedDocumentListField(GeographicalAreaInfo)
     nsst_ids = ListField(StringField())
-    nsst = ListField(ReferenceField('self'))
+    nsst = ListField(ReferenceField('self'),)
     nsd_id = StringField()
     nsd_version = StringField()
     nst_service_profile = EmbeddedDocumentField(NstServiceProfile)

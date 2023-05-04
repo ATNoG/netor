@@ -38,5 +38,5 @@ class ProdConfig(Config):
 
 class DevConfig(Config):
     """Development configurations"""
-    DEBUG = False
+    DEBUG = True
     ENV = 'dev'

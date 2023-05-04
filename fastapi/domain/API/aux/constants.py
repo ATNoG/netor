@@ -41,6 +41,7 @@ IDP_CALLBACK_URI = None
 TOPIC_CREATEVSI = "createVSI"
 TOPIC_DOMAININFO = "domainInfo"
 TOPIC_INSTANTIATE_NSI = "instantiateNsi"
+TOPIC_INSTANTIATE_NS = "instantiateNs"
 TOPIC_DELETE_NSI = "deleteNSI"
 TOPIC_ACTION_NS = "actionNs"
 TOPIC_ACTION_NSI = "actionNsi"
@@ -48,6 +49,8 @@ TOPIC_FETCH_NS_INFO = "getNsInfo"
 TOPIC_FETCH_NSI_INFO = "getNsiInfo"
 TOPIC_FETCH_ACTION_INFO = "getPrimitiveInfo"
 TOPIC_NSI_INFO = "nsiInfo"
+TOPIC_NS_INFO = "nsInfo"
+
 TOPIC_ERROR = "errorOccured"
 
 

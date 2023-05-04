@@ -76,6 +76,7 @@ class OSMDriver(DomainDriver):
                 tunnelServiceId = nss["nsrId"]
             nssNsrId[nss["nss-id"]] = nss["nsrId"]
         return tunnelServiceId, nssNsrId
+    
     @require_session(remove_prefix=True)
     def instantiateNSI(self, nsiName, nstName, vimAccount,
                        additionalConf=None):
@@ -87,6 +88,17 @@ class OSMDriver(DomainDriver):
             )
         nsiData = self.osm_client.nsi.get(nsiName)
         return nsiData
+
+    @require_session(remove_prefix=True)
+    def instantiateNS(self,nsdName, nsName, vimAccount,
+                       additionalConf=None):
+        return self.osm_client.ns.create(
+            nsd_name=nsdName,
+            nsr_name=nsName,
+            account=vimAccount,
+            config=additionalConf
+            )
+    
 
     @require_session(remove_prefix=True)
     def sendActionNS(self, nsId, additionalConf=None):
@@ -107,6 +119,10 @@ class OSMDriver(DomainDriver):
     @require_session(remove_prefix=True)
     def getNSI(self, nsiId):
         return self.osm_client.nsi.get(nsiId)
+
+    @require_session(remove_prefix=True)
+    def getNS(self, nsId):
+        return self.osm_client.ns.get(nsId)
 
     @require_session(remove_prefix=True)
     def terminateNSI(self, nsiId, force):

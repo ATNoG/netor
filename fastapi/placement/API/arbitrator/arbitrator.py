@@ -148,8 +148,10 @@ class Arbitrator:
                     for nsst_id in nst.nsst_ids:
                         externalNSST = True
                         for nsst in nst.nsst:
+                            logging.info(f"nsst_id : {nsst_id}, nsst.nst_id: {nsst.nst_id}")
                             if nsst_id == nsst.nst_id:
-                                externalNST = False
+                                logging.info("Entrei1")
+                                externalNSST = False
                                 translation = Utils.prepare_translation(
                                     domainId=domainId,
                                     sliceEnabled=False,
@@ -157,18 +159,21 @@ class Arbitrator:
                                     translation_set=translation)
                                 break
                         if externalNSST:
+                            logging.info("Entrei 2")
                             translation = Utils.prepare_translation(
                                     domainId=domainId,
                                     sliceEnabled=True,
                                     nstId=nsst_id,
                                     translation_set=translation)   
                 else:
+                    logging.info("Entrei 3")
                     translation = Utils.prepare_translation(
                                     domainId=domainId,
                                     sliceEnabled=True,
                                     nsdId=nst.nsd_id,
                                     translation_set=translation) 
         if externalNST:
+            logging.info("Entrei 3")
             translation = Utils.prepare_translation(
                                     domainId=domainId,
                                     sliceEnabled=True,

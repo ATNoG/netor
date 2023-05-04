@@ -57,7 +57,7 @@ class NstSerializer(Schema):
     nst_provider = String(required=True, error_messages={"required": "NST provider not set"})
     geographical_area_info_list = List(Nested(GeographicalAreaInfoSerializer))
     nsst_ids = List(String())
-    nsst = List(Nested('self'))
+    nsst = List(Nested('self'), exclude=('nsst', 'nst_service_profile', 'geographical_area_info_list', 'nsst.nsst'))
     nsd_id = String()
     nsd_version = String()
     nst_service_profile = Nested(NstServiceProfileSerializer)

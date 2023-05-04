@@ -17,18 +17,18 @@ def parse_correct_type(cls, v, values, **kwargs):
     return v
 
 class VSDData(BaseModel):
-    tenant_id: str
+    tenant_id: str = None
     associated_vsd_id: str = None
-    domain_id: str
-    vs_descriptor_id: str
-    version: str
+    domain_id: str = None
+    vs_descriptor_id: str = None
+    version: str = None
     is_public: bool = True
     nested_vsd_ids: dict = {}
     service_constraints: List = []
-    vs_blueprint_id: str
-    name: str
+    vs_blueprint_id: str = None
+    name: str = None
     sla: Any = None
-    management_type: str
+    management_type: str = None
     qos_parameters: dict
 
 class ParameterData(BaseModel):
@@ -49,11 +49,11 @@ class InputParameter(BaseModel):
     parameter_id: str
     max_value: Any
     min_value: Any
-    _parse_max_value = validator('max_value',
-     allow_reuse=True, always=True, pre=True)(parse_correct_type)
+    # _parse_max_value = validator('max_value',
+    #  allow_reuse=True, always=True, pre=True)(parse_correct_type)
    
-    _parse_min_value = validator('min_value',
-     allow_reuse=True, always=True, pre=True)(parse_correct_type)
+    # _parse_min_value = validator('min_value',
+    #  allow_reuse=True, always=True, pre=True)(parse_correct_type)
 
 
 
@@ -81,8 +81,8 @@ class VSBluePrint(BaseModel):
     blueprint_id: str
     service_sequence: List = []
     translation_rules: List[TranslationRules]
-    name: str
-    description: Any = None
+    name: str = None
+    description: str = None
     atomic_components: List = []
     configurable_parameters: List = []
     application_metrics: List = []
@@ -95,7 +95,7 @@ class VSBluePrintInfo(BaseModel):
     on_boarded_nst_info_id: List = []
     on_boarded_mec_app_package_info_id: List = []
     on_boarded_vnf_package_info_id: List = []
-    owner: Any =  None
+    owner: Any = None
     active_vsd_id: List
     vs_blueprint_id: str
     name: str

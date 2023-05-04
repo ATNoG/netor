@@ -52,7 +52,7 @@ def init_flask():
     CORS(app)
 
     # Configurations settings
-    app.config.from_object(DevConfig)
+    app.config.from_object(ProdConfig)
 
     oidc.init_app(app)
     
@@ -88,6 +88,7 @@ def init_flask():
 
 def init_rabbit():
     message_receiver = MessageReceiver()
+    print("Started RabbitMQ paa")
     message_receiver.start()
 
 

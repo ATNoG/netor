@@ -150,7 +150,7 @@ def parse_dns_params_to_vnf(vsiId: int, vs_in: VerticalSchemas.VSICreate):
         #     break
         # if ['additionalParamsForVnf'] not in peer_conf['netslice-subnet']:
         #     break
-        vnf_params = peer_conf['netslice-subnet'][0]['additionalParamsForVnf']
+        vnf_params = peer_conf['additionalParamsForVnf']
         for vnf in vnf_params:
             for param in dns_params:
                 if param == 'dns_ip' and vnf['additionalParams']['dns_ip'] != dns_params['dns_ip']:

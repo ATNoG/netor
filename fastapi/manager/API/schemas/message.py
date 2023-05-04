@@ -56,6 +56,13 @@ class InstantiateNsiData(BaseModel):
     nstId: str = None
     additionalConf: AdditionalConf = None
 
+class InstantiateNsData(BaseModel):
+    name: str
+    description: str = None
+    domainId: str = None
+    nsdId: str = None
+    additionalConf: AdditionalConf = None
+
 class FecthNsiInfoData(BaseModel):
     domainId: str
     nsiId: str
@@ -67,7 +74,7 @@ class FetchNsInfoData(BaseModel):
 class FetchPrimitiveData(BaseModel):
     domainId: str = None
     nfvoId: str
-    actionId: int = None
+    actionId: Union[int, str] = None
 
 class UpdateResourcesNfvoIdsData(BaseModel):
     componentName: str
@@ -78,31 +85,39 @@ class NsiInfoData(BaseModel):
     nsiId: str
     nsiInfo: str = None
 
+class NsInfoData(BaseModel):
+    nsId: str
+    nsInfo: str = None
+
 class PrimitiveData(BaseModel):
     primitiveName: str
     primitiveTarget: str
     primitiveInternalTarget: str
     primitiveParams: Dict = {}
-    actionId: int
+    actionId: Union[int, str]
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
+
 
 class ActionNsData(BaseModel):
     primitiveName: str = None
     domainId: str
     nsId: str = None
-    actionId: int = None # Id given by the Coordinator to identify the Action
+    actionId: Union[int, str] = None # Id given by the Coordinator to identify the Action
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
     additionalConf: Dict
 
 
 class ActionResponseData(BaseModel):
     primitiveName: str = None
-    actionId: int # Id given by the Coordinator to identify the Action(Primitive)
+    actionId: Union[int, str] # Id given by the Coordinator to identify the Action(Primitive)
     nfvoId: str # Id given by the NFVO to identify the Action(Primitive)
+    isAlarm: bool = False # Flag to identify the Alarm Day-2 Actions
     status: str
     output: str
 
 # Message to inform the Coordinator of a update on the Action(Primitive) lifecyle
 class ActionUpdateData(BaseModel):
-    actionId: int
+    actionId: Union[int, str]
     status: str
     output: str
 
@@ -124,7 +139,7 @@ class Message(BaseModel):
     tenantId: str = None
     data: Union[DomainInfoData, CreateVsiData,
                 CatalogueInfoData, RemoveVSIData, List[PlacementInfoData],
-                ActionResponseData,  ActionUpdateData, NsiInfoData, 
+                ActionResponseData,  ActionUpdateData, NsiInfoData, NsInfoData,
                 UpdateResourcesNfvoIdsData, PrimitiveData, ActionNsData,
                 FetchPrimitiveData, StatusUpdateData, FetchNsInfoData, 
                 FecthNsiInfoData] = None

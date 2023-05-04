@@ -73,9 +73,9 @@ class TranslationRules(BaseModel):
 
 
 class VSBluePrint(BaseModel):
-    urllc_service_category: Any = None,
-    end_points: List = [],
-    inter_site: bool = True,
+    urllc_service_category: Any = None
+    end_points: List = []
+    inter_site: bool = True
     parameters: List[ParameterData] = []
     version: str
     blueprint_id: str

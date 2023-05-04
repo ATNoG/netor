@@ -55,7 +55,7 @@ class MessageReceiver():
             msg = json.loads(msg)
             try:
                 payload = MessageSchemas.Message(**msg)
-            except Exception:
+            except Exception as e:
                 # if the message was not suposed to be received
                 return
             logging.info(f"Received message in Placement: {payload}")

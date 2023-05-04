@@ -80,6 +80,7 @@ class RabbitHandler:
         async with self.channel_pool.acquire() as channel:
             exchange = await channel.get_exchange(name=name, ensure=ensure)
             message = Message(message.encode())
+            logging.info("sent msg")
             await exchange.publish(message, routing_key=queue)
     
     async def publish_queue(self, queue, message, ensure=False):

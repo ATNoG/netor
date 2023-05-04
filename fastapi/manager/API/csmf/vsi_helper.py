@@ -85,18 +85,29 @@ class VsiHelper:
                     nstId=placement.nstId
                     )
                 res.msgType = Constants.TOPIC_INSTANTIATE_NSI
-                if self.is_interdomain(catalogueInfo.data):
-                    config = None
-                    for conf_component in vsiRequestInfo.data.additionalConf:
-                        # TODO: check better component name verification
-                        if conf_component['componentName'] == component_name:
-                            config = conf_component['conf']
-                            if type(config) == str: 
-                                config = json.loads(config)
-                            data.additionalConf = yaml.safe_dump(config)
-                            logging.info(f"AFTER {data.additionalConf}")
+        
+            else:
+                data = MessageSchemas.InstantiateNsData(
+                    name=component_name,
+                    description=vsiRequestInfo.data.description,
+                    domainId=placement.domainId,
+                    nsdId=placement.nsdId
+                    )
+                res.msgType = Constants.TOPIC_INSTANTIATE_NS
 
-                            break
+            if self.is_interdomain(catalogueInfo.data):
+                config = None
+                for conf_component in vsiRequestInfo.data.additionalConf:
+                    # TODO: check better component name verification
+                    if conf_component['componentName'] == component_name:
+                        config = conf_component['conf']
+                        if type(config) == str: 
+                            config = json.loads(config)
+                        data.additionalConf = yaml.safe_dump(config)
+                        logging.info(f"AFTER {data.additionalConf}")
+
+                        break
+
             # store on redis VSI Service Composition
             serviceComposition = await redis_handler.get_vsi_servicecomposition(
                 vsiId=payload.vsiId, store_objects=False
@@ -123,6 +134,7 @@ class VsiHelper:
             )
             res = Utils.prepare_message(res, data)
             # send message to Domain to instantiatie each component
+            logging.info(f"Instantiang, sent message {res}")
             await rabbit_handler.publish_queue(
                 Constants.QUEUE_DOMAIN,
                 json.dumps(res.dict()))
