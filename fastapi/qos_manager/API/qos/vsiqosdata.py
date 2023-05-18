@@ -31,11 +31,11 @@ class VSIQoSData:
     
     def add_link(self, tag, alarm):
         src_ip, dest_ip = tag.split("_")
-        val = 0.9 / alarm.notify_details.threshold_value
+        val = 1.2 / alarm.notify_details.threshold_value
         if src_ip not in self.links:
-            self.links[src_ip] = {dest_ip: val}
+            self.links[src_ip] = {dest_ip:  1 /val}
         else:
-            self.links[src_ip][dest_ip] = val
+            self.links[src_ip][dest_ip] = 1/val
         if not f'{src_ip}_{dest_ip}' in self.alarms_data:
             self.alarms_data[f'{src_ip}_{dest_ip}'] = {'alarm': alarm}
         else:
@@ -53,12 +53,12 @@ class VSIQoSData:
             if v.nfvoId == ns_id:
                 return services[k]
     def is_critical_threshold(self, tag, threshold):
-        return threshold <= WARNING
+        return threshold < WARNING
     
     async def analyze_threshold(self, tag, threshold):
         src, dest = tag.split("_")
         if self.is_critical_threshold(tag, threshold):
-            logging.info("Critical threshold found.. deciding new route to apply")
+            logging.info(f"Critical threshold found {src} {dest}.. deciding new route to apply")
             return await self.decide_new_route(src, dest)
         else:
             pass

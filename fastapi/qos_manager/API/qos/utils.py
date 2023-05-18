@@ -1,6 +1,6 @@
 CRITICAL = 0.10
 
-WARNING = 0.65
+WARNING = 0.55
 
 OKAY = 0.90
 import json

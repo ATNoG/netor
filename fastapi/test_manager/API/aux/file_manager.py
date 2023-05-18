@@ -10,7 +10,12 @@ import json
 from datetime import datetime
 import pytz
 
+import logging
 
+logging.basicConfig(
+    format="%(module)-15s:%(levelname)-10s| %(message)s",
+    level=logging.INFO
+)
 class FileManager:
     def __init__(self) -> None:
         pass
@@ -27,12 +32,15 @@ class FileManager:
         try:
             f = open(file_name, 'r+')
             file_data = f.read()
+            print(file_data)
             data = json.loads(file_data)
-            print(type(file_data))
+            #print(type(file_data))
             data = TimestampSchemas.FileData(**data)
-        except FileNotFoundError:
+        except Exception as e:
+            logging.info(f"Error: {e}")
             f = open(file_name, 'w+')
             data = TimestampSchemas.FileData()
+       
         return f, data
 
     def parse_timestamp_to_utc(self, timestamp):
@@ -58,6 +66,10 @@ class FileManager:
         step = TimestampSchemas.Steps(action=data.action, timestamp=ts)
         if not self.is_initial_step(data.action):
             file_data.netor_initial_step = step
+        logging.info(f"ACTION: {step}")
+        if data.action == "RECEIVED_ALARM_TS":
+            logging.info(f"ALARM: {data.action}")
+            file_data.alarm_step = step
         else:
             if not data.domain:
                 return
@@ -65,5 +77,6 @@ class FileManager:
                 file_data.remaining_steps[data.domain] = [step]
             else:
                 file_data.remaining_steps[data.domain].append(step)
+        
         print(file_data.dict())
         self.write_to_file(_file, file_data)

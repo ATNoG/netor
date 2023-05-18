@@ -41,12 +41,12 @@ class ResultsPublishingWrapper:
             logging.error(f"Could not Publish result. Reason: {e}")
 
 
-if __name__ == "__main__":
-    wrapper = ResultsPublishingWrapper(
-        ip="http://localhost:8000",
-        vsi_id="1"
-    )
-    wrapper.publish_data(domain=None, action="REQUEST_TS")
-    wrapper.publish_data(domain="ITAV", action="INSTANTIATE_VSI_TS")
-    wrapper.publish_data(domain="ITAV", action="DNS_SD_REGISTER_TS")
+# if __name__ == "__main__":
+#     wrapper = ResultsPublishingWrapper(
+#         ip="http://localhost:8000",
+#         vsi_id="1"
+#     )
+#     wrapper.publish_data(domain=None, action="REQUEST_TS")
+#     wrapper.publish_data(domain="ITAV", action="INSTANTIATE_VSI_TS")
+#     wrapper.publish_data(domain="ITAV", action="DNS_SD_REGISTER_TS")
 

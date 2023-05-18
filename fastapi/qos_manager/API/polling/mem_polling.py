@@ -85,7 +85,7 @@ class MemPolling(BasePolling):
 
     async def poll_vsi_primitive_status(self, vsiId: int, data):
         data_copy = copy.deepcopy(data)
-        logging.info(f"ITEMS {data.items()}")
+        logging.info(f"ITEMS {data.keys()}")
         for primitive_id, op_data in data.items():
             if op_data.status in self.action_ending_states:
                 logging.info("Removing primitive Polling"
@@ -107,4 +107,4 @@ class MemPolling(BasePolling):
                 await rabbit_handler.publish_queue(
                     Constants.QUEUE_DOMAIN,
                     json.dumps(msg.dict()))
-                time.sleep(5)
+                time.sleep(1)

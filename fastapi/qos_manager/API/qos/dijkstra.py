@@ -1,40 +1,34 @@
+import heapq
+def dijkstra(graph, src, dest):
+    distances = {node: float('inf') for node in graph}  # Initialize distances to infinity
+    distances[src] = 0  # Distance from source to itself is 0
+    queue = [(0, src)]  # Priority queue to track nodes to visit
+    previous_nodes = {}  # Keep track of previous nodes in the shortest path
 
-
-def dijkstra(graph, start, end):
-    dist = {node: float('inf') for node in graph}
-    dist[start] = 0
-
-    # The distance to each node is initially unknown.
-    queue = [start]
-
-    # Keep track of the path to each node.
-    prev = {node: None for node in graph}
-
-    # The main loop.
     while queue:
-        # Pop the next node with the smallest distance.
-        curr = min(queue, key=lambda node: dist[node])
-        queue.remove(curr)
+        current_distance, current_node = heapq.heappop(queue)
 
-        # Stop if we've reached the end.
-        if curr == end:
-            break
+        if current_node == dest:
+            break  # Reached the destination node
 
-        # Update the distances to the neighbors of the current node.
-        for neighbor, threshold in graph[curr].items():
-            alt = dist[curr] + 1/threshold
-            if alt < dist[neighbor]:
-                dist[neighbor] = alt
-                prev[neighbor] = curr
-                queue.append(neighbor)
-    
+        if current_distance > distances[current_node]:
+            continue  # Skip if a shorter path to current_node has already been found
+
+        for neighbor, weight in graph[current_node].items():
+            distance = current_distance + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                previous_nodes[neighbor] = current_node
+                heapq.heappush(queue, (distance, neighbor))
+
     path = []
-    node = end
-    while node is not None:
-        path.append(node)
-        node = prev[node]
-
-    # Reverse the path so that it goes from the start to the end.
-    path = path[::-1]
+    current = dest
+    while current != src:
+        path.append(current)
+        current = previous_nodes[current]
+    path.append(src)
+    path.reverse()
 
     return path
+
+

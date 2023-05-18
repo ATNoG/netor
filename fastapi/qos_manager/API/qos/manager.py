@@ -11,7 +11,7 @@ import logging
 from rabbitmq.adaptor import rabbit_handler
 from redis.handler import redis_handler
 import json
-
+import aux.utils as Utils
 
 logging.basicConfig(
     format="%(module)-15s:%(levelname)-10s| %(message)s",
@@ -59,7 +59,7 @@ class QosManager:
             )
         
        
-        val = 0.9 / alarm.notify_details.threshold_value
+        val = 1.2 / alarm.notify_details.threshold_value
         is_critical = self.vsis[vsi_id].is_critical_threshold(tag, val)
         
         # we need to avoid setting multiple route changes for the same vertical service
@@ -76,12 +76,14 @@ class QosManager:
                     if alarm_found and alarm_found.decode() == "1":
                         logging.info("alarm already found")
                         return
+                    
                     logging.info(f"starting transaction for {tag}...")
                     await pipe.execute_command("hset",
-                    "alarmFound",
-                    vsi_id,
-                    "1"
-                    )
+                        "alarmFound",
+                        vsi_id,
+                        "1"
+                        )
+                    
                     #await redis_handler.store_vsi_alarmfound(pipe, vsi_id, "1")
                     logging.info("transaction sucessful..")
                 except Exception as e:
@@ -98,6 +100,11 @@ class QosManager:
             tag=tag,
             threshold=val)
         if message:
+            logging.info("sent alarm TS")
+            Utils.send_instantiation_ts(
+                vsiId=int(vsi_id),
+                domain=None,
+                action="RECEIVED_ALARM_TS")
             await self.poller.update_primitive_data(
                 vsiId=vsi_id,
                 data=message.data

@@ -41,9 +41,12 @@ def publish_timestamp(
                       timestamp_data: TimeStampSchemas.TimestampData):
     
     file_manager = FileManager()
+    if timestamp_data.action == "RECEIVED_ALARM_TS":
+        logging.info("FOUND ALARM")
     file_manager.store_vsi_timestamp(vsi_id=vsiId, data=timestamp_data)
     return Utils.create_response(
         status_code=201,
-        message="Sucess storing step timestamp"
+        message="Sucess storing step timestamp" 
+        
     )
    

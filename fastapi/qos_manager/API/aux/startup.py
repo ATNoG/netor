@@ -44,6 +44,8 @@ def load_config():
         Constants.REDIS_PORT = config['Redis']['Port']
         Constants.REDIS_USER = config['Redis']['User']
         Constants.REDIS_PASS = config['Redis']['Password']
+        Constants.TEST_MANAGER_HOST = config['TestManager']['Host']
+        Constants.TEST_MANAGER_PORT = config['TestManager']['Port']
     except Exception:
         return False, """The config file should have the folling sections with
                          the following variables:

@@ -23,6 +23,7 @@ class Steps(BaseModel):
 
 class FileData(BaseModel):
     netor_initial_step: Steps = None
+    alarm_step: Steps = None
     remaining_steps: Dict[str, List[Steps]] = {}
 
 
